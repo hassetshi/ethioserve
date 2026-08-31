@@ -28,7 +28,8 @@ EthioServe/
 
 ## Current status
 
-Phase 1 (project setup) is complete:
+Phase 2 (authentication, users, profiles, roles) is complete. Phase 1 (project
+setup):
 
 - Git repository initialized.
 - Full Supabase schema authored: all tables from the spec, RLS policies, booking
@@ -38,16 +39,23 @@ Phase 1 (project setup) is complete:
   localization), with a working splash → language selection → home flow.
   `flutter analyze` is clean and `flutter test` passes.
 
-A dev Supabase project is connected and live: all 10 migrations are applied,
+A dev Supabase project is connected and live: 11 migrations are applied,
 RLS/seed data verified against the real REST API. Config lives in
 `mobile/env/development.json` (gitignored).
+
+Phase 2 adds: phone-OTP login/verification screens, a Profile screen, and
+router-level redirect logic gating every route on locale + auth state + role
+(`mobile/lib/features/auth/`, `mobile/lib/features/profile/`,
+`mobile/lib/core/router/app_router.dart`). 14 tests passing.
 
 Not yet done (tracked toolchain gaps — see the note in LOCAL_DEVELOPMENT.md):
 
 - Android SDK isn't installed, so the app can't yet be run/built for Android
   (the primary target platform) — static analysis, unit/widget tests, and
   Flutter's web/Windows desktop targets work today.
-- Phone-based OTP auth (chosen for Phase 2) needs an SMS provider (e.g.
-  Twilio) configured on the Supabase project before real OTP codes can be sent.
+- Phone-based OTP auth needs an SMS provider (e.g. Twilio) configured on the
+  Supabase project before real OTP codes can be sent — confirmed via a live
+  `phone_provider_disabled` response from the Supabase Auth API. The app-side
+  code is otherwise complete and tested.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the full phase plan (Phases 2–17).

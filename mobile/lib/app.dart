@@ -13,6 +13,7 @@ class EthioServeApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
+    final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
       title: 'EthioServe',
@@ -27,7 +28,7 @@ class EthioServeApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

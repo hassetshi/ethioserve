@@ -45,6 +45,8 @@ lib/
 │   ├── router/            go_router route table
 │   └── theme/             Single source of truth for colors/typography
 ├── features/
+│   ├── auth/               Phone-OTP login (AuthRepository, LoginScreen, OtpVerificationScreen)
+│   ├── profile/            Profile view/edit (ProfileRepository, ProfileScreen)
 │   └── <feature>/
 │       ├── data/          Repository implementations (Supabase calls live ONLY here)
 │       ├── domain/        Repository interfaces + entities (no Supabase imports)
@@ -76,7 +78,14 @@ used anywhere in the project (including server-only ones for Edge Functions).
 Following the spec's phase order (section 48):
 
 1. **Project setup** — done (this document, plus the schema and mobile scaffold).
-2. Authentication, users, profiles, roles
+2. **Authentication, users, profiles, roles** — done: phone-OTP login/verification
+   screens, `AuthRepository`/`ProfileRepository` (repository pattern, no direct
+   Supabase calls from widgets), router-level redirect gating every route on
+   locale + auth state + role (admins are blocked from the mobile app
+   entirely, per spec section 13/43). Real OTP delivery is blocked on an SMS
+   provider not yet being configured on the Supabase project (confirmed via a
+   live `phone_provider_disabled` response) — the code path is otherwise
+   complete and covered by tests using a fake `AuthRepository`.
 3. Categories, services, provider profiles
 4. Provider registration, provider verification
 5. Provider search, location, filtering

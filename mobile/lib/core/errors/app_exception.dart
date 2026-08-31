@@ -17,8 +17,11 @@ class NetworkException extends AppException {
       : super('Something went wrong. Please try again.');
 }
 
-class AuthException extends AppException {
-  const AuthException(super.userMessage, {super.debugDetail});
+/// Named `AppAuthException` (not `AuthException`) to avoid colliding with
+/// `supabase_flutter`'s own `AuthException`, which repository code needs to
+/// catch separately.
+class AppAuthException extends AppException {
+  const AppAuthException(super.userMessage, {super.debugDetail});
 }
 
 class ValidationException extends AppException {

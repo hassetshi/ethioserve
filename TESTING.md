@@ -5,13 +5,23 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # unit + widget tests — currently 2 passing (app boot, language → home nav)
+flutter test      # 14 tests passing as of Phase 2
 ```
 
-`test/widget_test.dart` covers the Phase 1 app shell: it boots to language
-selection, and selecting a language navigates to home with the right localized
-text. This is the pattern for widget tests going forward — pump `EthioServeApp`
-inside a `ProviderScope`, override providers as needed for the scenario.
+- `test/widget_test.dart`: app-shell + router redirect behavior — language
+  selection, unauthenticated → login redirect, authenticated → home redirect.
+  Uses `test/fakes/fake_auth_repository.dart` (overrides `authRepositoryProvider`
+  in the `ProviderScope`) so these never touch the real Supabase client — this
+  is the pattern for any widget test that depends on auth state going forward.
+- `test/features/auth/phone_number_validator_test.dart`: pure-logic unit tests
+  for Ethiopian phone number normalization/validation.
+
+Live OTP delivery (actually receiving an SMS) isn't covered by an automated
+test — it requires a real SMS provider on the Supabase project, which isn't
+configured yet. Verified manually instead: a direct call to the Supabase
+`/auth/v1/otp` endpoint against the live dev project returns
+`phone_provider_disabled`, confirming the app's error-mapping path (generic
+message to the user, detail to `AppLogger`) is exercised correctly today.
 
 ## Planned (spec section 28), added as each phase lands
 

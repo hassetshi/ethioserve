@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 
-/// Phase 1 placeholder: proves routing/localization/theme work end to end.
+/// Phase 1/2 placeholder: proves routing/localization/theme/auth work end
+/// to end.
 ///
 /// The real layout (categories, nearby/featured providers, recent bookings —
 /// spec section 14) is built in Phase 3 (categories/services) and Phase 5
@@ -15,7 +17,16 @@ class HomeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appName)),
+      appBar: AppBar(
+        title: Text(l10n.appName),
+        actions: [
+          IconButton(
+            onPressed: () => context.push('/profile'),
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Profile',
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
