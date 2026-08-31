@@ -86,8 +86,26 @@ node scripts/dev-db.mjs --file scripts/dev-seed-sample-provider.sql
 Phase 2 OTP smoke test (`251912345678`) into a verified provider with a
 seeded service, so the Phase 3 browse flow (categories → services →
 providers → profile) has real data to look at without needing Phase 4's
-provider registration flow to exist yet. Dev/test data only — never run
-against staging or production.
+provider registration flow to exist yet.
+
+`scripts/dev-seed-second-test-user.sql` creates a second identity directly in
+`auth.users` (a customer, `251922345678`) — not something real signup ever
+does, but necessary to test anything involving two distinct participants
+(booking accept/decline, cancellation rules, later messaging/reviews)
+without needing a second real phone number. To act as a specific user when
+testing RLS/trigger logic directly over the `postgres` connection, simulate
+their session with the same GUC Supabase's `auth.uid()` reads:
+```sql
+set local request.jwt.claim.sub = '<user-id>';
+-- now auth.uid() returns that user's id for the rest of this transaction
+```
+Note this only affects what `auth.uid()` returns — it does **not** turn on
+RLS enforcement, since the `postgres` role bypasses RLS entirely regardless.
+It's useful for testing trigger logic (which fires regardless of RLS), not
+for testing RLS policies themselves.
+
+All of the above is dev/test data and dev-only technique — never run against
+staging or production.
 
 ## Getting the Android SDK working
 

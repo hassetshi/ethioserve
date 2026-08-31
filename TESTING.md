@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 18 tests passing as of Phase 5
+flutter test      # 27 tests passing as of Phase 6
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -45,6 +45,27 @@ permission-request/denial handling isn't covered by an automated test (needs
 a real device/emulator location prompt) — it's structured so every failure
 path returns `null` rather than throwing, which the UI already handles
 (falls back to city/rating filtering only).
+
+Phase 6's booking actor-authorization rules got the most thorough live
+verification yet, because getting this wrong would be a real security bug:
+using a second real test identity (`scripts/dev-seed-second-test-user.sql`,
+a customer, alongside the Phase 3 seed provider), verified directly against
+the live database with the session GUC that Supabase's `auth.uid()` reads
+(`set local request.jwt.claim.sub = '<uuid>'`):
+- a customer accepting their own booking → correctly rejected
+- the assigned provider accepting it → succeeds
+- the customer cancelling an accepted booking → succeeds
+- an invalid value transition (`cancelled → completed`) → still rejected
+  regardless of actor
+- `booking_status_history` correctly attributes each transition to the
+  right `changed_by`
+
+The join queries the Dart repository relies on (`provider_profiles`,
+`services`, `users!bookings_customer_id_fkey` embeds) were verified via an
+equivalent direct SQL join, confirming the exact shape `Booking.fromJson`
+expects. Full authenticated REST-level testing (two real users actually
+logged in via the app, one creating a booking and the other accepting it)
+still needs real app usage to exercise, same caveat as Phases 4-5.
 
 ## Planned (spec section 28), added as each phase lands
 

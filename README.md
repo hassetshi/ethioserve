@@ -63,7 +63,15 @@ plain client update.
 Phase 5 adds: a real Home search field (service name search, English/Amharic),
 and a generalized provider search-results screen (city, rating, and an
 opt-in "Near me" location filter) shared by both the category-browse and
-text-search entry points. 18 tests passing.
+text-search entry points.
+
+Phase 6 adds: the full booking flow — request, confirmation, live-tracking
+details (Supabase Realtime), and bookings lists for both customer and
+provider. Along the way, fixed a real gap in the Phase 1 booking trigger: it
+only validated which status *values* were reachable, not *who* could set
+them, so a customer could have accepted their own booking. Verified live
+with two distinct test identities that this is now correctly enforced.
+27 tests passing.
 
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 

@@ -23,6 +23,11 @@ class HomeScreen extends ConsumerWidget {
         title: Text(l10n.appName),
         actions: [
           IconButton(
+            onPressed: () => context.push('/bookings'),
+            icon: const Icon(Icons.calendar_month_outlined),
+            tooltip: 'My Bookings',
+          ),
+          IconButton(
             onPressed: () => context.push('/profile'),
             icon: const Icon(Icons.person_outline),
             tooltip: 'Profile',

@@ -126,7 +126,21 @@ Following the spec's phase order (section 48):
    section 17 lists them too) — the RPC can take those params later without
    a redesign, but there's no meaningful UI for them until bookings
    (Phase 6) give "availability" a concrete meaning.
-6. Booking system
+6. **Booking system** — done: request → confirmation → tracking → bookings
+   list, on both the customer and provider sides, sharing one
+   `BookingDetailsScreen` that shows role-appropriate actions (accept/
+   decline/on-the-way/in-progress/complete for the provider; cancel for the
+   customer) rather than two near-duplicate screens. Live status updates via
+   Supabase Realtime (`BookingRepository.watchBooking`), with the joined
+   display fields (provider name, service name, customer phone) re-attached
+   to each realtime row since Realtime only delivers plain columns, not
+   embeds. A real gap in the Phase 1 trigger got fixed here: it validated
+   which status *values* were reachable but not *who* could set them — a
+   customer could have set their own booking straight to `accepted`. Fixed
+   in `20260831000015_booking_transition_actor_rules.sql` and verified live
+   with two distinct real identities (see TESTING.md) — a customer accepting
+   their own booking is now rejected, the assigned provider succeeds, and
+   invalid value transitions are still rejected regardless of actor.
 7. Notifications
 8. Messaging
 9. Reviews

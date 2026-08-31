@@ -23,6 +23,7 @@ even for a one-line fix.
 | `20260831000012_storage_buckets.sql` | `provider-photos` (public) and `provider-documents` (private) Storage buckets + their object-level RLS |
 | `20260831000013_seed_services.sql` | Starter services (3 per category) — initial catalog content, not test data |
 | `20260831000014_provider_registration.sql` | `register_as_provider()` — `SECURITY DEFINER` RPC that promotes `users.role` and creates `provider_profiles`, since RLS deliberately forbids a client from changing its own role directly |
+| `20260831000015_booking_transition_actor_rules.sql` | Replaces `validate_booking_status_transition()` to also check *who* may make a transition (only the assigned provider can accept/decline/progress/complete; either participant can cancel), not just which status values are reachable. Also adds `bookings` to the `supabase_realtime` publication for live tracking. |
 
 ## Deliberate deviations from the literal field list in the spec
 
@@ -57,8 +58,11 @@ future integration) makes the write:
 - **Booking status transitions** (`validate_booking_status_transition`): the
   only legal moves are `requested → accepted|declined|cancelled`,
   `accepted → on_the_way|cancelled`, `on_the_way → in_progress|cancelled`,
-  `in_progress → completed|cancelled`. Every transition is also appended to
-  `booking_status_history` automatically.
+  `in_progress → completed|cancelled`. As of Phase 6, it also checks *who*
+  is making the change: only the assigned provider may set
+  `accepted`/`declined`/`on_the_way`/`in_progress`/`completed`; either
+  participant may set `cancelled`; admins bypass both checks. Every
+  transition is also appended to `booking_status_history` automatically.
 - **Review eligibility** (`validate_review_eligibility`): a review can only be
   inserted if its `booking_id` refers to a `completed` booking, and the
   `customer_id`/`provider_id` on the review match that booking.

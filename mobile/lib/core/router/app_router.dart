@@ -6,6 +6,11 @@ import '../../features/auth/domain/app_user.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/otp_verification_screen.dart';
+import '../../features/bookings/presentation/booking_confirmation_screen.dart';
+import '../../features/bookings/presentation/booking_details_screen.dart';
+import '../../features/bookings/presentation/booking_request_screen.dart';
+import '../../features/bookings/presentation/bookings_list_screen.dart';
+import '../../features/bookings/presentation/provider_booking_requests_screen.dart';
 import '../../features/catalog/presentation/category_detail_screen.dart';
 import '../../features/catalog/presentation/search_screen.dart';
 import '../../features/home/presentation/admin_blocked_screen.dart';
@@ -158,6 +163,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/provider/verification',
         builder: (context, state) =>
             ProviderVerificationScreen(providerId: state.extra! as String),
+      ),
+      GoRoute(
+        path: '/providers/:providerId/book',
+        builder: (context, state) => BookingRequestScreen(
+          providerId: state.pathParameters['providerId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/bookings',
+        builder: (context, state) => const BookingsListScreen(),
+      ),
+      GoRoute(
+        path: '/bookings/:bookingId',
+        builder: (context, state) => BookingDetailsScreen(
+          bookingId: state.pathParameters['bookingId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/bookings/:bookingId/confirmation',
+        builder: (context, state) => BookingConfirmationScreen(
+          bookingId: state.pathParameters['bookingId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/provider/bookings',
+        builder: (context, state) => ProviderBookingRequestsScreen(
+          providerId: state.extra! as String,
+        ),
       ),
     ],
   );

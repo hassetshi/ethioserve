@@ -5,9 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../auth/presentation/auth_providers.dart';
 import 'provider_providers.dart';
 
-/// Booking requests, earnings, and subscription management (spec section 12)
-/// land in later phases (6 and 12) once bookings/payments exist. For now
-/// this is the provider's home: verification status + services offered.
+/// Earnings and subscription management (spec section 12) land in Phase 12
+/// once payments exist. Booking requests are wired up as of Phase 6.
 class ProviderDashboardScreen extends ConsumerWidget {
   const ProviderDashboardScreen({super.key});
 
@@ -57,6 +56,12 @@ class _DashboardBody extends ConsumerWidget {
       data: (provider) => ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          FilledButton.icon(
+            onPressed: () => context.push('/provider/bookings', extra: providerId),
+            icon: const Icon(Icons.list_alt),
+            label: const Text('Booking Requests'),
+          ),
+          const SizedBox(height: 16),
           Card(
             child: ListTile(
               leading: Icon(

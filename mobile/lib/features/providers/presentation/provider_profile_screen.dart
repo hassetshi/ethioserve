@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/locale_provider.dart';
 import '../domain/provider_detail.dart';
@@ -25,6 +26,20 @@ class ProviderProfileScreen extends ConsumerWidget {
           provider: provider,
           languageCode: languageCode,
         ),
+      ),
+      bottomNavigationBar: detailAsync.maybeWhen(
+        data: (provider) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: FilledButton(
+              onPressed: provider.services.isEmpty
+                  ? null
+                  : () => context.push('/providers/$providerId/book'),
+              child: const Text('Book'),
+            ),
+          ),
+        ),
+        orElse: () => null,
       ),
     );
   }
