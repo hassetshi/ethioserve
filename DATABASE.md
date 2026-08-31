@@ -19,6 +19,9 @@ even for a one-line fix.
 | `20260831000008_rls_policies.sql` | `is_admin()`/`is_provider()`/`owns_provider_profile()`/`is_booking_participant()` helper functions, RLS enabled + policies on every table |
 | `20260831000009_search_functions.sql` | `search_providers()` — server-side paginated/filterable/geospatial provider search RPC |
 | `20260831000010_seed_data.sql` | Initial languages, cities, categories, and the default booking commission rate |
+| `20260831000011_profiles_nullable_names.sql` | Names are collected post-signup, not at OTP time; drops the `NOT NULL` constraint |
+| `20260831000012_storage_buckets.sql` | `provider-photos` (public) and `provider-documents` (private) Storage buckets + their object-level RLS |
+| `20260831000013_seed_services.sql` | Starter services (3 per category) — initial catalog content, not test data |
 
 ## Deliberate deviations from the literal field list in the spec
 

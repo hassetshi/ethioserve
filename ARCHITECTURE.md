@@ -86,7 +86,17 @@ Following the spec's phase order (section 48):
    provider not yet being configured on the Supabase project (confirmed via a
    live `phone_provider_disabled` response) — the code path is otherwise
    complete and covered by tests using a fake `AuthRepository`.
-3. Categories, services, provider profiles
+3. **Categories, services, provider profiles** — done: `CatalogRepository`
+   (categories/services) and `ProviderRepository` (provider detail + a
+   provider list per service, both reusing the `search_providers` RPC from
+   Phase 1 rather than duplicating query logic). Home now shows real
+   categories; tapping one lists its services; tapping a service lists
+   verified providers offering it; tapping a provider shows the full profile
+   (photos, description, rating, services+pricing). Storage buckets
+   (`provider-photos` public, `provider-documents` private) and a starter
+   services catalog (3 per category) were added as migrations. Verified
+   end-to-end against the live dev project with a seeded sample provider
+   (see `scripts/dev-seed-sample-provider.sql`).
 4. Provider registration, provider verification
 5. Provider search, location, filtering
 6. Booking system

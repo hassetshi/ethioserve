@@ -69,6 +69,26 @@ npx supabase db reset  # applies all migrations + seed data fresh
 `supabase start` prints a local `API URL` and `anon key` to put in
 `mobile/env/development.json`.
 
+## Direct database access (`scripts/dev-db.mjs`)
+
+For anything that doesn't fit the migration workflow — ad-hoc inspection,
+seeding throwaway test data — `scripts/dev-db.mjs` connects straight to
+Postgres as the `postgres` role (bypasses RLS entirely, so **never** point it
+at staging/production):
+
+```powershell
+$env:DEV_DATABASE_URL = "postgresql://postgres:<url-encoded-password>@db.<project-ref>.supabase.co:5432/postgres"
+node scripts/dev-db.mjs "select * from categories limit 5"
+node scripts/dev-db.mjs --file scripts/dev-seed-sample-provider.sql
+```
+
+`scripts/dev-seed-sample-provider.sql` promotes the test user created by the
+Phase 2 OTP smoke test (`251912345678`) into a verified provider with a
+seeded service, so the Phase 3 browse flow (categories → services →
+providers → profile) has real data to look at without needing Phase 4's
+provider registration flow to exist yet. Dev/test data only — never run
+against staging or production.
+
 ## Getting the Android SDK working
 
 Building/running on Android needs Android Studio (which bundles the SDK) or the

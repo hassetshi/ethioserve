@@ -5,23 +5,29 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 14 tests passing as of Phase 2
+flutter test      # 15 tests passing as of Phase 3
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
-  selection, unauthenticated → login redirect, authenticated → home redirect.
-  Uses `test/fakes/fake_auth_repository.dart` (overrides `authRepositoryProvider`
-  in the `ProviderScope`) so these never touch the real Supabase client — this
-  is the pattern for any widget test that depends on auth state going forward.
+  selection, unauthenticated → login redirect, authenticated → home redirect
+  (now also asserting the categories grid renders with real-shaped data).
+  Uses `test/fakes/fake_auth_repository.dart` and
+  `test/fakes/fake_catalog_repository.dart` (provider overrides in the
+  `ProviderScope`) so these never touch the real Supabase client — this is
+  the pattern for any widget test that depends on remote data going forward.
 - `test/features/auth/phone_number_validator_test.dart`: pure-logic unit tests
   for Ethiopian phone number normalization/validation.
+- `test/features/catalog/category_detail_screen_test.dart`: services list
+  renders for a given category.
 
-Live OTP delivery (actually receiving an SMS) isn't covered by an automated
-test — it requires a real SMS provider on the Supabase project, which isn't
-configured yet. Verified manually instead: a direct call to the Supabase
-`/auth/v1/otp` endpoint against the live dev project returns
-`phone_provider_disabled`, confirming the app's error-mapping path (generic
-message to the user, detail to `AppLogger`) is exercised correctly today.
+Live OTP delivery is now confirmed working end-to-end (Twilio configured on
+the dev Supabase project) — not covered by an automated test (that would need
+a real phone to receive the SMS), but verified manually via the
+`/auth/v1/otp` endpoint. The Phase 3 browse flow (categories → services →
+providers → profile) was verified the same way: direct REST/RPC calls against
+the live dev project with a seeded sample provider
+(`scripts/dev-seed-sample-provider.sql`), confirming the exact JSON shapes the
+Dart parsing code expects.
 
 ## Planned (spec section 28), added as each phase lands
 

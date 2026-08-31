@@ -46,16 +46,18 @@ RLS/seed data verified against the real REST API. Config lives in
 Phase 2 adds: phone-OTP login/verification screens, a Profile screen, and
 router-level redirect logic gating every route on locale + auth state + role
 (`mobile/lib/features/auth/`, `mobile/lib/features/profile/`,
-`mobile/lib/core/router/app_router.dart`). 14 tests passing.
+`mobile/lib/core/router/app_router.dart`).
 
-Not yet done (tracked toolchain gaps — see the note in LOCAL_DEVELOPMENT.md):
+Phase 3 adds: real categories/services browsing and a full provider profile
+screen (`mobile/lib/features/catalog/`, `mobile/lib/features/providers/`),
+Storage buckets for provider photos/documents, and a starter services
+catalog. 15 tests passing. Real phone-OTP delivery is now confirmed working
+(Twilio configured) — see ARCHITECTURE.md.
+
+Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 
 - Android SDK isn't installed, so the app can't yet be run/built for Android
   (the primary target platform) — static analysis, unit/widget tests, and
   Flutter's web/Windows desktop targets work today.
-- Phone-based OTP auth needs an SMS provider (e.g. Twilio) configured on the
-  Supabase project before real OTP codes can be sent — confirmed via a live
-  `phone_provider_disabled` response from the Supabase Auth API. The app-side
-  code is otherwise complete and tested.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the full phase plan (Phases 2–17).
