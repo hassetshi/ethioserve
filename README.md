@@ -51,8 +51,14 @@ router-level redirect logic gating every route on locale + auth state + role
 Phase 3 adds: real categories/services browsing and a full provider profile
 screen (`mobile/lib/features/catalog/`, `mobile/lib/features/providers/`),
 Storage buckets for provider photos/documents, and a starter services
-catalog. 15 tests passing. Real phone-OTP delivery is now confirmed working
-(Twilio configured) — see ARCHITECTURE.md.
+catalog. Real phone-OTP delivery is now confirmed working (Twilio
+configured) — see ARCHITECTURE.md.
+
+Phase 4 adds: provider registration ("Become a provider" on the Profile
+screen), a Provider Dashboard, adding offered services, and verification
+document upload — backed by a `SECURITY DEFINER` RPC for the
+customer-to-provider role promotion, since RLS correctly blocks that from a
+plain client update. 16 tests passing.
 
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 

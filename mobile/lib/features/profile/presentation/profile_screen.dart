@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../auth/domain/app_user.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../domain/profile.dart';
 import 'profile_providers.dart';
@@ -122,11 +123,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           )
                         : const Text('Save'),
                   ),
+                  const _BecomeProviderSection(),
                 ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Only shown to customer-role users — providers already see everything
+/// they need from the Provider Dashboard, and admins never see this app's
+/// customer screens at all (router-enforced).
+class _BecomeProviderSection extends ConsumerWidget {
+  const _BecomeProviderSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider).valueOrNull;
+    if (user == null || user.role != UserRole.customer) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: OutlinedButton(
+        onPressed: () => context.push('/provider/register'),
+        child: const Text('Become a provider'),
       ),
     );
   }

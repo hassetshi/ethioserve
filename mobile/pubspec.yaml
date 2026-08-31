@@ -50,6 +50,9 @@ dependencies:
   # Localization (English/Amharic now; Afaan Oromo/Tigrinya/Somali later).
   intl: ^0.20.3
 
+  # Picking verification documents/photos from gallery or camera (Phase 4).
+  image_picker: ^1.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 15 tests passing as of Phase 3
+flutter test      # 16 tests passing as of Phase 4
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -28,6 +28,13 @@ providers → profile) was verified the same way: direct REST/RPC calls against
 the live dev project with a seeded sample provider
 (`scripts/dev-seed-sample-provider.sql`), confirming the exact JSON shapes the
 Dart parsing code expects.
+
+Phase 4's `register_as_provider` RPC has its auth guard verified live
+(an unauthenticated call correctly returns a clean `P0001` error, not a raw
+exception) — the full happy path (an actual customer registering and getting
+promoted to provider) needs a real authenticated session, which needs a real
+phone completing OTP login; exercise it by running the app once Android/web
+is available to click through, rather than via API calls.
 
 ## Planned (spec section 28), added as each phase lands
 

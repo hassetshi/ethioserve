@@ -97,7 +97,19 @@ Following the spec's phase order (section 48):
    services catalog (3 per category) were added as migrations. Verified
    end-to-end against the live dev project with a seeded sample provider
    (see `scripts/dev-seed-sample-provider.sql`).
-4. Provider registration, provider verification
+4. **Provider registration, Provider verification** — done: a logged-in
+   customer can register as a provider from the Profile screen
+   ("Become a provider"), landing on a Provider Dashboard once approved
+   through `register_as_provider` — a `SECURITY DEFINER` RPC, because
+   promoting `users.role` is exactly the kind of client-untrusted mutation
+   spec section 31 has in mind, and RLS correctly refuses to let a client do
+   it directly. The dashboard lets a provider add offered services
+   (category → service → pricing) and upload verification documents to the
+   private `provider-documents` bucket; an admin actually approving those
+   (flipping `verification_status` to `verified`) is Phase 10 (admin-web),
+   since spec section 13 keeps admin functionality out of this app entirely.
+   Verified the RPC's auth guard against the live project (an unauthenticated
+   call is correctly rejected with a clean error, not a raw exception).
 5. Provider search, location, filtering
 6. Booking system
 7. Notifications

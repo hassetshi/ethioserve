@@ -22,6 +22,7 @@ even for a one-line fix.
 | `20260831000011_profiles_nullable_names.sql` | Names are collected post-signup, not at OTP time; drops the `NOT NULL` constraint |
 | `20260831000012_storage_buckets.sql` | `provider-photos` (public) and `provider-documents` (private) Storage buckets + their object-level RLS |
 | `20260831000013_seed_services.sql` | Starter services (3 per category) — initial catalog content, not test data |
+| `20260831000014_provider_registration.sql` | `register_as_provider()` — `SECURITY DEFINER` RPC that promotes `users.role` and creates `provider_profiles`, since RLS deliberately forbids a client from changing its own role directly |
 
 ## Deliberate deviations from the literal field list in the spec
 

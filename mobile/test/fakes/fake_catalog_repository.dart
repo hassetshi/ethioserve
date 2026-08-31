@@ -1,5 +1,6 @@
 import 'package:ethioserve/features/catalog/domain/catalog_repository.dart';
 import 'package:ethioserve/features/catalog/domain/category.dart';
+import 'package:ethioserve/features/catalog/domain/city.dart';
 import 'package:ethioserve/features/catalog/domain/service.dart';
 
 class FakeCatalogRepository implements CatalogRepository {
@@ -23,5 +24,10 @@ class FakeCatalogRepository implements CatalogRepository {
           nameEn: 'Pipe Repair',
           nameAm: 'የቧንቧ ጥገና',
         ),
+      ];
+
+  @override
+  Future<List<City>> getCities() async => const [
+        City(id: 'city-1', nameEn: 'Addis Ababa', nameAm: 'አዲስ አበባ'),
       ];
 }

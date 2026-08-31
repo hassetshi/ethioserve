@@ -11,7 +11,11 @@ import '../../features/home/presentation/admin_blocked_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/onboarding/presentation/language_selection_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/providers/presentation/add_provider_service_screen.dart';
+import '../../features/providers/presentation/provider_dashboard_screen.dart';
 import '../../features/providers/presentation/provider_profile_screen.dart';
+import '../../features/providers/presentation/provider_registration_screen.dart';
+import '../../features/providers/presentation/provider_verification_screen.dart';
 import '../../features/providers/presentation/providers_for_service_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../providers/locale_provider.dart';
@@ -72,11 +76,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Logged in past this point.
       if (path == '/' || path == '/language' || isAuthRoute) {
-        return user.role == UserRole.admin ? '/admin-blocked' : '/home';
+        return switch (user.role) {
+          UserRole.admin => '/admin-blocked',
+          UserRole.provider => '/provider',
+          UserRole.customer => '/home',
+        };
       }
 
       if (user.role == UserRole.admin && path != '/admin-blocked') {
         return '/admin-blocked';
+      }
+
+      if (user.role == UserRole.provider && path == '/provider/register') {
+        // Already a provider — nothing to register.
+        return '/provider';
       }
 
       return null;
@@ -119,6 +132,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ProviderProfileScreen(
           providerId: state.pathParameters['providerId']!,
         ),
+      ),
+      GoRoute(
+        path: '/provider/register',
+        builder: (context, state) => const ProviderRegistrationScreen(),
+      ),
+      GoRoute(
+        path: '/provider',
+        builder: (context, state) => const ProviderDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/provider/services/add',
+        builder: (context, state) =>
+            AddProviderServiceScreen(providerId: state.extra! as String),
+      ),
+      GoRoute(
+        path: '/provider/verification',
+        builder: (context, state) =>
+            ProviderVerificationScreen(providerId: state.extra! as String),
       ),
     ],
   );
