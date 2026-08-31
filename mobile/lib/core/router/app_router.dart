@@ -15,6 +15,7 @@ import '../../features/catalog/presentation/category_detail_screen.dart';
 import '../../features/catalog/presentation/search_screen.dart';
 import '../../features/home/presentation/admin_blocked_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/messaging/presentation/chat_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/onboarding/presentation/language_selection_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -196,6 +197,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/bookings/:bookingId/chat',
+        builder: (context, state) => ChatScreen(
+          bookingId: state.pathParameters['bookingId']!,
+        ),
       ),
     ],
   );

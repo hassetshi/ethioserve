@@ -154,7 +154,22 @@ Following the spec's phase order (section 48):
    needs a Firebase project and, for server-initiated sends, an Edge
    Function holding a service-account credential that must never reach the
    client, same category of decision as Twilio in Phase 2.
-8. Messaging
+8. **Messaging** — done: booking-scoped chat (text + images), reached from
+   Booking Details. The schema and RLS for this were already complete from
+   Phase 1 (`messages` table, participant-only policies) — Phase 8 is
+   Realtime + UI on top of infrastructure that was already correct. Chat
+   images go to a private `chat-images` bucket (path `{booking_id}/...`,
+   RLS via `is_booking_participant()` on the path's first segment) and are
+   displayed via time-limited signed URLs, not permanent public ones.
+   Verified live: RLS correctly returns zero rows for an unauthenticated
+   read and rejects a spoofed insert with a 401 (`new row violates row-level
+   security policy`) — confirming no one can read or send a message without
+   being a genuine participant with a real session. Deliberately trimmed: no
+   separate "Messages" inbox screen aggregating conversations across
+   bookings — each conversation is reached via its booking (Booking Details
+   → Chat), which is the only context chat exists in for this app, so a
+   separate inbox would mostly duplicate the bookings list for modest
+   added value.
 9. Reviews
 10. Admin dashboard (`admin-web/`)
 11. AI search

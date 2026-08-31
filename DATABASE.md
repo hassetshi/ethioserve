@@ -25,6 +25,7 @@ even for a one-line fix.
 | `20260831000014_provider_registration.sql` | `register_as_provider()` — `SECURITY DEFINER` RPC that promotes `users.role` and creates `provider_profiles`, since RLS deliberately forbids a client from changing its own role directly |
 | `20260831000015_booking_transition_actor_rules.sql` | Replaces `validate_booking_status_transition()` to also check *who* may make a transition (only the assigned provider can accept/decline/progress/complete; either participant can cancel), not just which status values are reachable. Also adds `bookings` to the `supabase_realtime` publication for live tracking. |
 | `20260831000016_notifications.sql` | `device_tokens` table; `notify_new_booking()` and `notify_booking_status_change()` triggers that generate `notifications` rows server-side; adds `notifications` to the `supabase_realtime` publication for the unread-count badge |
+| `20260831000017_messaging.sql` | `chat-images` private Storage bucket (RLS via `is_booking_participant()` on the path's booking-id segment); adds `messages` to the `supabase_realtime` publication for live chat |
 
 ## Deliberate deviations from the literal field list in the spec
 

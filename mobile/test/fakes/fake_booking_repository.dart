@@ -16,6 +16,7 @@ Booking _testBooking({BookingStatus status = BookingStatus.requested}) => Bookin
       serviceNameEn: 'Pipe Repair',
       serviceNameAm: 'የቧንቧ ጥገና',
       customerPhone: '+251912345678',
+      providerUserId: 'provider-user-1',
     );
 
 class FakeBookingRepository implements BookingRepository {

@@ -76,7 +76,12 @@ Phase 7 adds: server-side notification generation (new booking, every status
 change) and an in-app notification center with a live unread badge. Actual
 push delivery to the device tray is behind a `PushNotificationService`
 abstraction with a no-op default — wiring in Firebase Cloud Messaging is a
-pending decision (see ARCHITECTURE.md). 28 tests passing.
+pending decision (see ARCHITECTURE.md).
+
+Phase 8 adds: booking-scoped chat (text + images) via Supabase Realtime,
+reached from Booking Details. The schema/RLS for this were already correct
+from Phase 1; verified live that an unauthenticated read returns nothing and
+a spoofed insert is correctly rejected. 29 tests passing.
 
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 

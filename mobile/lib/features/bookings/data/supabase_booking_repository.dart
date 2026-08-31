@@ -7,7 +7,7 @@ import '../domain/booking_repository.dart';
 import '../domain/booking_status.dart';
 
 const _detailSelect =
-    '*, provider_profiles(business_name), services(name_en, name_am), users!bookings_customer_id_fkey(phone)';
+    '*, provider_profiles(business_name, user_id), services(name_en, name_am), users!bookings_customer_id_fkey(phone)';
 
 class SupabaseBookingRepository implements BookingRepository {
   SupabaseBookingRepository(this._client);
@@ -116,7 +116,10 @@ class SupabaseBookingRepository implements BookingRepository {
       if (rows.isEmpty) continue;
       yield Booking.fromJson({
         ...rows.first,
-        'provider_profiles': {'business_name': initial.providerBusinessName},
+        'provider_profiles': {
+          'business_name': initial.providerBusinessName,
+          'user_id': initial.providerUserId,
+        },
         'services': {'name_en': initial.serviceNameEn, 'name_am': initial.serviceNameAm},
         'users': {'phone': initial.customerPhone},
       });

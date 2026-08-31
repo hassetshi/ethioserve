@@ -24,6 +24,7 @@ class Booking {
     this.serviceNameEn,
     this.serviceNameAm,
     this.customerPhone,
+    this.providerUserId,
   });
 
   final String id;
@@ -55,6 +56,11 @@ class Booking {
   final String? serviceNameEn;
   final String? serviceNameAm;
   final String? customerPhone;
+
+  /// provider_profiles.user_id — the provider's account id, distinct from
+  /// [providerId] (which is provider_profiles.id). Needed to address chat
+  /// messages to the provider.
+  final String? providerUserId;
 
   DateTime get scheduledDateTime => DateTime.parse('${scheduledDate}T$scheduledTime');
 
@@ -91,6 +97,7 @@ class Booking {
       serviceNameEn: service?['name_en'] as String?,
       serviceNameAm: service?['name_am'] as String?,
       customerPhone: customerUser?['phone'] as String?,
+      providerUserId: provider?['user_id'] as String?,
     );
   }
 }

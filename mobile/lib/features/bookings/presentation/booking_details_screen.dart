@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/providers/locale_provider.dart';
@@ -158,7 +159,14 @@ class _BookingDetailsBody extends ConsumerWidget {
             const SizedBox(height: 12),
             Text('Reason: ${booking.cancellationReason}'),
           ],
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+          if (isCustomerView || isProviderView)
+            OutlinedButton.icon(
+              onPressed: () => context.push('/bookings/${booking.id}/chat'),
+              icon: const Icon(Icons.chat_bubble_outline),
+              label: const Text('Chat'),
+            ),
+          const SizedBox(height: 8),
           if (isProviderView) ..._providerActions(context, ref),
           if (isCustomerView && !booking.status.isTerminal) _cancelAction(context, ref),
         ],

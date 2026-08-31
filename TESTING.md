@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 28 tests passing as of Phase 7
+flutter test      # 29 tests passing as of Phase 8
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -74,6 +74,14 @@ notification for the customer. The in-app notification center (list,
 mark-as-read, mark-all-read) is covered by a widget test using
 `FakeNotificationRepository`. Actual push delivery isn't testable at all yet
 since no push provider is wired in (`NoopPushNotificationService`).
+
+Phase 8's messaging RLS got the same live-verification treatment as Phase
+6's booking security: an unauthenticated REST read of a booking's messages
+correctly returns zero rows, and an unauthenticated insert attempting to
+spoof a message from one of the test users is correctly rejected with 401
+`new row violates row-level security policy`. The Chat screen itself is
+covered by a widget test (`FakeMessagingRepository`, a broadcast-stream
+fake) verifying a sent message appears in the thread.
 
 ## Planned (spec section 28), added as each phase lands
 
