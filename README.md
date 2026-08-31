@@ -38,13 +38,16 @@ Phase 1 (project setup) is complete:
   localization), with a working splash → language selection → home flow.
   `flutter analyze` is clean and `flutter test` passes.
 
+A dev Supabase project is connected and live: all 10 migrations are applied,
+RLS/seed data verified against the real REST API. Config lives in
+`mobile/env/development.json` (gitignored).
+
 Not yet done (tracked toolchain gaps — see the note in LOCAL_DEVELOPMENT.md):
 
-- No real Supabase project is connected yet; the migrations haven't been applied
-  anywhere. Requires either Docker (for `supabase start` locally) or a real
-  Supabase dev project.
 - Android SDK isn't installed, so the app can't yet be run/built for Android
-  (the primary target platform) — only static analysis, unit/widget tests, and
+  (the primary target platform) — static analysis, unit/widget tests, and
   Flutter's web/Windows desktop targets work today.
+- Phone-based OTP auth (chosen for Phase 2) needs an SMS provider (e.g.
+  Twilio) configured on the Supabase project before real OTP codes can be sent.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the full phase plan (Phases 2–17).

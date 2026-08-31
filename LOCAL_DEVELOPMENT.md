@@ -8,7 +8,8 @@
 | Node.js LTS + npm | Installed |
 | Flutter SDK (stable, cloned to `C:\flutter`) | Installed, `flutter analyze`/`flutter test` verified working |
 | Supabase CLI | Installed as a repo devDependency (`npx supabase --version`) |
-| Docker | **Not installed** — needed for `npx supabase start` (local Postgres/Auth/Storage stack) |
+| Dev Supabase project | **Live** — `xvcwqkghhkuwvtdrmcey.supabase.co`, all migrations applied via `supabase db push --db-url ...` |
+| Docker | Not installed — only needed if you want a fully local Postgres too (`npx supabase start`); not required now that a real dev project exists |
 | Android SDK / Android Studio | **Not installed** — needed to build/run on Android, the primary target platform |
 | Xcode | N/A (Windows machine) — iOS builds require a Mac regardless |
 
@@ -30,30 +31,30 @@ cd mobile
 flutter pub get
 flutter analyze
 flutter test
-flutter run -d edge      # runs in Microsoft Edge (web target)
-flutter run -d windows   # runs as a Windows desktop app
+flutter run -d edge --dart-define-from-file=env/development.json    # Microsoft Edge (web target)
+flutter run -d windows --dart-define-from-file=env/development.json # Windows desktop app
 ```
 
-The app boots with backend features disabled (a warning is logged) until a real
-Supabase project is connected — see below.
+`mobile/env/development.json` already points at the live dev Supabase project
+(gitignored — ask whoever set it up for a copy, or follow the steps below to
+create your own). Without `--dart-define-from-file`, the app still boots but
+logs a warning and runs with backend features disabled.
 
-## Connecting a real Supabase dev project
+## Connecting a real Supabase dev project (already done once — for reference/reset)
 
 1. Create a Supabase project (the *development* one — keep it separate from
    staging/production, per spec section 24).
 2. Copy `mobile/env/development.example.json` to `mobile/env/development.json`
    and fill in `SUPABASE_URL` / `SUPABASE_ANON_KEY` from the project's API
    settings. This file is gitignored.
-3. Push the schema:
+3. Push the schema (CLI login via OAuth doesn't work in a non-interactive
+   shell, so push straight via connection string instead of `link`):
    ```powershell
-   npx supabase login
-   npx supabase link --project-ref <your-project-ref>
-   npx supabase db push
+   npx supabase db push --db-url "postgresql://postgres:<url-encoded-password>@db.<project-ref>.supabase.co:5432/postgres"
    ```
-4. Run the app with the dev config compiled in:
-   ```powershell
-   flutter run -d edge --dart-define-from-file=env/development.json
-   ```
+4. Enable **Phone** under Authentication → Providers (Phase 2 uses phone OTP).
+   An SMS provider (e.g. Twilio) still needs to be configured there before real
+   OTP codes can be sent.
 
 ## Running the full local stack instead (optional, needs Docker)
 
