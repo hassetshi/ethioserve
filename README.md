@@ -81,7 +81,17 @@ pending decision (see ARCHITECTURE.md).
 Phase 8 adds: booking-scoped chat (text + images) via Supabase Realtime,
 reached from Booking Details. The schema/RLS for this were already correct
 from Phase 1; verified live that an unauthenticated read returns nothing and
-a spoofed insert is correctly rejected. 29 tests passing.
+a spoofed insert is correctly rejected.
+
+Phase 9 adds: leave-a-review on completed bookings, and a reviews +
+provider-response section on the Provider Profile screen. Found and fixed
+two real bugs along the way — a provider could have overwritten a
+customer's rating via the "respond" policy, and a legitimate review
+submission was being rejected by an unrelated admin-only guard reacting to
+its own rating-recalculation side effect. Both fixed and verified live with
+two real test identities (see ARCHITECTURE.md for the full story, including
+a first fix attempt that turned out to be wrong for Supabase's actual
+connection model). 30 tests passing.
 
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 

@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 29 tests passing as of Phase 8
+flutter test      # 30 tests passing as of Phase 9
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -82,6 +82,18 @@ spoof a message from one of the test users is correctly rejected with 401
 `new row violates row-level security policy`. The Chat screen itself is
 covered by a widget test (`FakeMessagingRepository`, a broadcast-stream
 fake) verifying a sent message appears in the thread.
+
+Phase 9's review logic got the most iterative live verification yet, because
+it surfaced two real bugs (see ARCHITECTURE.md for the full story): a
+provider being able to overwrite a customer's rating via the "respond" RLS
+policy, and a completely legitimate review submission being rejected because
+its rating-aggregation cascade collided with an unrelated admin-only guard.
+Verified end-to-end with the two test identities: a real review insert took
+the provider from `0.00/0` to `5.00/1`; a non-completed booking correctly
+rejects a review attempt; a provider trying to change the rating while
+responding is rejected; a provider setting only `provider_response`
+succeeds without touching the rating. The Leave-a-review UI is covered by a
+widget test (`FakeReviewRepository`).
 
 ## Planned (spec section 28), added as each phase lands
 

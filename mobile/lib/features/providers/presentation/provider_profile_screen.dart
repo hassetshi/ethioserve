@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/locale_provider.dart';
+import '../../reviews/presentation/provider_reviews_section.dart';
 import '../domain/provider_detail.dart';
 import 'provider_providers.dart';
 
@@ -45,7 +46,7 @@ class ProviderProfileScreen extends ConsumerWidget {
   }
 }
 
-class _ProviderProfileBody extends StatelessWidget {
+class _ProviderProfileBody extends ConsumerWidget {
   const _ProviderProfileBody({required this.provider, required this.languageCode});
 
   final ProviderDetail provider;
@@ -58,7 +59,7 @@ class _ProviderProfileBody extends StatelessWidget {
       languageCode == 'am' ? provider.cityNameAm : provider.cityNameEn;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -124,6 +125,10 @@ class _ProviderProfileBody extends StatelessWidget {
             trailing: Text(_formatPrice(service)),
           ),
         ),
+        const SizedBox(height: 24),
+        Text('Reviews', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        ProviderReviewsSection(providerId: provider.id),
       ],
     );
   }

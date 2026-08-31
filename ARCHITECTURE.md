@@ -170,7 +170,33 @@ Following the spec's phase order (section 48):
    → Chat), which is the only context chat exists in for this app, so a
    separate inbox would mostly duplicate the bookings list for modest
    added value.
-9. Reviews
+9. **Reviews** — done: leave-a-review on a completed booking (Booking
+   Details), a reviews list + provider-response flow on the Provider Profile
+   screen. Found and fixed two real bugs while building this:
+   1. `reviews_provider_respond` (Phase 1 RLS) let a provider UPDATE *any*
+      column on their own review, not just `provider_response` — they could
+      have rewritten the customer's rating. Same category as the Phase 6
+      booking-actor gap; fixed with a trigger (RLS is row-level, it can't
+      express "this actor may only touch this one column").
+   2. A customer submitting a review (fully legitimate, RLS-validated)
+      cascaded into `recalculate_provider_rating()`, which updates
+      `provider_profiles.rating` — and that update was being rejected by
+      the Phase 1 `guard_provider_profile_admin_fields()` trigger, because
+      it checked `is_admin()` against the *customer's* `auth.uid()`, with
+      no way to tell "a trusted system cascade" apart from "a client
+      directly editing their own provider row." First attempted fix (check
+      `current_user <> session_user`, assuming that only diverges under
+      `SECURITY DEFINER`) was itself wrong for Supabase's actual connection
+      model — PostgREST connects as a fixed `authenticator` role and does
+      `SET ROLE` per request, so `session_user` never equals `current_user`
+      for *any* authenticated request, cascade or not; that fix would have
+      disabled the guard entirely. Correct fix: an explicit transaction-local
+      flag (`set_config('app.internal_rating_update', ...)`) the cascade
+      sets around its own update — no reliance on role-switching semantics.
+   Both verified live with the two test identities: the "already registered
+   0.00/0" provider went to the correct `5.00/1` after a real review
+   insert; a provider attempt to alter the rating while responding was
+   rejected; a provider setting only `provider_response` succeeded.
 10. Admin dashboard (`admin-web/`)
 11. AI search
 12. Payment integration

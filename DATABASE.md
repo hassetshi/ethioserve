@@ -26,6 +26,9 @@ even for a one-line fix.
 | `20260831000015_booking_transition_actor_rules.sql` | Replaces `validate_booking_status_transition()` to also check *who* may make a transition (only the assigned provider can accept/decline/progress/complete; either participant can cancel), not just which status values are reachable. Also adds `bookings` to the `supabase_realtime` publication for live tracking. |
 | `20260831000016_notifications.sql` | `device_tokens` table; `notify_new_booking()` and `notify_booking_status_change()` triggers that generate `notifications` rows server-side; adds `notifications` to the `supabase_realtime` publication for the unread-count badge |
 | `20260831000017_messaging.sql` | `chat-images` private Storage bucket (RLS via `is_booking_participant()` on the path's booking-id segment); adds `messages` to the `supabase_realtime` publication for live chat |
+| `20260831000018_reviews_field_ownership.sql` | `guard_review_field_ownership()` trigger: a provider responding to a review may only change `provider_response`, not the customer's rating/comment (the Phase 1 RLS policy allowed any column) |
+| `20260831000019_fix_rating_cascade_vs_admin_guard.sql` | First (incorrect) attempt at fixing the rating-cascade-vs-admin-guard conflict below — superseded by 000020 |
+| `20260831000020_fix_rating_cascade_properly.sql` | Correct fix: `recalculate_provider_rating()` now sets a transaction-local flag around its update, and `guard_provider_profile_admin_fields()` trusts it — see ARCHITECTURE.md Phase 9 for why the 000019 approach (`current_user <> session_user`) was wrong for Supabase's actual PostgREST connection model |
 
 ## Deliberate deviations from the literal field list in the spec
 
@@ -70,11 +73,19 @@ future integration) makes the write:
   `customer_id`/`provider_id` on the review match that booking.
 - **Provider rating aggregation** (`recalculate_provider_rating`): keeps
   `provider_profiles.rating`/`review_count` in sync automatically; the app never
-  computes or writes these directly.
+  computes or writes these directly. Runs as `SECURITY DEFINER` and sets a
+  transaction-local flag (`app.internal_rating_update`) around its own
+  update so the admin-fields guard below trusts it (see Phase 9 in
+  ARCHITECTURE.md for the two wrong turns before landing on this).
 - **Provider self-verification guard** (`guard_provider_profile_admin_fields`):
   a provider updating their own profile cannot change
   `verification_status`/`verification_date`/`rating`/`review_count` — only an
-  admin (`is_admin()`) can.
+  admin (`is_admin()`) or the trusted rating-recalculation cascade can.
+- **Review field ownership** (`guard_review_field_ownership`): a provider
+  responding to a review may only set `provider_response`; a customer
+  editing their own review may change `rating`/`comment` but not
+  `provider_response`. RLS alone permits either participant to update the
+  row at all — this trigger is what keeps them to their own column.
 
 ## Local development
 

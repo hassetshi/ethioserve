@@ -6,6 +6,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../providers/presentation/provider_providers.dart';
+import '../../reviews/presentation/leave_review_section.dart';
 import '../domain/booking.dart';
 import '../domain/booking_status.dart';
 import 'booking_providers.dart';
@@ -169,6 +170,10 @@ class _BookingDetailsBody extends ConsumerWidget {
           const SizedBox(height: 8),
           if (isProviderView) ..._providerActions(context, ref),
           if (isCustomerView && !booking.status.isTerminal) _cancelAction(context, ref),
+          if (isCustomerView && booking.status == BookingStatus.completed) ...[
+            const SizedBox(height: 16),
+            LeaveReviewSection(bookingId: booking.id, providerId: booking.providerId),
+          ],
         ],
       ),
     );
