@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../auth/presentation/auth_providers.dart';
+import '../../notifications/presentation/notification_bell.dart';
 import 'provider_providers.dart';
 
 /// Earnings and subscription management (spec section 12) land in Phase 12
@@ -18,6 +19,7 @@ class ProviderDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Provider Dashboard'),
         actions: [
+          const NotificationBell(),
           IconButton(
             onPressed: () => ref.read(authRepositoryProvider).signOut(),
             icon: const Icon(Icons.logout),

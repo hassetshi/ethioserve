@@ -141,7 +141,19 @@ Following the spec's phase order (section 48):
    with two distinct real identities (see TESTING.md) — a customer accepting
    their own booking is now rejected, the assigned provider succeeds, and
    invalid value transitions are still rejected regardless of actor.
-7. Notifications
+7. **Notifications** — in-app half done: `notifications` rows are generated
+   server-side by triggers on `bookings` (new request → provider, every
+   status change → the other participant), verified live. A Notifications
+   screen, a shared unread-count badge (`NotificationBell`, Realtime-backed)
+   on Home and the Provider Dashboard, mark-as-read/mark-all-read. The actual
+   *push* delivery (spec section 21 — reaching the device tray when the app
+   is closed) is behind `PushNotificationService`, an interface with a
+   `NoopPushNotificationService` default — "use a notification abstraction
+   so providers can be changed later" is exactly this. Wiring a real
+   implementation (Firebase Cloud Messaging) is a pending decision — it
+   needs a Firebase project and, for server-initiated sends, an Edge
+   Function holding a service-account credential that must never reach the
+   client, same category of decision as Twilio in Phase 2.
 8. Messaging
 9. Reviews
 10. Admin dashboard (`admin-web/`)

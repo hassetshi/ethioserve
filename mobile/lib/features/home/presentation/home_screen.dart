@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../catalog/presentation/catalog_providers.dart';
+import '../../notifications/presentation/notification_bell.dart';
 
 /// AI search wiring (spec section 15) is Phase 11; nearby/featured provider
 /// home sections are deferred until there's enough real provider density to
@@ -22,6 +23,7 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.appName),
         actions: [
+          const NotificationBell(),
           IconButton(
             onPressed: () => context.push('/bookings'),
             icon: const Icon(Icons.calendar_month_outlined),

@@ -15,6 +15,7 @@ import '../../features/catalog/presentation/category_detail_screen.dart';
 import '../../features/catalog/presentation/search_screen.dart';
 import '../../features/home/presentation/admin_blocked_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/onboarding/presentation/language_selection_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/providers/presentation/add_provider_service_screen.dart';
@@ -191,6 +192,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ProviderBookingRequestsScreen(
           providerId: state.extra! as String,
         ),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
     ],
   );

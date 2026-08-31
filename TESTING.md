@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 27 tests passing as of Phase 6
+flutter test      # 28 tests passing as of Phase 7
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -66,6 +66,14 @@ equivalent direct SQL join, confirming the exact shape `Booking.fromJson`
 expects. Full authenticated REST-level testing (two real users actually
 logged in via the app, one creating a booking and the other accepting it)
 still needs real app usage to exercise, same caveat as Phases 4-5.
+
+Phase 7's notification triggers were verified live the same way: a fresh
+booking correctly generated a `booking_requested` notification for the
+provider, and accepting it correctly generated a `booking_status_changed`
+notification for the customer. The in-app notification center (list,
+mark-as-read, mark-all-read) is covered by a widget test using
+`FakeNotificationRepository`. Actual push delivery isn't testable at all yet
+since no push provider is wired in (`NoopPushNotificationService`).
 
 ## Planned (spec section 28), added as each phase lands
 
