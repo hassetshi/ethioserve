@@ -1,0 +1,11 @@
+{
+  "name": "ethioserve",
+  "private": true,
+  "description": "Tooling root for the EthioServe Supabase project (mobile app and admin web app are separate sub-projects).",
+  "scripts": {
+    "supabase": "supabase"
+  },
+  "devDependencies": {
+    "supabase": "^2.116.0"
+  }
+}

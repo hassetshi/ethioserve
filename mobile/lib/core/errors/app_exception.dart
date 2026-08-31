@@ -1,0 +1,31 @@
+/// Base type for all errors that cross a repository/service boundary into
+/// the UI layer. UI code catches [AppException] and shows [userMessage];
+/// it must never render a raw exception/stack trace to the user (spec
+/// section 29). Technical detail goes to [AppLogger], not to the screen.
+sealed class AppException implements Exception {
+  const AppException(this.userMessage, {this.debugDetail});
+
+  final String userMessage;
+  final String? debugDetail;
+
+  @override
+  String toString() => 'AppException: $userMessage (${debugDetail ?? ''})';
+}
+
+class NetworkException extends AppException {
+  const NetworkException({super.debugDetail})
+      : super('Something went wrong. Please try again.');
+}
+
+class AuthException extends AppException {
+  const AuthException(super.userMessage, {super.debugDetail});
+}
+
+class ValidationException extends AppException {
+  const ValidationException(super.userMessage, {super.debugDetail});
+}
+
+class UnknownAppException extends AppException {
+  const UnknownAppException({super.debugDetail})
+      : super('Something went wrong. Please try again.');
+}

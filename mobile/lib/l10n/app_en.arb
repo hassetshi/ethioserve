@@ -1,0 +1,24 @@
+{
+  "@@locale": "en",
+  "appName": "EthioServe",
+  "homeGreetingTitle": "What service do you need?",
+  "@homeGreetingTitle": {
+    "description": "Home screen greeting/prompt shown above the search field"
+  },
+  "searchHint": "Search services...",
+  "@searchHint": {
+    "description": "Placeholder text in the home screen search field"
+  },
+  "aiSearchLabel": "Ask EthioServe",
+  "@aiSearchLabel": {
+    "description": "Label on the AI-powered search entry point"
+  },
+  "genericErrorMessage": "Something went wrong. Please try again.",
+  "@genericErrorMessage": {
+    "description": "Shown to users for any unexpected/technical error; never show raw error details"
+  },
+  "languageSelectionTitle": "Choose your language",
+  "@languageSelectionTitle": {
+    "description": "Title on the language selection screen"
+  }
+}

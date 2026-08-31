@@ -1,0 +1,9 @@
+{
+  "@@locale": "am",
+  "appName": "ኢትዮሰርቭ",
+  "homeGreetingTitle": "ምን አገልግሎት ይፈልጋሉ?",
+  "searchHint": "አገልግሎቶችን ይፈልጉ...",
+  "aiSearchLabel": "ኢትዮሰርቭን ይጠይቁ",
+  "genericErrorMessage": "የሆነ ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
+  "languageSelectionTitle": "ቋንቋዎን ይምረጡ"
+}

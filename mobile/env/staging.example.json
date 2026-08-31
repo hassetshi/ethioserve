@@ -1,0 +1,8 @@
+{
+  "ENVIRONMENT": "staging",
+  "SUPABASE_URL": "",
+  "SUPABASE_ANON_KEY": "",
+  "AI_API_URL": "",
+  "MAPS_API_KEY": "",
+  "PAYMENT_API_URL": ""
+}
