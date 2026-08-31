@@ -28,3 +28,8 @@ final servicesByCategoryProvider =
 final citiesProvider = FutureProvider.autoDispose<List<City>>((ref) {
   return ref.watch(catalogRepositoryProvider).getCities();
 });
+
+final serviceSearchProvider =
+    FutureProvider.autoDispose.family<List<Service>, String>((ref, query) {
+  return ref.watch(catalogRepositoryProvider).searchServices(query);
+});

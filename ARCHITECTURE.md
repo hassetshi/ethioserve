@@ -110,7 +110,22 @@ Following the spec's phase order (section 48):
    since spec section 13 keeps admin functionality out of this app entirely.
    Verified the RPC's auth guard against the live project (an unauthenticated
    call is correctly rejected with a clean error, not a raw exception).
-5. Provider search, location, filtering
+5. **Provider search, Location, Filtering** — done: a real Home search field
+   (text search over service names, English/Amharic) and a generalized
+   `ProviderSearchResultsScreen` — shared by the Phase 3 category-browse flow
+   and the new text-search flow, both converging on `ProviderRepository
+   .searchProviders()` (one query path, not two) — with filters for city,
+   minimum rating, and an opt-in "Near me" toggle. `LocationService`
+   (`core/location/`) wraps `geolocator`: permission is requested only when
+   the user taps "Near me," every failure path degrades to `null` rather than
+   throwing, and city/rating filtering works with no location at all (spec
+   section 18: never require GPS for every feature). Verified live: substring
+   search in both languages, the `min_rating` filter, and real-coordinate
+   distance filtering/sorting all confirmed against the dev project.
+   Deliberately deferred: availability- and price-range filtering (spec
+   section 17 lists them too) — the RPC can take those params later without
+   a redesign, but there's no meaningful UI for them until bookings
+   (Phase 6) give "availability" a concrete meaning.
 6. Booking system
 7. Notifications
 8. Messaging

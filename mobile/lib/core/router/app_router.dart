@@ -7,6 +7,7 @@ import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/otp_verification_screen.dart';
 import '../../features/catalog/presentation/category_detail_screen.dart';
+import '../../features/catalog/presentation/search_screen.dart';
 import '../../features/home/presentation/admin_blocked_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/onboarding/presentation/language_selection_screen.dart';
@@ -15,8 +16,8 @@ import '../../features/providers/presentation/add_provider_service_screen.dart';
 import '../../features/providers/presentation/provider_dashboard_screen.dart';
 import '../../features/providers/presentation/provider_profile_screen.dart';
 import '../../features/providers/presentation/provider_registration_screen.dart';
+import '../../features/providers/presentation/provider_search_results_screen.dart';
 import '../../features/providers/presentation/provider_verification_screen.dart';
-import '../../features/providers/presentation/providers_for_service_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../providers/locale_provider.dart';
 
@@ -122,11 +123,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        path: '/categories/:categoryId/providers',
+        builder: (context, state) => ProviderSearchResultsScreen(
+          categoryId: state.pathParameters['categoryId']!,
+        ),
+      ),
+      GoRoute(
         path: '/services/:serviceId/providers',
-        builder: (context, state) => ProvidersForServiceScreen(
+        builder: (context, state) => ProviderSearchResultsScreen(
           serviceId: state.pathParameters['serviceId']!,
         ),
       ),
+      GoRoute(path: '/search', builder: (context, state) => const SearchScreen()),
       GoRoute(
         path: '/providers/:providerId',
         builder: (context, state) => ProviderProfileScreen(

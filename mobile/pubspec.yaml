@@ -53,6 +53,10 @@ dependencies:
   # Picking verification documents/photos from gallery or camera (Phase 4).
   image_picker: ^1.1.2
 
+  # Location for nearby provider search (Phase 5). Permission is requested
+  # only when the user opts into distance sorting, never on app start.
+  geolocator: ^13.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

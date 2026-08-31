@@ -24,31 +24,44 @@ class CategoryDetailScreen extends ConsumerWidget {
           error: (_, _) => const Text('Category'),
         ),
       ),
-      body: servicesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            const Center(child: Text('Something went wrong. Please try again.')),
-        data: (services) {
-          if (services.isEmpty) {
-            return const Center(child: Text('No services in this category yet.'));
-          }
-          return ListView.separated(
+      body: Column(
+        children: [
+          Padding(
             padding: const EdgeInsets.all(16),
-            itemCount: services.length,
-            separatorBuilder: (_, _) => const Divider(),
-            itemBuilder: (context, index) {
-              final service = services[index];
-              return ListTile(
-                title: Text(service.localizedName(languageCode)),
-                subtitle: languageCode == 'am'
-                    ? (service.descriptionAm != null ? Text(service.descriptionAm!) : null)
-                    : (service.descriptionEn != null ? Text(service.descriptionEn!) : null),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/services/${service.id}/providers'),
-              );
-            },
-          );
-        },
+            child: OutlinedButton(
+              onPressed: () => context.push('/categories/$categoryId/providers'),
+              child: const Text('View all providers in this category'),
+            ),
+          ),
+          Expanded(
+            child: servicesAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, _) =>
+                  const Center(child: Text('Something went wrong. Please try again.')),
+              data: (services) {
+                if (services.isEmpty) {
+                  return const Center(child: Text('No services in this category yet.'));
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: services.length,
+                  separatorBuilder: (_, _) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final service = services[index];
+                    return ListTile(
+                      title: Text(service.localizedName(languageCode)),
+                      subtitle: languageCode == 'am'
+                          ? (service.descriptionAm != null ? Text(service.descriptionAm!) : null)
+                          : (service.descriptionEn != null ? Text(service.descriptionEn!) : null),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/services/${service.id}/providers'),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

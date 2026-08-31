@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 16 tests passing as of Phase 4
+flutter test      # 18 tests passing as of Phase 5
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -35,6 +35,16 @@ exception) — the full happy path (an actual customer registering and getting
 promoted to provider) needs a real authenticated session, which needs a real
 phone completing OTP login; exercise it by running the app once Android/web
 is available to click through, rather than via API calls.
+
+Phase 5's search was verified live end-to-end: English- and Amharic-substring
+service search, the `min_rating` filter (confirmed it both excludes and
+includes the seeded provider depending on threshold), and real-coordinate
+geospatial filtering (a nearby point returns `distance_km: 0`; a distant
+point with a small radius correctly returns zero results). `LocationService`'s
+permission-request/denial handling isn't covered by an automated test (needs
+a real device/emulator location prompt) — it's structured so every failure
+path returns `null` rather than throwing, which the UI already handles
+(falls back to city/rating filtering only).
 
 ## Planned (spec section 28), added as each phase lands
 

@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Nearby provider search / distance sort (Phase 5). Requested at
+         runtime only when the user opts in, never on app start. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:label="ethioserve"
         android:name="${applicationName}"

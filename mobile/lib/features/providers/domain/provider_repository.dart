@@ -7,11 +7,20 @@ import 'provider_summary.dart';
 abstract class ProviderRepository {
   Future<ProviderDetail> getProviderDetail(String providerId);
 
-  /// Providers offering [serviceId], verified-only, nearest/highest-rated
-  /// first. Backed by the `search_providers` RPC so this and the future
-  /// Phase 5 search screens share one server-side query, not two.
-  Future<List<ProviderSummary>> listProvidersForService(
-    String serviceId, {
+  /// Server-side filtered/paginated provider search (spec section 17): the
+  /// Category-browse flow (Phase 3), the Search flow (Phase 5), and any
+  /// future entry point (AI search, Phase 11) all call this one method
+  /// instead of each re-implementing filtering — it's a thin pass-through
+  /// to the `search_providers` RPC.
+  Future<List<ProviderSummary>> searchProviders({
+    String? categoryId,
+    String? serviceId,
+    String? cityId,
+    double? lat,
+    double? lng,
+    double radiusKm = 25,
+    double? minRating,
+    bool verifiedOnly = true,
     int limit = 20,
     int offset = 0,
   });

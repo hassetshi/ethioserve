@@ -30,4 +30,12 @@ class FakeCatalogRepository implements CatalogRepository {
   Future<List<City>> getCities() async => const [
         City(id: 'city-1', nameEn: 'Addis Ababa', nameAm: 'አዲስ አበባ'),
       ];
+
+  @override
+  Future<List<Service>> searchServices(String query) async {
+    final services = await getServicesByCategory('cat-1');
+    return services
+        .where((s) => s.nameEn.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
 }

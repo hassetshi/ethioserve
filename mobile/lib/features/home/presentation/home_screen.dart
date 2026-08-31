@@ -6,9 +6,9 @@ import '../../../core/providers/locale_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../catalog/presentation/catalog_providers.dart';
 
-/// Search/AI-search wiring and nearby/featured provider sections (spec
-/// section 14) land in Phase 5 once provider search exists; categories are
-/// real data as of Phase 3.
+/// AI search wiring (spec section 15) is Phase 11; nearby/featured provider
+/// home sections are deferred until there's enough real provider density to
+/// make them meaningful. Search and categories are both real as of Phase 5.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -40,6 +40,7 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             TextField(
               readOnly: true,
+              onTap: () => context.push('/search'),
               decoration: InputDecoration(
                 hintText: l10n.searchHint,
                 prefixIcon: const Icon(Icons.search),

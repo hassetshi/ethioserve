@@ -58,7 +58,12 @@ Phase 4 adds: provider registration ("Become a provider" on the Profile
 screen), a Provider Dashboard, adding offered services, and verification
 document upload — backed by a `SECURITY DEFINER` RPC for the
 customer-to-provider role promotion, since RLS correctly blocks that from a
-plain client update. 16 tests passing.
+plain client update.
+
+Phase 5 adds: a real Home search field (service name search, English/Amharic),
+and a generalized provider search-results screen (city, rating, and an
+opt-in "Near me" location filter) shared by both the category-browse and
+text-search entry points. 18 tests passing.
 
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 

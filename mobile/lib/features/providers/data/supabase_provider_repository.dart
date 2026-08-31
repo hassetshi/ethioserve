@@ -54,14 +54,28 @@ class SupabaseProviderRepository implements ProviderRepository {
   }
 
   @override
-  Future<List<ProviderSummary>> listProvidersForService(
-    String serviceId, {
+  Future<List<ProviderSummary>> searchProviders({
+    String? categoryId,
+    String? serviceId,
+    String? cityId,
+    double? lat,
+    double? lng,
+    double radiusKm = 25,
+    double? minRating,
+    bool verifiedOnly = true,
     int limit = 20,
     int offset = 0,
   }) async {
     try {
       final rows = await _client.rpc('search_providers', params: {
+        'p_category_id': categoryId,
         'p_service_id': serviceId,
+        'p_city_id': cityId,
+        'p_lat': lat,
+        'p_lng': lng,
+        'p_radius_km': radiusKm,
+        'p_min_rating': minRating,
+        'p_verified_only': verifiedOnly,
         'p_limit': limit,
         'p_offset': offset,
       });
@@ -69,7 +83,7 @@ class SupabaseProviderRepository implements ProviderRepository {
           .map((row) => ProviderSummary.fromJson(row as Map<String, dynamic>))
           .toList();
     } on PostgrestException catch (e, st) {
-      AppLogger.error('listProvidersForService failed', error: e, stackTrace: st);
+      AppLogger.error('searchProviders failed', error: e, stackTrace: st);
       throw const NetworkException();
     }
   }

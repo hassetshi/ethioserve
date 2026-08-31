@@ -16,9 +16,28 @@ final providerDetailProvider =
   return ref.watch(providerRepositoryProvider).getProviderDetail(providerId);
 });
 
-final providersForServiceProvider =
-    FutureProvider.autoDispose.family<List<ProviderSummary>, String>((ref, serviceId) {
-  return ref.watch(providerRepositoryProvider).listProvidersForService(serviceId);
+/// A record (not a class) so Riverpod's family caching gets structural
+/// equality for free — two searches with the same filters share one cached
+/// result instead of re-fetching.
+typedef ProviderSearchFilters = ({
+  String? categoryId,
+  String? serviceId,
+  String? cityId,
+  double? lat,
+  double? lng,
+  double? minRating,
+});
+
+final providerSearchResultsProvider = FutureProvider.autoDispose
+    .family<List<ProviderSummary>, ProviderSearchFilters>((ref, filters) {
+  return ref.watch(providerRepositoryProvider).searchProviders(
+        categoryId: filters.categoryId,
+        serviceId: filters.serviceId,
+        cityId: filters.cityId,
+        lat: filters.lat,
+        lng: filters.lng,
+        minRating: filters.minRating,
+      );
 });
 
 /// The current user's own provider_profiles.id, or `null` if they haven't

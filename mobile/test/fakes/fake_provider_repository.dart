@@ -25,8 +25,15 @@ class FakeProviderRepository implements ProviderRepository {
       );
 
   @override
-  Future<List<ProviderSummary>> listProvidersForService(
-    String serviceId, {
+  Future<List<ProviderSummary>> searchProviders({
+    String? categoryId,
+    String? serviceId,
+    String? cityId,
+    double? lat,
+    double? lng,
+    double radiusKm = 25,
+    double? minRating,
+    bool verifiedOnly = true,
     int limit = 20,
     int offset = 0,
   }) async =>
