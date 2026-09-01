@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/ai_search/presentation/ai_search_screen.dart';
 import '../../features/auth/domain/app_user.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
@@ -142,6 +143,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/search', builder: (context, state) => const SearchScreen()),
+      GoRoute(path: '/ai-search', builder: (context, state) => const AiSearchScreen()),
       GoRoute(
         path: '/providers/:providerId',
         builder: (context, state) => ProviderProfileScreen(

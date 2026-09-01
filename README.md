@@ -104,6 +104,13 @@ Refresh/duplicate-client issue, and finally landing on the real cause: the
 dev machine's system clock was ~3 hours off from real time, which broke
 Supabase's token-freshness check regardless of any code here.
 
+Phase 11 adds AI search: a Supabase Edge Function calls Claude to classify a
+free-text query (English or Amharic) against the platform's real
+categories/services, validates every id it returns before trusting it, and
+feeds the result into the same search RPC manual search already uses.
+Verified live with the spec's own example queries in both languages. 32
+tests passing. See AI.md for the full pipeline.
+
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 
 - Android SDK isn't installed, so the app can't yet be run/built for Android

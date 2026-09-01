@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 30 tests passing as of Phase 9
+flutter test      # 32 tests passing as of Phase 11
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -103,6 +103,13 @@ expected counts from the dev project's actual data (1 customer, 1 provider,
 automated test suite exists yet for admin-web (unlike `mobile/`, which has
 Flutter's widget-test tooling already wired up); worth adding Vitest +
 React Testing Library in a future pass if admin-web's page count grows.
+
+Phase 11's AI search was verified live against the deployed Edge Function
+with the spec's own two example queries (English and Amharic), plus a
+deliberately vague query to confirm the clarification path — see AI.md for
+the exact results. The Flutter side (`AiSearchScreen`) is covered by a
+widget test using `FakeAIService` for both the matched and
+needs-clarification branches.
 
 ## Planned (spec section 28), added as each phase lands
 

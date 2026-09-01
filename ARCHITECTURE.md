@@ -257,7 +257,21 @@ Following the spec's phase order (section 48):
     they don't fix clock skew, but they stop this specific app from turning
     any future skew into a broken login loop, which is a reasonable
     defensive posture for an admin tool regardless.
-11. AI search
+11. **AI search** — done: a Supabase Edge Function (`supabase/functions/ai-search`)
+    calls Claude to classify a free-text query (English or Amharic) against
+    the platform's actual current categories/services, verifies every id it
+    returns against that same catalog before trusting it, and the client
+    feeds the validated result into the existing `search_providers` RPC —
+    no new search code path, no AI-generated SQL, matching spec section 15
+    exactly. `AIService` is a vendor-agnostic interface, same pattern as
+    `PushNotificationService` (Phase 7). `SpeechToTextService`/
+    `TextToSpeechService` interfaces exist per spec section 16 with `Noop`
+    defaults — deliberately not wired to a real STT/TTS vendor yet, since
+    on-device Amharic speech recognition quality needs validating against
+    real users before committing to one, unlike text search which was
+    straightforward to ship working end-to-end now. See AI.md for the full
+    pipeline and live verification against the spec's own example queries
+    (including the Amharic one, byte-for-byte).
 12. Payment integration
 13. Testing (continuous, but hardened/expanded here)
 14. CI/CD

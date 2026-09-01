@@ -58,7 +58,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
-              onPressed: null,
+              onPressed: () => context.push('/ai-search'),
               icon: const Icon(Icons.auto_awesome),
               label: Text(l10n.aiSearchLabel),
             ),
