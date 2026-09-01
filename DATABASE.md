@@ -29,6 +29,7 @@ even for a one-line fix.
 | `20260831000018_reviews_field_ownership.sql` | `guard_review_field_ownership()` trigger: a provider responding to a review may only change `provider_response`, not the customer's rating/comment (the Phase 1 RLS policy allowed any column) |
 | `20260831000019_fix_rating_cascade_vs_admin_guard.sql` | First (incorrect) attempt at fixing the rating-cascade-vs-admin-guard conflict below — superseded by 000020 |
 | `20260831000020_fix_rating_cascade_properly.sql` | Correct fix: `recalculate_provider_rating()` now sets a transaction-local flag around its update, and `guard_provider_profile_admin_fields()` trusts it — see ARCHITECTURE.md Phase 9 for why the 000019 approach (`current_user <> session_user`) was wrong for Supabase's actual PostgREST connection model |
+| `20260901000021_payments_architecture.sql` | `calculate_commission()` (reads the configurable commission rate, never hard-coded); `record_cash_payment()` — `SECURITY DEFINER` RPC for the provider to record cash received, computing the split server-side; unique constraint on `payments.booking_id` |
 
 ## Deliberate deviations from the literal field list in the spec
 

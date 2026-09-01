@@ -108,8 +108,16 @@ Phase 11 adds AI search: a Supabase Edge Function calls Claude to classify a
 free-text query (English or Amharic) against the platform's real
 categories/services, validates every id it returns before trusting it, and
 feeds the result into the same search RPC manual search already uses.
-Verified live with the spec's own example queries in both languages. 32
-tests passing. See AI.md for the full pipeline.
+Verified live with the spec's own example queries in both languages. See
+AI.md for the full pipeline.
+
+Phase 12 adds payments — architecture-only per the spec's own MVP scope
+allowance, but with cash payments genuinely working end-to-end (no external
+provider needed for that): a `record_cash_payment` RPC only the assigned
+provider can call, computing the commission split server-side from a
+configurable rate (never hard-coded). Digital payment (Chapa/Telebirr/etc.)
+sits behind the same interface, currently returning a clear "not available
+yet" until a real provider is configured. 34 tests passing.
 
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 

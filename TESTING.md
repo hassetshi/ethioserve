@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 32 tests passing as of Phase 11
+flutter test      # 34 tests passing as of Phase 12
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -110,6 +110,15 @@ deliberately vague query to confirm the clarification path — see AI.md for
 the exact results. The Flutter side (`AiSearchScreen`) is covered by a
 widget test using `FakeAIService` for both the matched and
 needs-clarification branches.
+
+Phase 12's payment logic — real money math, so it got the same live-verification
+treatment as bookings/reviews: a 1000 ETB cash payment on the test booking
+correctly split into 100/900 (the seeded 10% commission rate); a customer
+attempting to record their own payment was rejected; a second payment
+attempt on the same booking was rejected (the unique constraint doing its
+job). The Flutter side is covered by a widget test
+(`FakePaymentRepository`) for both the provider's record-payment action and
+the customer's read-only view.
 
 ## Planned (spec section 28), added as each phase lands
 

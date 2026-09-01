@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../auth/presentation/auth_providers.dart';
+import '../../payments/presentation/payment_section.dart';
 import '../../providers/presentation/provider_providers.dart';
 import '../../reviews/presentation/leave_review_section.dart';
 import '../domain/booking.dart';
@@ -159,6 +160,10 @@ class _BookingDetailsBody extends ConsumerWidget {
           if (booking.cancellationReason != null) ...[
             const SizedBox(height: 12),
             Text('Reason: ${booking.cancellationReason}'),
+          ],
+          if (booking.status == BookingStatus.completed && (isCustomerView || isProviderView)) ...[
+            const SizedBox(height: 16),
+            PaymentSection(bookingId: booking.id, isProviderView: isProviderView),
           ],
           const SizedBox(height: 16),
           if (isCustomerView || isProviderView)

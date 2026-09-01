@@ -272,7 +272,24 @@ Following the spec's phase order (section 48):
     straightforward to ship working end-to-end now. See AI.md for the full
     pipeline and live verification against the spec's own example queries
     (including the Amharic one, byte-for-byte).
-12. Payment integration
+12. **Payment integration** — architecture-only per the spec's own MVP scope
+    allowance (section 46: "Architecture only initially, unless payment
+    integration is explicitly configured" — no real provider was configured
+    for this pass). What's genuinely real and working, not just stubbed:
+    commission calculation (`calculate_commission()`, reading the
+    configurable `platform_settings.booking_commission_rate` — never a
+    hard-coded 10%, per spec section 23) and cash payments end-to-end
+    (`record_cash_payment()`, a `SECURITY DEFINER` RPC only the assigned
+    provider can call, only for a completed booking, computing the split
+    server-side from `final_price`). Cash needed no external provider to be
+    real, so it's built for real rather than stubbed. Digital payment
+    (Chapa/Telebirr/etc.) is behind the same `PaymentRepository` interface
+    but its method currently throws a clear "not yet available" error —
+    swapping in a real provider later is an implementation change behind
+    that interface, not an architecture change (spec section 20: "Do not
+    hard-code one Ethiopian payment provider"). Verified live: correct
+    100/900 split on a 1000 ETB booking, a customer attempting to record
+    their own payment rejected, a duplicate payment attempt rejected.
 13. Testing (continuous, but hardened/expanded here)
 14. CI/CD
 15. Staging deployment
