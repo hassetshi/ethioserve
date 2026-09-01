@@ -46,3 +46,11 @@ above to pass, require at least one PR review, disallow force-pushes —
 needs to be turned on once under Settings → Branches on the actual GitHub
 repo; there's no way to express or verify that from inside this repo's
 files.
+
+## Staging deploy (Phase 15)
+
+[.github/workflows/staging-deploy.yml](.github/workflows/staging-deploy.yml)
+pushes database migrations and redeploys the `ai-search` edge function on
+every push to `staging`. See STAGING.md for the full breakdown, including
+the deliberate (and temporary) decision to point staging at the same
+Supabase project as local dev rather than standing up a second one.

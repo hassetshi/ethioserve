@@ -136,6 +136,12 @@ Phase 14 adds CI: two path-filtered GitHub Actions workflows, one for
 pass. See DEPLOYMENT.md for the full breakdown and the one piece that
 still needs a manual step in the GitHub UI (branch protection on `main`).
 
+Phase 15 adds an automated staging deploy: pushing to the `staging` branch
+runs database migrations and redeploys the AI search edge function via
+GitHub Actions. Staging deliberately shares the dev Supabase project for
+now rather than a fully isolated environment — see STAGING.md for the
+tradeoff and when to revisit it.
+
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 
 - Android SDK isn't installed, so the app can't yet be run/built for Android

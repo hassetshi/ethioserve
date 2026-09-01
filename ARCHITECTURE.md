@@ -330,7 +330,19 @@ Following the spec's phase order (section 48):
     review, spec section 26) is a GitHub repo Settings change, not
     expressible as a file in this repo — left as a manual step, documented
     in DEPLOYMENT.md. See DEPLOYMENT.md for the full breakdown.
-15. Staging deployment
+15. **Staging deployment** — done, with one explicit, documented scope
+    tradeoff: rather than standing up a second Supabase project, staging
+    currently shares the dev project used since Phase 2. Added
+    `.github/workflows/staging-deploy.yml` (`supabase db push` +
+    `supabase functions deploy ai-search` on every push to `staging`, or
+    manual `workflow_dispatch`), driven by three GitHub Actions secrets
+    (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`,
+    `SUPABASE_DB_PASSWORD`). Also added `mobile/env/staging.json` (mirrors
+    `development.json` since it's the same project) for
+    `--dart-define-from-file` staging builds. admin-web has no public
+    staging hosting yet — deferred until a non-developer needs to click
+    through it. See STAGING.md for the full reasoning on the shared-project
+    decision and what it means to revisit before real users are involved.
 16. Production deployment
 17. Google Play / Apple App Store release
 
