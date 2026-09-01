@@ -116,15 +116,20 @@ await test('register_as_provider rejects an unauthenticated caller', async () =>
 });
 
 await test('log_admin_action RPC rejects an unauthenticated caller', async () => {
-  // Granted to `authenticated` only, not `anon` (see
-  // 20260901000022_admin_audit_log_rpc.sql) - an anon call should be
-  // rejected by Postgres's own grant system before it ever reaches the
-  // function body's is_admin() check.
-  const { status } = await restPost('rpc/log_admin_action', {
+  // Postgres grants EXECUTE to PUBLIC by default, so `grant ... to
+  // authenticated` (20260901000022_admin_audit_log_rpc.sql) doesn't
+  // actually block anon at the grant level - the real rejection is the
+  // function body's own is_admin() check, surfaced as a plain Postgres
+  // exception (400/P0001), not a permission-denied error.
+  const { status, body } = await restPost('rpc/log_admin_action', {
     p_action: 'test.probe',
     p_entity_type: 'users',
   });
-  assert(status === 401 || status === 403, `expected 401/403, got ${status}`);
+  assert(status === 400, `expected 400, got ${status}`);
+  assert(
+    /Only admins may write audit log entries/.test(body?.message ?? ''),
+    `expected the is_admin rejection message, got ${JSON.stringify(body)}`,
+  );
 });
 
 if (!DB_URL) {

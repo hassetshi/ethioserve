@@ -7,6 +7,15 @@
 -- path: it re-checks is_admin() itself rather than trusting the caller, and
 -- always stamps user_id from auth.uid() rather than trusting a client-supplied
 -- value.
+--
+-- Note: `grant execute ... to authenticated` below does NOT revoke anon's
+-- access - Postgres grants EXECUTE to PUBLIC by default on function
+-- creation, and every role implicitly includes PUBLIC. Verified live: an
+-- anon call reaches the function body and is rejected by the is_admin()
+-- check (P0001), not by a permission-denied error from the grant system.
+-- That's an acceptable, intentional defense-in-depth layer, not the actual
+-- boundary - same pattern as every other role-gated RPC in this schema
+-- (e.g. register_as_provider).
 create or replace function public.log_admin_action(
   p_action text,
   p_entity_type text,
