@@ -343,7 +343,28 @@ Following the spec's phase order (section 48):
     staging hosting yet — deferred until a non-developer needs to click
     through it. See STAGING.md for the full reasoning on the shared-project
     decision and what it means to revisit before real users are involved.
-16. Production deployment
+16. **Production deployment** — pipeline built, project deliberately not
+    created yet: `.github/workflows/production-deploy.yml` mirrors
+    staging's but is manual-only (`workflow_dispatch`, no automatic push
+    trigger) and targets a genuinely separate project once one exists —
+    unlike staging, production cannot share dev's data. While assembling
+    PRODUCTION.md's pre-launch checklist, found that SECURITY.md's own
+    claim about Phase 10 was stale: MFA, session expiration, and
+    restricted-operation logging on admin-web were said to be "implemented
+    then" but none of the three had actually landed. Fixed two of three
+    now: `useIdleLogout` (15-minute inactivity auto-sign-out) and
+    `log_admin_action` (a SECURITY DEFINER RPC, the only path into
+    `audit_logs` since that table has no client insert policy at all by
+    design), wired into every admin-web mutation (provider verify/
+    reject/suspend, user activate/deactivate, category/service create and
+    toggle). Both covered by new checks in `scripts/security-tests.mjs`
+    (unauthenticated rejection, non-admin rejection, and a positive-path
+    check that the written row is correctly attributed). MFA is left as an
+    explicit, documented launch-blocker — it needs a real provider decision,
+    not just code. Backups and monitoring are documented as a lightweight
+    plan (Supabase's own dashboard today; Sentry + uptime checks before real
+    users) rather than stood up now, same "architecture first" pattern as
+    Phase 12's payments. See PRODUCTION.md for the full checklist.
 17. Google Play / Apple App Store release
 
 ## Database

@@ -142,6 +142,16 @@ GitHub Actions. Staging deliberately shares the dev Supabase project for
 now rather than a fully isolated environment — see STAGING.md for the
 tradeoff and when to revisit it.
 
+Phase 16 builds the production deploy pipeline (manual-only, unlike
+staging's automatic one) ahead of the production Supabase project actually
+existing — no reason to pay for it before the app can be installed
+anywhere. While writing the pre-launch checklist, caught a real gap:
+SECURITY.md claimed admin-web had session expiration and audit logging
+since Phase 10; neither had actually shipped. Both are fixed now (15-minute
+inactivity auto-sign-out; every admin action writes to `audit_logs` via a
+SECURITY DEFINER RPC, the table's only insert path). MFA is still open,
+tracked as a launch-blocker in PRODUCTION.md.
+
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 
 - Android SDK isn't installed, so the app can't yet be run/built for Android

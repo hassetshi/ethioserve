@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { logAdminAction } from '../lib/audit'
 import { supabase } from '../lib/supabase'
 
 type UserRow = {
@@ -27,7 +28,9 @@ export function UsersPage() {
   })
 
   async function toggleActive(user: UserRow) {
-    await supabase.from('users').update({ is_active: !user.is_active }).eq('id', user.id)
+    const nextActive = !user.is_active
+    await supabase.from('users').update({ is_active: nextActive }).eq('id', user.id)
+    await logAdminAction(nextActive ? 'user.reactivated' : 'user.deactivated', 'users', user.id)
     queryClient.invalidateQueries({ queryKey: ['users'] })
   }
 

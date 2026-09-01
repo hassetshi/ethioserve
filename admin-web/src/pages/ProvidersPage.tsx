@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { logAdminAction } from '../lib/audit'
 import { supabase } from '../lib/supabase'
 
 type ProviderRow = {
@@ -96,6 +97,7 @@ export function ProvidersPage() {
       .from('provider_profiles')
       .update({ verification_status: status, verification_date: new Date().toISOString() })
       .eq('id', providerId)
+    await logAdminAction(`provider.${status}`, 'provider_profiles', providerId)
     queryClient.invalidateQueries({ queryKey: ['providers'] })
   }
 

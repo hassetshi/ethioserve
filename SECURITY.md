@@ -59,9 +59,34 @@ never shown to the user (spec section 29).
 
 ## Admin security
 
-Deferred to Phase 10 (admin-web build): MFA, session expiration, and
-restricted-operation logging are implemented then, not simulated now. Tracked
-here so it isn't forgotten — see spec section 43.
+Spec section 43 calls for MFA, session expiration, and restricted-operation
+logging on admin-web. Phase 10 (admin-web build) shipped the app itself but
+not these three — that gap sat undetected until Phase 16's production
+checklist review caught SECURITY.md's own claim not matching reality.
+Current status:
+
+- **Session expiration**: `admin-web/src/hooks/useIdleLogout.ts` signs the
+  admin out after 15 minutes of no mouse/keyboard/scroll/touch activity —
+  the realistic risk on an admin panel handling PII and payment records is
+  an unattended, unlocked tab, not just a long-lived token. This is on top
+  of (not instead of) the Supabase JWT's own 1-hour expiry combined with
+  `autoRefreshToken: false` (`admin-web/src/lib/supabase.ts`), which already
+  means a session can't silently renew itself forever.
+- **Restricted-operation logging**: `log_admin_action` (SECURITY DEFINER
+  RPC, `supabase/migrations/20260901000022_admin_audit_log_rpc.sql`) is the
+  only path admin-web has to `audit_logs` — the table's own RLS has no
+  client insert policy at all, by design, so even a fully compromised admin
+  session can't tamper with its own audit trail via a direct table write.
+  The RPC re-checks `is_admin()` itself (never trusts the caller) and always
+  stamps `user_id` from `auth.uid()` (never a client-supplied value). Wired
+  into every admin-web mutation: provider verify/reject/suspend, user
+  activate/deactivate, category/service create and activate/deactivate.
+  Failures are logged to the console rather than blocking the action that
+  already succeeded — see `admin-web/src/lib/audit.ts`.
+- **MFA**: still not implemented. This is a real launch-blocker, not a
+  formality — it needs an actual provider decision (Supabase Auth's own TOTP
+  support vs. a third-party option) before it can be built, tracked in
+  PRODUCTION.md's pre-launch checklist.
 
 ## Storage
 

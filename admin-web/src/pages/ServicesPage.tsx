@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { logAdminAction } from '../lib/audit'
 import { supabase } from '../lib/supabase'
 
 type ServiceRow = {
@@ -47,16 +48,27 @@ export function ServicesPage() {
   async function addService(e: FormEvent) {
     e.preventDefault()
     if (!nameEn.trim() || !nameAm.trim() || !categoryId) return
-    await supabase
+    const { data } = await supabase
       .from('services')
       .insert({ name_en: nameEn.trim(), name_am: nameAm.trim(), category_id: categoryId })
+      .select('id')
+      .single()
+    if (data) {
+      await logAdminAction('service.created', 'services', data.id, { name_en: nameEn.trim() })
+    }
     setNameEn('')
     setNameAm('')
     queryClient.invalidateQueries({ queryKey: ['services'] })
   }
 
   async function toggleActive(service: ServiceRow) {
-    await supabase.from('services').update({ is_active: !service.is_active }).eq('id', service.id)
+    const nextActive = !service.is_active
+    await supabase.from('services').update({ is_active: nextActive }).eq('id', service.id)
+    await logAdminAction(
+      nextActive ? 'service.activated' : 'service.deactivated',
+      'services',
+      service.id,
+    )
     queryClient.invalidateQueries({ queryKey: ['services'] })
   }
 

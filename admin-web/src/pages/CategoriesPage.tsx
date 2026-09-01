@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { logAdminAction } from '../lib/audit'
 import { supabase } from '../lib/supabase'
 
 type CategoryRow = {
@@ -30,17 +31,27 @@ export function CategoriesPage() {
   async function addCategory(e: FormEvent) {
     e.preventDefault()
     if (!nameEn.trim() || !nameAm.trim()) return
-    await supabase.from('categories').insert({ name_en: nameEn.trim(), name_am: nameAm.trim() })
+    const { data } = await supabase
+      .from('categories')
+      .insert({ name_en: nameEn.trim(), name_am: nameAm.trim() })
+      .select('id')
+      .single()
+    if (data) {
+      await logAdminAction('category.created', 'categories', data.id, { name_en: nameEn.trim() })
+    }
     setNameEn('')
     setNameAm('')
     queryClient.invalidateQueries({ queryKey: ['categories'] })
   }
 
   async function toggleActive(category: CategoryRow) {
-    await supabase
-      .from('categories')
-      .update({ is_active: !category.is_active })
-      .eq('id', category.id)
+    const nextActive = !category.is_active
+    await supabase.from('categories').update({ is_active: nextActive }).eq('id', category.id)
+    await logAdminAction(
+      nextActive ? 'category.activated' : 'category.deactivated',
+      'categories',
+      category.id,
+    )
     queryClient.invalidateQueries({ queryKey: ['categories'] })
   }
 

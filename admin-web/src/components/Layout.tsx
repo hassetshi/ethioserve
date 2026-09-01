@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/auth-context'
+import { useIdleLogout } from '../hooks/useIdleLogout'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', end: true },
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
 
 export function Layout() {
   const { signOut } = useAuth()
+  useIdleLogout()
 
   return (
     <div className="flex h-screen">

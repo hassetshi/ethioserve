@@ -115,6 +115,18 @@ await test('register_as_provider rejects an unauthenticated caller', async () =>
   assert(status === 400, `expected 400, got ${status}`);
 });
 
+await test('log_admin_action RPC rejects an unauthenticated caller', async () => {
+  // Granted to `authenticated` only, not `anon` (see
+  // 20260901000022_admin_audit_log_rpc.sql) - an anon call should be
+  // rejected by Postgres's own grant system before it ever reaches the
+  // function body's is_admin() check.
+  const { status } = await restPost('rpc/log_admin_action', {
+    p_action: 'test.probe',
+    p_entity_type: 'users',
+  });
+  assert(status === 401 || status === 403, `expected 401/403, got ${status}`);
+});
+
 if (!DB_URL) {
   console.log('\nDEV_DATABASE_URL not set — skipping trigger-level actor-authorization tests.');
 } else {
@@ -222,6 +234,38 @@ if (!DB_URL) {
   await test('cleanup: remove the payment test booking', async () => {
     await client.query('delete from public.payments where booking_id = $1', [paidBookingId]);
     await client.query('delete from public.bookings where id = $1', [paidBookingId]);
+  });
+
+  console.log('\n--- Admin audit logging ---');
+
+  await test('a non-admin cannot write an audit log entry', () =>
+    expectRejection(
+      () => asUser(CUSTOMER_ID, `select public.log_admin_action('test.probe', 'users', null, null)`),
+      /Only admins may write audit log entries/,
+    ));
+
+  await test('an admin can write an audit log entry, correctly attributed', async () => {
+    const { rows: adminRows } = await client.query(
+      `select id from public.users where role = 'admin' limit 1`,
+    );
+    if (adminRows.length === 0) {
+      throw new Error('no admin user found in this database - cannot test the positive path');
+    }
+    const adminId = adminRows[0].id;
+    const result = await asUser(
+      adminId,
+      `select public.log_admin_action('test.probe', 'users', $1, null) as id`,
+      [CUSTOMER_ID],
+    );
+    const logId = result.rows[0].id;
+    const { rows: logRows } = await client.query(
+      'select user_id, action, entity_type, entity_id from public.audit_logs where id = $1',
+      [logId],
+    );
+    assert(logRows[0].user_id === adminId, 'audit log user_id should be the calling admin');
+    assert(logRows[0].action === 'test.probe', 'action should match what was passed in');
+    assert(logRows[0].entity_id === CUSTOMER_ID, 'entity_id should match what was passed in');
+    await client.query('delete from public.audit_logs where id = $1', [logId]);
   });
 
   await client.end();

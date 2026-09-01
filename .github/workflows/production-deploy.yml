@@ -1,0 +1,40 @@
+name: Production Deploy
+
+# Deliberately manual-only (workflow_dispatch, no push trigger) even though
+# main/staging/develop all auto-deploy their own environments. Production
+# holds real user data once it exists - a human clicking "Run workflow"
+# each time is the safeguard here, not a branch-protection rule or an
+# approval gate on top of an automatic trigger. See PRODUCTION.md: this
+# workflow is written ahead of the production Supabase project actually
+# existing (Phase 16), and will fail on SUPABASE_PROD_PROJECT_REF /
+# SUPABASE_PROD_DB_PASSWORD until those secrets are added once it does.
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: supabase link --project-ref "${{ secrets.SUPABASE_PROD_PROJECT_REF }}"
+
+      - name: Push database migrations
+        run: supabase db push --password "${{ secrets.SUPABASE_PROD_DB_PASSWORD }}"
+
+      - name: Deploy edge functions
+        run: supabase functions deploy ai-search --no-verify-jwt

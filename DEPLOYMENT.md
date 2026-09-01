@@ -54,3 +54,11 @@ pushes database migrations and redeploys the `ai-search` edge function on
 every push to `staging`. See STAGING.md for the full breakdown, including
 the deliberate (and temporary) decision to point staging at the same
 Supabase project as local dev rather than standing up a second one.
+
+## Production deploy (Phase 16)
+
+[.github/workflows/production-deploy.yml](.github/workflows/production-deploy.yml)
+does the same as staging's, but manual-only (`workflow_dispatch`, no
+automatic push trigger) against a genuinely separate production project.
+The project itself doesn't exist yet — see PRODUCTION.md for the full
+pre-launch checklist and what's still open (MFA, backups, monitoring).
