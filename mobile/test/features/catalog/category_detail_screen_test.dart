@@ -10,7 +10,9 @@ void main() {
   testWidgets('shows services for the category', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository())],
+        overrides: [
+          catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+        ],
         child: const MaterialApp(
           home: CategoryDetailScreen(categoryId: 'cat-1'),
         ),

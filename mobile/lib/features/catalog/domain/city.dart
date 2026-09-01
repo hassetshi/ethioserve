@@ -6,10 +6,10 @@ class City {
   final String nameAm;
 
   factory City.fromJson(Map<String, dynamic> json) => City(
-        id: json['id'] as String,
-        nameEn: json['name_en'] as String,
-        nameAm: json['name_am'] as String,
-      );
+    id: json['id'] as String,
+    nameEn: json['name_en'] as String,
+    nameAm: json['name_am'] as String,
+  );
 
   String localizedName(String languageCode) =>
       languageCode == 'am' ? nameAm : nameEn;

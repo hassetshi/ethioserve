@@ -39,18 +39,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             hintText: 'Search services...',
             border: InputBorder.none,
           ),
-          onSubmitted: (value) => setState(() => _submittedQuery = value.trim()),
+          onSubmitted: (value) =>
+              setState(() => _submittedQuery = value.trim()),
         ),
       ),
       body: resultsAsync == null
           ? const Center(child: Text('Search for a service, e.g. "plumbing".'))
           : resultsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) =>
-                  const Center(child: Text('Something went wrong. Please try again.')),
+              error: (_, _) => const Center(
+                child: Text('Something went wrong. Please try again.'),
+              ),
               data: (services) {
                 if (services.isEmpty) {
-                  return const Center(child: Text('No matching services found.'));
+                  return const Center(
+                    child: Text('No matching services found.'),
+                  );
                 }
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
@@ -61,7 +65,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     return ListTile(
                       title: Text(service.localizedName(languageCode)),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.push('/services/${service.id}/providers'),
+                      onTap: () =>
+                          context.push('/services/${service.id}/providers'),
                     );
                   },
                 );

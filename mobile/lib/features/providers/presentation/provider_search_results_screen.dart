@@ -14,8 +14,11 @@ const _ratingOptions = [null, 3.0, 4.0, 4.5];
 /// [categoryId], and the filter controls (city, rating, distance) are the
 /// same regardless of how the user got here (spec section 17).
 class ProviderSearchResultsScreen extends ConsumerStatefulWidget {
-  const ProviderSearchResultsScreen({this.serviceId, this.categoryId, super.key})
-      : assert(serviceId != null || categoryId != null);
+  const ProviderSearchResultsScreen({
+    this.serviceId,
+    this.categoryId,
+    super.key,
+  }) : assert(serviceId != null || categoryId != null);
 
   final String? serviceId;
   final String? categoryId;
@@ -35,7 +38,9 @@ class _ProviderSearchResultsScreenState
 
   Future<void> _useMyLocation() async {
     setState(() => _locatingUser = true);
-    final location = await ref.read(locationServiceProvider).getCurrentLocation();
+    final location = await ref
+        .read(locationServiceProvider)
+        .getCurrentLocation();
     if (!mounted) return;
     setState(() {
       _locatingUser = false;
@@ -83,11 +88,16 @@ class _ProviderSearchResultsScreenState
                     hint: const Text('City'),
                     value: _cityId,
                     items: [
-                      const DropdownMenuItem(value: null, child: Text('Any city')),
-                      ...cities.map((c) => DropdownMenuItem(
-                            value: c.id,
-                            child: Text(c.localizedName(languageCode)),
-                          )),
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('Any city'),
+                      ),
+                      ...cities.map(
+                        (c) => DropdownMenuItem(
+                          value: c.id,
+                          child: Text(c.localizedName(languageCode)),
+                        ),
+                      ),
                     ],
                     onChanged: (value) => setState(() => _cityId = value),
                   ),
@@ -97,10 +107,12 @@ class _ProviderSearchResultsScreenState
                   hint: const Text('Rating'),
                   value: _minRating,
                   items: _ratingOptions
-                      .map((r) => DropdownMenuItem(
-                            value: r,
-                            child: Text(r == null ? 'Any rating' : '$r+ stars'),
-                          ))
+                      .map(
+                        (r) => DropdownMenuItem(
+                          value: r,
+                          child: Text(r == null ? 'Any rating' : '$r+ stars'),
+                        ),
+                      )
                       .toList(),
                   onChanged: (value) => setState(() => _minRating = value),
                 ),
@@ -111,7 +123,8 @@ class _ProviderSearchResultsScreenState
                       ? const SizedBox(
                           height: 14,
                           width: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2))
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : null,
                   onSelected: (selected) {
                     if (selected) {
@@ -137,7 +150,9 @@ class _ProviderSearchResultsScreenState
               data: (providers) {
                 if (providers.isEmpty) {
                   return const Center(
-                    child: Text('No verified providers match these filters yet.'),
+                    child: Text(
+                      'No verified providers match these filters yet.',
+                    ),
                   );
                 }
                 return ListView.separated(
@@ -147,22 +162,29 @@ class _ProviderSearchResultsScreenState
                   itemBuilder: (context, index) {
                     final provider = providers[index];
                     return ListTile(
-                      leading: const CircleAvatar(child: Icon(Icons.storefront)),
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.storefront),
+                      ),
                       title: Text(provider.businessName),
                       subtitle: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(Icons.star, size: 16, color: Colors.amber),
                           const SizedBox(width: 4),
-                          Text('${provider.rating.toStringAsFixed(1)} (${provider.reviewCount})'),
+                          Text(
+                            '${provider.rating.toStringAsFixed(1)} (${provider.reviewCount})',
+                          ),
                           if (provider.distanceKm != null) ...[
                             const SizedBox(width: 12),
-                            Text('${provider.distanceKm!.toStringAsFixed(1)} km'),
+                            Text(
+                              '${provider.distanceKm!.toStringAsFixed(1)} km',
+                            ),
                           ],
                         ],
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.push('/providers/${provider.providerId}'),
+                      onTap: () =>
+                          context.push('/providers/${provider.providerId}'),
                     );
                   },
                 );

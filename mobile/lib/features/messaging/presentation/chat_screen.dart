@@ -32,7 +32,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _textController.clear();
     setState(() => _sending = true);
     try {
-      await ref.read(messagingRepositoryProvider).sendTextMessage(
+      await ref
+          .read(messagingRepositoryProvider)
+          .sendTextMessage(
             bookingId: widget.bookingId,
             receiverId: receiverId,
             message: text,
@@ -40,7 +42,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
         );
       }
     } finally {
@@ -49,14 +53,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> _sendImage(String receiverId) async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 70);
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
     if (picked == null) return;
 
     setState(() => _sending = true);
     try {
       final bytes = await picked.readAsBytes();
-      final extension = picked.name.contains('.') ? picked.name.split('.').last : 'jpg';
-      await ref.read(messagingRepositoryProvider).sendImageMessage(
+      final extension = picked.name.contains('.')
+          ? picked.name.split('.').last
+          : 'jpg';
+      await ref
+          .read(messagingRepositoryProvider)
+          .sendImageMessage(
             bookingId: widget.bookingId,
             receiverId: receiverId,
             bytes: bytes,
@@ -65,7 +76,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
         );
       }
     } finally {
@@ -82,8 +95,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(title: const Text('Chat')),
       body: bookingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            const Center(child: Text('Something went wrong. Please try again.')),
+        error: (_, _) => const Center(
+          child: Text('Something went wrong. Please try again.'),
+        ),
         data: (booking) {
           if (currentUserId == null) return const SizedBox.shrink();
 
@@ -92,23 +106,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               : booking.customerId;
 
           if (receiverId == null) {
-            return const Center(child: Text('Unable to determine the other participant.'));
+            return const Center(
+              child: Text('Unable to determine the other participant.'),
+            );
           }
 
-          final messagesAsync = ref.watch(messagesStreamProvider(widget.bookingId));
+          final messagesAsync = ref.watch(
+            messagesStreamProvider(widget.bookingId),
+          );
 
           return Column(
             children: [
               Expanded(
                 child: messagesAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (_, _) => const Center(
                     child: Text('Something went wrong. Please try again.'),
                   ),
                   data: (messages) {
                     _markIncomingAsRead(messages, currentUserId);
                     if (messages.isEmpty) {
-                      return const Center(child: Text('No messages yet. Say hello!'));
+                      return const Center(
+                        child: Text('No messages yet. Say hello!'),
+                      );
                     }
                     return ListView.builder(
                       reverse: true,
@@ -131,7 +152,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        onPressed: _sending ? null : () => _sendImage(receiverId),
+                        onPressed: _sending
+                            ? null
+                            : () => _sendImage(receiverId),
                         icon: const Icon(Icons.image_outlined),
                       ),
                       Expanded(
@@ -140,13 +163,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           decoration: const InputDecoration(
                             hintText: 'Message',
                             border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
                           ),
                           onSubmitted: (_) => _sendText(receiverId),
                         ),
                       ),
                       IconButton(
-                        onPressed: _sending ? null : () => _sendText(receiverId),
+                        onPressed: _sending
+                            ? null
+                            : () => _sendText(receiverId),
                         icon: const Icon(Icons.send),
                       ),
                     ],
@@ -186,8 +213,13 @@ class _MessageBubble extends ConsumerWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.all(10),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.7,
+        ),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: message.isImage
             ? _ChatImage(storagePath: message.message ?? '')
             : Text(message.message ?? ''),
@@ -204,7 +236,9 @@ class _ChatImage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return FutureBuilder<String>(
-      future: ref.read(messagingRepositoryProvider).getSignedImageUrl(storagePath),
+      future: ref
+          .read(messagingRepositoryProvider)
+          .getSignedImageUrl(storagePath),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox(

@@ -19,13 +19,13 @@ class AppUser {
   final bool isActive;
 
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
-        id: json['id'] as String,
-        role: UserRole.fromValue(json['role'] as String),
-        phone: json['phone'] as String?,
-        email: json['email'] as String?,
-        languageCode: json['language_code'] as String? ?? 'en',
-        isActive: json['is_active'] as bool? ?? true,
-      );
+    id: json['id'] as String,
+    role: UserRole.fromValue(json['role'] as String),
+    phone: json['phone'] as String?,
+    email: json['email'] as String?,
+    languageCode: json['language_code'] as String? ?? 'en',
+    isActive: json['is_active'] as bool? ?? true,
+  );
 }
 
 enum UserRole {
@@ -34,8 +34,8 @@ enum UserRole {
   admin;
 
   static UserRole fromValue(String value) => switch (value) {
-        'provider' => UserRole.provider,
-        'admin' => UserRole.admin,
-        _ => UserRole.customer,
-      };
+    'provider' => UserRole.provider,
+    'admin' => UserRole.admin,
+    _ => UserRole.customer,
+  };
 }

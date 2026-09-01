@@ -10,7 +10,8 @@ class OtpController extends AsyncNotifier<AppUser?> {
   Future<bool> verify({required String phone, required String code}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(authRepositoryProvider).verifyOtp(phone: phone, code: code),
+      () =>
+          ref.read(authRepositoryProvider).verifyOtp(phone: phone, code: code),
     );
     return !state.hasError;
   }

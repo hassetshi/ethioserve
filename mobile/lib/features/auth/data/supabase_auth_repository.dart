@@ -32,7 +32,11 @@ class SupabaseAuthRepository implements AuthRepository {
       if (row == null) return null;
       return AppUser.fromJson(row);
     } on PostgrestException catch (e, st) {
-      AppLogger.error('Failed to load current user row', error: e, stackTrace: st);
+      AppLogger.error(
+        'Failed to load current user row',
+        error: e,
+        stackTrace: st,
+      );
       throw const NetworkException();
     }
   }
@@ -48,7 +52,10 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AppUser> verifyOtp({required String phone, required String code}) async {
+  Future<AppUser> verifyOtp({
+    required String phone,
+    required String code,
+  }) async {
     try {
       final response = await _client.auth.verifyOTP(
         type: OtpType.sms,
@@ -56,12 +63,15 @@ class SupabaseAuthRepository implements AuthRepository {
         token: code,
       );
       if (response.user == null) {
-        throw const AppAuthException('Invalid or expired code. Please try again.');
+        throw const AppAuthException(
+          'Invalid or expired code. Please try again.',
+        );
       }
       final user = await getCurrentUser();
       if (user == null) {
         throw const UnknownAppException(
-          debugDetail: 'public.users row missing after successful OTP verification',
+          debugDetail:
+              'public.users row missing after successful OTP verification',
         );
       }
       return user;

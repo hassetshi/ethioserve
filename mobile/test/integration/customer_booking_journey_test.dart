@@ -44,9 +44,13 @@ void main() {
         ProviderScope(
           overrides: [
             authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
-            catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+            catalogRepositoryProvider.overrideWithValue(
+              FakeCatalogRepository(),
+            ),
             providerRepositoryProvider.overrideWithValue(fakeProviders),
-            bookingRepositoryProvider.overrideWithValue(FakeBookingRepository()),
+            bookingRepositoryProvider.overrideWithValue(
+              FakeBookingRepository(),
+            ),
           ],
           child: const EthioServeApp(),
         ),
@@ -87,7 +91,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Provider profile.
-      expect(find.text('Test Provider'), findsOneWidget); // FakeProviderRepository's detail fixture
+      expect(
+        find.text('Test Provider'),
+        findsOneWidget,
+      ); // FakeProviderRepository's detail fixture
       await tester.tap(find.text('Book'));
       await tester.pumpAndSettle();
 
@@ -108,7 +115,10 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.widgetWithText(TextField, 'Address'), 'Bole, Addis Ababa');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Address'),
+        'Bole, Addis Ababa',
+      );
       await tester.tap(find.text('Submit request'));
       await tester.pumpAndSettle();
 
@@ -117,8 +127,14 @@ void main() {
       await tester.tap(find.text('View booking'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Pipe Repair'), findsOneWidget); // service name on Booking Details
-      expect(find.textContaining('Addis Plumbing Experts'), findsWidgets); // provider name shown again
+      expect(
+        find.text('Pipe Repair'),
+        findsOneWidget,
+      ); // service name on Booking Details
+      expect(
+        find.textContaining('Addis Plumbing Experts'),
+        findsWidgets,
+      ); // provider name shown again
     },
   );
 }

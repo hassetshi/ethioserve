@@ -32,7 +32,10 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> sendOtp(String phone) async {}
 
   @override
-  Future<AppUser> verifyOtp({required String phone, required String code}) async {
+  Future<AppUser> verifyOtp({
+    required String phone,
+    required String code,
+  }) async {
     _user = const AppUser(
       id: 'test-user-id',
       role: UserRole.customer,

@@ -9,12 +9,16 @@ final reviewRepositoryProvider = Provider<ReviewRepository>((ref) {
   return SupabaseReviewRepository(Supabase.instance.client);
 });
 
-final providerReviewsProvider =
-    FutureProvider.autoDispose.family<List<Review>, String>((ref, providerId) {
-  return ref.watch(reviewRepositoryProvider).getReviewsForProvider(providerId);
-});
+final providerReviewsProvider = FutureProvider.autoDispose
+    .family<List<Review>, String>((ref, providerId) {
+      return ref
+          .watch(reviewRepositoryProvider)
+          .getReviewsForProvider(providerId);
+    });
 
-final myReviewForBookingProvider =
-    FutureProvider.autoDispose.family<Review?, String>((ref, bookingId) {
-  return ref.watch(reviewRepositoryProvider).getMyReviewForBooking(bookingId);
-});
+final myReviewForBookingProvider = FutureProvider.autoDispose
+    .family<Review?, String>((ref, bookingId) {
+      return ref
+          .watch(reviewRepositoryProvider)
+          .getMyReviewForBooking(bookingId);
+    });

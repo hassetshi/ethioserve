@@ -18,7 +18,9 @@ class BookingRequestController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     Booking? booking;
     state = await AsyncValue.guard(() async {
-      booking = await ref.read(bookingRepositoryProvider).createBooking(
+      booking = await ref
+          .read(bookingRepositoryProvider)
+          .createBooking(
             providerId: providerId,
             serviceId: serviceId,
             scheduledDate: scheduledDate,
@@ -33,5 +35,5 @@ class BookingRequestController extends AsyncNotifier<void> {
 
 final bookingRequestControllerProvider =
     AsyncNotifierProvider<BookingRequestController, void>(
-  BookingRequestController.new,
-);
+      BookingRequestController.new,
+    );

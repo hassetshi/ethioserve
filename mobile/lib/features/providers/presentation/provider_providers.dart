@@ -11,10 +11,12 @@ final providerRepositoryProvider = Provider<ProviderRepository>((ref) {
   return SupabaseProviderRepository(Supabase.instance.client);
 });
 
-final providerDetailProvider =
-    FutureProvider.autoDispose.family<ProviderDetail, String>((ref, providerId) {
-  return ref.watch(providerRepositoryProvider).getProviderDetail(providerId);
-});
+final providerDetailProvider = FutureProvider.autoDispose
+    .family<ProviderDetail, String>((ref, providerId) {
+      return ref
+          .watch(providerRepositoryProvider)
+          .getProviderDetail(providerId);
+    });
 
 /// A record (not a class) so Riverpod's family caching gets structural
 /// equality for free — two searches with the same filters share one cached
@@ -30,15 +32,17 @@ typedef ProviderSearchFilters = ({
 
 final providerSearchResultsProvider = FutureProvider.autoDispose
     .family<List<ProviderSummary>, ProviderSearchFilters>((ref, filters) {
-  return ref.watch(providerRepositoryProvider).searchProviders(
-        categoryId: filters.categoryId,
-        serviceId: filters.serviceId,
-        cityId: filters.cityId,
-        lat: filters.lat,
-        lng: filters.lng,
-        minRating: filters.minRating,
-      );
-});
+      return ref
+          .watch(providerRepositoryProvider)
+          .searchProviders(
+            categoryId: filters.categoryId,
+            serviceId: filters.serviceId,
+            cityId: filters.cityId,
+            lat: filters.lat,
+            lng: filters.lng,
+            minRating: filters.minRating,
+          );
+    });
 
 /// The current user's own provider_profiles.id, or `null` if they haven't
 /// registered as a provider yet. Drives router redirects and Profile's
@@ -47,7 +51,7 @@ final myProviderIdProvider = FutureProvider.autoDispose<String?>((ref) {
   return ref.watch(providerRepositoryProvider).getMyProviderId();
 });
 
-final myDocumentsProvider =
-    FutureProvider.autoDispose.family<List<ProviderDocument>, String>((ref, providerId) {
-  return ref.watch(providerRepositoryProvider).getMyDocuments(providerId);
-});
+final myDocumentsProvider = FutureProvider.autoDispose
+    .family<List<ProviderDocument>, String>((ref, providerId) {
+      return ref.watch(providerRepositoryProvider).getMyDocuments(providerId);
+    });

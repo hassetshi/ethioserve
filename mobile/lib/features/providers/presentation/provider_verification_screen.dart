@@ -16,20 +16,28 @@ class ProviderVerificationScreen extends ConsumerStatefulWidget {
       _ProviderVerificationScreenState();
 }
 
-class _ProviderVerificationScreenState extends ConsumerState<ProviderVerificationScreen> {
+class _ProviderVerificationScreenState
+    extends ConsumerState<ProviderVerificationScreen> {
   String _documentType = _documentTypes.first;
   bool _uploading = false;
 
   Future<void> _pickAndUpload() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
     if (picked == null) return;
 
     setState(() => _uploading = true);
     try {
       final bytes = await picked.readAsBytes();
-      final extension = picked.name.contains('.') ? picked.name.split('.').last : 'jpg';
-      await ref.read(providerRepositoryProvider).uploadVerificationDocument(
+      final extension = picked.name.contains('.')
+          ? picked.name.split('.').last
+          : 'jpg';
+      await ref
+          .read(providerRepositoryProvider)
+          .uploadVerificationDocument(
             providerId: widget.providerId,
             documentType: _documentType,
             bytes: bytes,
@@ -43,7 +51,9 @@ class _ProviderVerificationScreenState extends ConsumerState<ProviderVerificatio
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
         );
       }
     } finally {
@@ -75,9 +85,13 @@ class _ProviderVerificationScreenState extends ConsumerState<ProviderVerificatio
                   border: OutlineInputBorder(),
                 ),
                 items: _documentTypes
-                    .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                    .map(
+                      (type) =>
+                          DropdownMenuItem(value: type, child: Text(type)),
+                    )
                     .toList(),
-                onChanged: (value) => setState(() => _documentType = value ?? _documentType),
+                onChanged: (value) =>
+                    setState(() => _documentType = value ?? _documentType),
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
@@ -86,11 +100,15 @@ class _ProviderVerificationScreenState extends ConsumerState<ProviderVerificatio
                 label: Text(_uploading ? 'Uploading...' : 'Choose & upload'),
               ),
               const SizedBox(height: 24),
-              Text('Submitted documents', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Submitted documents',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Expanded(
                 child: documentsAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (_, _) =>
                       const Text('Something went wrong. Please try again.'),
                   data: (documents) {

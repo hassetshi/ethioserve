@@ -22,7 +22,8 @@ class ProviderSummary {
   final String verificationStatus;
   final double? distanceKm;
 
-  factory ProviderSummary.fromJson(Map<String, dynamic> json) => ProviderSummary(
+  factory ProviderSummary.fromJson(Map<String, dynamic> json) =>
+      ProviderSummary(
         providerId: json['provider_id'] as String,
         businessName: json['business_name'] as String,
         descriptionEn: json['description_en'] as String?,

@@ -12,7 +12,8 @@ class BookingRequestScreen extends ConsumerStatefulWidget {
   final String providerId;
 
   @override
-  ConsumerState<BookingRequestScreen> createState() => _BookingRequestScreenState();
+  ConsumerState<BookingRequestScreen> createState() =>
+      _BookingRequestScreenState();
 }
 
 class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
@@ -42,22 +43,32 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
   }
 
   Future<void> _pickTime() async {
-    final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
     if (picked != null) setState(() => _time = picked);
   }
 
   Future<void> _submit() async {
     setState(() => _errorText = null);
 
-    if (_serviceId == null || _date == null || _time == null || _addressController.text.trim().isEmpty) {
-      setState(() => _errorText = 'Service, date, time, and address are required.');
+    if (_serviceId == null ||
+        _date == null ||
+        _time == null ||
+        _addressController.text.trim().isEmpty) {
+      setState(
+        () => _errorText = 'Service, date, time, and address are required.',
+      );
       return;
     }
 
     final timeString =
         '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}:00';
 
-    final booking = await ref.read(bookingRequestControllerProvider.notifier).submit(
+    final booking = await ref
+        .read(bookingRequestControllerProvider.notifier)
+        .submit(
           providerId: widget.providerId,
           serviceId: _serviceId!,
           scheduledDate: _date!,
@@ -89,8 +100,9 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
       appBar: AppBar(title: const Text('Request a booking')),
       body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            const Center(child: Text('Something went wrong. Please try again.')),
+        error: (_, _) => const Center(
+          child: Text('Something went wrong. Please try again.'),
+        ),
         data: (provider) {
           if (provider.services.isEmpty) {
             return const Center(
@@ -108,10 +120,14 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
                     border: OutlineInputBorder(),
                   ),
                   items: provider.services
-                      .map((s) => DropdownMenuItem(
-                            value: s.serviceId,
-                            child: Text(languageCode == 'am' ? s.nameAm : s.nameEn),
-                          ))
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s.serviceId,
+                          child: Text(
+                            languageCode == 'am' ? s.nameAm : s.nameEn,
+                          ),
+                        ),
+                      )
                       .toList(),
                   onChanged: (value) => setState(() => _serviceId = value),
                 ),
@@ -119,15 +135,19 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
                 OutlinedButton.icon(
                   onPressed: _pickDate,
                   icon: const Icon(Icons.calendar_today),
-                  label: Text(_date == null
-                      ? 'Choose date'
-                      : '${_date!.year}-${_date!.month.toString().padLeft(2, '0')}-${_date!.day.toString().padLeft(2, '0')}'),
+                  label: Text(
+                    _date == null
+                        ? 'Choose date'
+                        : '${_date!.year}-${_date!.month.toString().padLeft(2, '0')}-${_date!.day.toString().padLeft(2, '0')}',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: _pickTime,
                   icon: const Icon(Icons.access_time),
-                  label: Text(_time == null ? 'Choose time' : _time!.format(context)),
+                  label: Text(
+                    _time == null ? 'Choose time' : _time!.format(context),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -148,7 +168,12 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
                 ),
                 if (_errorText != null) ...[
                   const SizedBox(height: 12),
-                  Text(_errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                  Text(
+                    _errorText!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(

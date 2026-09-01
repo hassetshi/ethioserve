@@ -38,7 +38,9 @@ class _ProviderRegistrationScreenState
     if (_businessNameController.text.trim().isEmpty ||
         _phoneController.text.trim().isEmpty ||
         _cityId == null) {
-      setState(() => _errorText = 'Business name, phone, and city are required.');
+      setState(
+        () => _errorText = 'Business name, phone, and city are required.',
+      );
       return;
     }
 
@@ -124,17 +126,22 @@ class _ProviderRegistrationScreenState
                   border: OutlineInputBorder(),
                 ),
                 items: cities
-                    .map((city) => DropdownMenuItem(
-                          value: city.id,
-                          child: Text(city.localizedName(languageCode)),
-                        ))
+                    .map(
+                      (city) => DropdownMenuItem(
+                        value: city.id,
+                        child: Text(city.localizedName(languageCode)),
+                      ),
+                    )
                     .toList(),
                 onChanged: (value) => setState(() => _cityId = value),
               ),
             ),
             if (_errorText != null) ...[
               const SizedBox(height: 12),
-              Text(_errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Text(
+                _errorText!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
             ],
             const SizedBox(height: 24),
             FilledButton(

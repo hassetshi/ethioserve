@@ -29,8 +29,9 @@ class ProviderDashboardScreen extends ConsumerWidget {
       ),
       body: myProviderIdAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            const Center(child: Text('Something went wrong. Please try again.')),
+        error: (_, _) => const Center(
+          child: Text('Something went wrong. Please try again.'),
+        ),
         data: (providerId) {
           if (providerId == null) {
             return const Center(child: Text('No provider profile found.'));
@@ -59,7 +60,8 @@ class _DashboardBody extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           FilledButton.icon(
-            onPressed: () => context.push('/provider/bookings', extra: providerId),
+            onPressed: () =>
+                context.push('/provider/bookings', extra: providerId),
             icon: const Icon(Icons.list_alt),
             label: const Text('Booking Requests'),
           ),
@@ -89,7 +91,10 @@ class _DashboardBody extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Services offered', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Services offered',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               TextButton.icon(
                 onPressed: () =>
                     context.push('/provider/services/add', extra: providerId),
@@ -117,9 +122,9 @@ class _DashboardBody extends ConsumerWidget {
   }
 
   String _statusLabel(String status) => switch (status) {
-        'verified' => 'Verified',
-        'rejected' => 'Verification rejected',
-        'suspended' => 'Account suspended',
-        _ => 'Verification pending',
-      };
+    'verified' => 'Verified',
+    'rejected' => 'Verification rejected',
+    'suspended' => 'Account suspended',
+    _ => 'Verification pending',
+  };
 }

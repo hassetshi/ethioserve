@@ -9,9 +9,10 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return SupabaseNotificationRepository(Supabase.instance.client);
 });
 
-final myNotificationsProvider = FutureProvider.autoDispose<List<AppNotification>>((ref) {
-  return ref.watch(notificationRepositoryProvider).getMyNotifications();
-});
+final myNotificationsProvider =
+    FutureProvider.autoDispose<List<AppNotification>>((ref) {
+      return ref.watch(notificationRepositoryProvider).getMyNotifications();
+    });
 
 final unreadNotificationCountProvider = StreamProvider.autoDispose<int>((ref) {
   return ref.watch(notificationRepositoryProvider).watchUnreadCount();

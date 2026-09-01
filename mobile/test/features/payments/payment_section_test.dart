@@ -7,34 +7,47 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../fakes/fake_payment_repository.dart';
 
 void main() {
-  testWidgets('provider can record a cash payment and sees the commission split', (tester) async {
-    final fakeRepo = FakePaymentRepository();
+  testWidgets(
+    'provider can record a cash payment and sees the commission split',
+    (tester) async {
+      final fakeRepo = FakePaymentRepository();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [paymentRepositoryProvider.overrideWithValue(fakeRepo)],
-        child: const MaterialApp(
-          home: Scaffold(
-            body: PaymentSection(bookingId: 'booking-1', isProviderView: true),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [paymentRepositoryProvider.overrideWithValue(fakeRepo)],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: PaymentSection(
+                bookingId: 'booking-1',
+                isProviderView: true,
+              ),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Mark as paid (cash)'), findsOneWidget);
+      expect(find.text('Mark as paid (cash)'), findsOneWidget);
 
-    await tester.tap(find.text('Mark as paid (cash)'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Mark as paid (cash)'));
+      await tester.pumpAndSettle();
 
-    expect(find.textContaining('1000 ETB (cash) — completed'), findsOneWidget);
-    expect(find.textContaining('You receive: 900 ETB'), findsOneWidget);
-  });
+      expect(
+        find.textContaining('1000 ETB (cash) — completed'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('You receive: 900 ETB'), findsOneWidget);
+    },
+  );
 
-  testWidgets('customer sees a read-only pending message, no action button', (tester) async {
+  testWidgets('customer sees a read-only pending message, no action button', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [paymentRepositoryProvider.overrideWithValue(FakePaymentRepository())],
+        overrides: [
+          paymentRepositoryProvider.overrideWithValue(FakePaymentRepository()),
+        ],
         child: const MaterialApp(
           home: Scaffold(
             body: PaymentSection(bookingId: 'booking-1', isProviderView: false),

@@ -129,6 +129,13 @@ in `FakeAuthRepository` (a non-reactive fake stream was silently hiding
 login-triggered navigation from every earlier test); fixed and documented
 in ARCHITECTURE.md. 38 tests passing.
 
+Phase 14 adds CI: two path-filtered GitHub Actions workflows, one for
+`mobile/` (format check, analyze, all 38 tests) and one for `admin-web/`
+(lint, type-check + build), both running on every PR and on pushes to
+`develop`/`staging`/`main`. Neither needs real Supabase credentials to
+pass. See DEPLOYMENT.md for the full breakdown and the one piece that
+still needs a manual step in the GitHub UI (branch protection on `main`).
+
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 
 - Android SDK isn't installed, so the app can't yet be run/built for Android

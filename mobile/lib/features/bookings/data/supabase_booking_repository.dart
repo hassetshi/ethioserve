@@ -67,7 +67,11 @@ class SupabaseBookingRepository implements BookingRepository {
           .order('created_at', ascending: false);
       return rows.map(Booking.fromJson).toList();
     } on PostgrestException catch (e, st) {
-      AppLogger.error('getMyBookingsAsCustomer failed', error: e, stackTrace: st);
+      AppLogger.error(
+        'getMyBookingsAsCustomer failed',
+        error: e,
+        stackTrace: st,
+      );
       throw const NetworkException();
     }
   }
@@ -82,7 +86,11 @@ class SupabaseBookingRepository implements BookingRepository {
           .order('created_at', ascending: false);
       return rows.map(Booking.fromJson).toList();
     } on PostgrestException catch (e, st) {
-      AppLogger.error('getMyBookingsAsProvider failed', error: e, stackTrace: st);
+      AppLogger.error(
+        'getMyBookingsAsProvider failed',
+        error: e,
+        stackTrace: st,
+      );
       throw const NetworkException();
     }
   }
@@ -112,7 +120,10 @@ class SupabaseBookingRepository implements BookingRepository {
     yield initial;
 
     await for (final rows
-        in _client.from('bookings').stream(primaryKey: ['id']).eq('id', bookingId)) {
+        in _client
+            .from('bookings')
+            .stream(primaryKey: ['id'])
+            .eq('id', bookingId)) {
       if (rows.isEmpty) continue;
       yield Booking.fromJson({
         ...rows.first,
@@ -120,7 +131,10 @@ class SupabaseBookingRepository implements BookingRepository {
           'business_name': initial.providerBusinessName,
           'user_id': initial.providerUserId,
         },
-        'services': {'name_en': initial.serviceNameEn, 'name_am': initial.serviceNameAm},
+        'services': {
+          'name_en': initial.serviceNameEn,
+          'name_am': initial.serviceNameAm,
+        },
         'users': {'phone': initial.customerPhone},
       });
     }
@@ -135,8 +149,12 @@ class SupabaseBookingRepository implements BookingRepository {
   }) async {
     try {
       final updates = <String, dynamic>{'status': newStatus.value};
-      if (cancellationReason != null) updates['cancellation_reason'] = cancellationReason;
-      if (finalPrice != null) updates['final_price'] = finalPrice;
+      if (cancellationReason != null) {
+        updates['cancellation_reason'] = cancellationReason;
+      }
+      if (finalPrice != null) {
+        updates['final_price'] = finalPrice;
+      }
 
       await _client.from('bookings').update(updates).eq('id', bookingId);
     } on PostgrestException catch (e, st) {

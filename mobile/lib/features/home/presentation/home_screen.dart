@@ -76,10 +76,12 @@ class HomeScreen extends ConsumerWidget {
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 children: categories
-                    .map((category) => _CategoryTile(
-                          label: category.localizedName(languageCode),
-                          onTap: () => context.push('/categories/${category.id}'),
-                        ))
+                    .map(
+                      (category) => _CategoryTile(
+                        label: category.localizedName(languageCode),
+                        onTap: () => context.push('/categories/${category.id}'),
+                      ),
+                    )
                     .toList(),
               ),
             ),

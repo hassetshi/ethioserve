@@ -15,10 +15,10 @@ class EnvConfig {
   );
 
   static AppEnvironment get environment => switch (_environmentName) {
-        'staging' => AppEnvironment.staging,
-        'production' => AppEnvironment.production,
-        _ => AppEnvironment.development,
-      };
+    'staging' => AppEnvironment.staging,
+    'production' => AppEnvironment.production,
+    _ => AppEnvironment.development,
+  };
 
   static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 
@@ -30,9 +30,7 @@ class EnvConfig {
 
   static const String mapsApiKey = String.fromEnvironment('MAPS_API_KEY');
 
-  static const String paymentApiUrl = String.fromEnvironment(
-    'PAYMENT_API_URL',
-  );
+  static const String paymentApiUrl = String.fromEnvironment('PAYMENT_API_URL');
 
   static bool get isConfigured =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;

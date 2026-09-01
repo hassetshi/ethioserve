@@ -22,10 +22,14 @@ void main() {
     return MaterialApp.router(routerConfig: router);
   }
 
-  testWidgets('an invalid phone number shows an error and does not navigate', (tester) async {
+  testWidgets('an invalid phone number shows an error and does not navigate', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+        ],
         child: wrap(),
       ),
     );
@@ -38,18 +42,23 @@ void main() {
     expect(find.byType(LoginScreen), findsOneWidget);
   });
 
-  testWidgets('a valid phone number navigates to OTP with the normalized number', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
-        child: wrap(),
-      ),
-    );
+  testWidgets(
+    'a valid phone number navigates to OTP with the normalized number',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          ],
+          child: wrap(),
+        ),
+      );
 
-    await tester.enterText(find.byType(TextField), '0912345678');
-    await tester.tap(find.text('Continue'));
-    await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '0912345678');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('otp-for-+251912345678'), findsOneWidget);
-  });
+      expect(find.text('otp-for-+251912345678'), findsOneWidget);
+    },
+  );
 }

@@ -21,8 +21,9 @@ class ProviderBookingRequestsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Booking Requests')),
       body: bookingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            const Center(child: Text('Something went wrong. Please try again.')),
+        error: (_, _) => const Center(
+          child: Text('Something went wrong. Please try again.'),
+        ),
         data: (bookings) {
           if (bookings.isEmpty) {
             return const Center(child: Text('No booking requests yet.'));

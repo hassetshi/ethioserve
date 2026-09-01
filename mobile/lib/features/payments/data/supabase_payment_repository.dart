@@ -13,11 +13,15 @@ class SupabasePaymentRepository implements PaymentRepository {
   @override
   Future<Payment> recordCashPayment(String bookingId) async {
     try {
-      final paymentId = await _client.rpc('record_cash_payment', params: {
-        'p_booking_id': bookingId,
-      }) as String;
-      final row =
-          await _client.from('payments').select().eq('id', paymentId).single();
+      final paymentId = await _client.rpc(
+        'record_cash_payment',
+        params: {'p_booking_id': bookingId},
+      ) as String;
+      final row = await _client
+          .from('payments')
+          .select()
+          .eq('id', paymentId)
+          .single();
       return Payment.fromJson(row);
     } on PostgrestException catch (e, st) {
       AppLogger.error('recordCashPayment failed', error: e, stackTrace: st);

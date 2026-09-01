@@ -62,7 +62,8 @@ class Booking {
   /// messages to the provider.
   final String? providerUserId;
 
-  DateTime get scheduledDateTime => DateTime.parse('${scheduledDate}T$scheduledTime');
+  DateTime get scheduledDateTime =>
+      DateTime.parse('${scheduledDate}T$scheduledTime');
 
   String serviceName(String languageCode) =>
       (languageCode == 'am' ? serviceNameAm : serviceNameEn) ?? 'Service';

@@ -36,10 +36,12 @@ class ProviderReviewsSection extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: reviews
-              .map((review) => _ReviewTile(
-                    review: review,
-                    canRespond: isProviderView && review.providerResponse == null,
-                  ))
+              .map(
+                (review) => _ReviewTile(
+                  review: review,
+                  canRespond: isProviderView && review.providerResponse == null,
+                ),
+              )
               .toList(),
         );
       },
@@ -83,12 +85,16 @@ class _ReviewTileState extends ConsumerState<_ReviewTile> {
 
     setState(() => _responding = true);
     try {
-      await ref.read(reviewRepositoryProvider).respondToReview(widget.review.id, response);
+      await ref
+          .read(reviewRepositoryProvider)
+          .respondToReview(widget.review.id, response);
       ref.invalidate(providerReviewsProvider(widget.review.providerId));
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
         );
       }
     } finally {

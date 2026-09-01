@@ -25,7 +25,9 @@ class SupabaseProviderRepository implements ProviderRepository {
 
       final serviceRows = await _client
           .from('provider_services')
-          .select('min_price, max_price, pricing_type, services(id, name_en, name_am)')
+          .select(
+            'min_price, max_price, pricing_type, services(id, name_en, name_am)',
+          )
           .eq('provider_id', providerId);
 
       final photoRows = await _client
@@ -35,15 +37,20 @@ class SupabaseProviderRepository implements ProviderRepository {
           .order('display_order');
 
       final photoUrls = (photoRows as List)
-          .map((row) => _client.storage
-              .from('provider-photos')
-              .getPublicUrl(row['storage_path'] as String))
+          .map(
+            (row) => _client.storage
+                .from('provider-photos')
+                .getPublicUrl(row['storage_path'] as String),
+          )
           .toList();
 
       return ProviderDetail.fromJson(
         profileRow,
         services: (serviceRows as List)
-            .map((row) => ProviderOfferedService.fromJson(row as Map<String, dynamic>))
+            .map(
+              (row) =>
+                  ProviderOfferedService.fromJson(row as Map<String, dynamic>),
+            )
             .toList(),
         photoUrls: photoUrls,
       );
@@ -67,18 +74,21 @@ class SupabaseProviderRepository implements ProviderRepository {
     int offset = 0,
   }) async {
     try {
-      final rows = await _client.rpc('search_providers', params: {
-        'p_category_id': categoryId,
-        'p_service_id': serviceId,
-        'p_city_id': cityId,
-        'p_lat': lat,
-        'p_lng': lng,
-        'p_radius_km': radiusKm,
-        'p_min_rating': minRating,
-        'p_verified_only': verifiedOnly,
-        'p_limit': limit,
-        'p_offset': offset,
-      });
+      final rows = await _client.rpc(
+        'search_providers',
+        params: {
+          'p_category_id': categoryId,
+          'p_service_id': serviceId,
+          'p_city_id': cityId,
+          'p_lat': lat,
+          'p_lng': lng,
+          'p_radius_km': radiusKm,
+          'p_min_rating': minRating,
+          'p_verified_only': verifiedOnly,
+          'p_limit': limit,
+          'p_offset': offset,
+        },
+      );
       return (rows as List)
           .map((row) => ProviderSummary.fromJson(row as Map<String, dynamic>))
           .toList();
@@ -117,21 +127,26 @@ class SupabaseProviderRepository implements ProviderRepository {
     double? longitude,
   }) async {
     try {
-      final providerId = await _client.rpc('register_as_provider', params: {
-        'p_business_name': businessName,
-        'p_description_en': descriptionEn,
-        'p_description_am': descriptionAm,
-        'p_phone': phone,
-        'p_address': address,
-        'p_city_id': cityId,
-        'p_latitude': latitude,
-        'p_longitude': longitude,
-      });
+      final providerId = await _client.rpc(
+        'register_as_provider',
+        params: {
+          'p_business_name': businessName,
+          'p_description_en': descriptionEn,
+          'p_description_am': descriptionAm,
+          'p_phone': phone,
+          'p_address': address,
+          'p_city_id': cityId,
+          'p_latitude': latitude,
+          'p_longitude': longitude,
+        },
+      );
       return providerId as String;
     } on PostgrestException catch (e, st) {
       AppLogger.error('registerAsProvider failed', error: e, stackTrace: st);
       if (e.message.contains('already registered')) {
-        throw const ValidationException('You are already registered as a provider.');
+        throw const ValidationException(
+          'You are already registered as a provider.',
+        );
       }
       throw const NetworkException();
     }
@@ -181,19 +196,30 @@ class SupabaseProviderRepository implements ProviderRepository {
     required Uint8List bytes,
     required String fileExtension,
   }) async {
-    final path = '$providerId/${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
+    final path =
+        '$providerId/${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
     try {
-      await _client.storage.from('provider-documents').uploadBinary(path, bytes);
+      await _client.storage
+          .from('provider-documents')
+          .uploadBinary(path, bytes);
       await _client.from('provider_documents').insert({
         'provider_id': providerId,
         'document_type': documentType,
         'storage_path': path,
       });
     } on StorageException catch (e, st) {
-      AppLogger.error('uploadVerificationDocument (storage) failed', error: e, stackTrace: st);
+      AppLogger.error(
+        'uploadVerificationDocument (storage) failed',
+        error: e,
+        stackTrace: st,
+      );
       throw const NetworkException();
     } on PostgrestException catch (e, st) {
-      AppLogger.error('uploadVerificationDocument (db) failed', error: e, stackTrace: st);
+      AppLogger.error(
+        'uploadVerificationDocument (db) failed',
+        error: e,
+        stackTrace: st,
+      );
       throw const NetworkException();
     }
   }

@@ -18,18 +18,18 @@ class FakeCatalogRepository implements CatalogRepository {
 
   @override
   Future<List<Service>> getServicesByCategory(String categoryId) async => [
-        const Service(
-          id: 'svc-1',
-          categoryId: 'cat-1',
-          nameEn: 'Pipe Repair',
-          nameAm: 'የቧንቧ ጥገና',
-        ),
-      ];
+    const Service(
+      id: 'svc-1',
+      categoryId: 'cat-1',
+      nameEn: 'Pipe Repair',
+      nameAm: 'የቧንቧ ጥገና',
+    ),
+  ];
 
   @override
   Future<List<City>> getCities() async => const [
-        City(id: 'city-1', nameEn: 'Addis Ababa', nameAm: 'አዲስ አበባ'),
-      ];
+    City(id: 'city-1', nameEn: 'Addis Ababa', nameAm: 'አዲስ አበባ'),
+  ];
 
   @override
   Future<List<Service>> searchServices(String query) async {

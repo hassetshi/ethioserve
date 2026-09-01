@@ -22,16 +22,18 @@ class FakeMessagingRepository implements MessagingRepository {
     required String receiverId,
     required String message,
   }) async {
-    _messages.add(ChatMessage(
-      id: 'msg-${_messages.length}',
-      bookingId: bookingId,
-      senderId: 'me',
-      receiverId: receiverId,
-      message: message,
-      messageType: 'text',
-      isRead: false,
-      createdAt: DateTime.now(),
-    ));
+    _messages.add(
+      ChatMessage(
+        id: 'msg-${_messages.length}',
+        bookingId: bookingId,
+        senderId: 'me',
+        receiverId: receiverId,
+        message: message,
+        messageType: 'text',
+        isRead: false,
+        createdAt: DateTime.now(),
+      ),
+    );
     _emit();
   }
 
@@ -62,5 +64,6 @@ class FakeMessagingRepository implements MessagingRepository {
   }
 
   @override
-  Future<String> getSignedImageUrl(String storagePath) async => 'https://example.com/$storagePath';
+  Future<String> getSignedImageUrl(String storagePath) async =>
+      'https://example.com/$storagePath';
 }

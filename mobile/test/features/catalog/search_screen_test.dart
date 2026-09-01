@@ -10,7 +10,9 @@ void main() {
   testWidgets('submitting a query shows matching services', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository())],
+        overrides: [
+          catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+        ],
         child: const MaterialApp(home: SearchScreen()),
       ),
     );
@@ -25,7 +27,9 @@ void main() {
   testWidgets('no query shows the prompt instead of results', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository())],
+        overrides: [
+          catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+        ],
         child: const MaterialApp(home: SearchScreen()),
       ),
     );

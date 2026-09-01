@@ -14,7 +14,9 @@ void main() {
   testWidgets('app boots to the language selection screen', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+        ],
         child: const EthioServeApp(),
       ),
     );
@@ -25,10 +27,14 @@ void main() {
     expect(find.text('አማርኛ'), findsOneWidget);
   });
 
-  testWidgets('selecting a language with no session redirects to login', (tester) async {
+  testWidgets('selecting a language with no session redirects to login', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+        ],
         child: const EthioServeApp(),
       ),
     );
@@ -40,7 +46,9 @@ void main() {
     expect(find.text('Enter your phone number'), findsOneWidget);
   });
 
-  testWidgets('an already-authenticated user lands on home with categories', (tester) async {
+  testWidgets('an already-authenticated user lands on home with categories', (
+    tester,
+  ) async {
     final fakeAuth = FakeAuthRepository(
       initialUser: const AppUser(
         id: 'test-user-id',
@@ -69,7 +77,9 @@ void main() {
     expect(find.text('Electrical'), findsOneWidget);
   });
 
-  testWidgets('an authenticated provider lands on the provider dashboard', (tester) async {
+  testWidgets('an authenticated provider lands on the provider dashboard', (
+    tester,
+  ) async {
     final fakeAuth = FakeAuthRepository(
       initialUser: const AppUser(
         id: 'test-provider-id',
@@ -84,8 +94,9 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuth),
           catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
-          providerRepositoryProvider
-              .overrideWithValue(FakeProviderRepository(myProviderId: 'provider-1')),
+          providerRepositoryProvider.overrideWithValue(
+            FakeProviderRepository(myProviderId: 'provider-1'),
+          ),
         ],
         child: const EthioServeApp(),
       ),

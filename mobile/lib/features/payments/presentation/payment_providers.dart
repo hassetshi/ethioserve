@@ -9,7 +9,9 @@ final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
   return SupabasePaymentRepository(Supabase.instance.client);
 });
 
-final paymentForBookingProvider =
-    FutureProvider.autoDispose.family<Payment?, String>((ref, bookingId) {
-  return ref.watch(paymentRepositoryProvider).getPaymentForBooking(bookingId);
-});
+final paymentForBookingProvider = FutureProvider.autoDispose
+    .family<Payment?, String>((ref, bookingId) {
+      return ref
+          .watch(paymentRepositoryProvider)
+          .getPaymentForBooking(bookingId);
+    });

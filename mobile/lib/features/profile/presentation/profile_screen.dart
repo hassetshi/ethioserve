@@ -45,7 +45,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         userId: currentUser.id,
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
-        preferredLanguage: existing?.preferredLanguage ?? currentUser.languageCode,
+        preferredLanguage:
+            existing?.preferredLanguage ?? currentUser.languageCode,
       );
       await ref.read(profileRepositoryProvider).upsertProfile(updated);
       ref.invalidate(myProfileProvider);
@@ -56,7 +57,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
         );
       }
     } finally {
@@ -143,7 +146,9 @@ class _BecomeProviderSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider).valueOrNull;
-    if (user == null || user.role != UserRole.customer) return const SizedBox.shrink();
+    if (user == null || user.role != UserRole.customer) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.only(top: 24),

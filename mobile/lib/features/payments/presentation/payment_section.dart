@@ -9,7 +9,11 @@ import 'payment_providers.dart';
 /// physically present to collect payment in an in-home service model; the
 /// customer sees a read-only status.
 class PaymentSection extends ConsumerStatefulWidget {
-  const PaymentSection({required this.bookingId, required this.isProviderView, super.key});
+  const PaymentSection({
+    required this.bookingId,
+    required this.isProviderView,
+    super.key,
+  });
 
   final String bookingId;
   final bool isProviderView;
@@ -24,16 +28,21 @@ class _PaymentSectionState extends ConsumerState<PaymentSection> {
   Future<void> _recordCash() async {
     setState(() => _recording = true);
     try {
-      await ref.read(paymentRepositoryProvider).recordCashPayment(widget.bookingId);
+      await ref
+          .read(paymentRepositoryProvider)
+          .recordCashPayment(widget.bookingId);
       ref.invalidate(paymentForBookingProvider(widget.bookingId));
     } on ValidationException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.userMessage)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.userMessage)));
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
         );
       }
     } finally {
@@ -56,14 +65,19 @@ class _PaymentSectionState extends ConsumerState<PaymentSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Payment', style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    'Payment',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     '${payment.amount.toStringAsFixed(0)} ${payment.currency} '
                     '(${payment.paymentProvider}) — ${payment.status}',
                   ),
                   if (widget.isProviderView)
-                    Text('You receive: ${payment.providerAmount.toStringAsFixed(0)} ${payment.currency}'),
+                    Text(
+                      'You receive: ${payment.providerAmount.toStringAsFixed(0)} ${payment.currency}',
+                    ),
                 ],
               ),
             ),

@@ -7,10 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../fakes/fake_booking_repository.dart';
 
 void main() {
-  testWidgets('shows a booking with its provider, service, and status', (tester) async {
+  testWidgets('shows a booking with its provider, service, and status', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [bookingRepositoryProvider.overrideWithValue(FakeBookingRepository())],
+        overrides: [
+          bookingRepositoryProvider.overrideWithValue(FakeBookingRepository()),
+        ],
         child: const MaterialApp(home: BookingsListScreen()),
       ),
     );

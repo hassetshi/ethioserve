@@ -16,45 +16,57 @@ void main() {
         GoRoute(path: '/ai-search', builder: (_, _) => child),
         GoRoute(
           path: '/services/:serviceId/providers',
-          builder: (_, state) => Text('providers-for-${state.pathParameters['serviceId']}'),
+          builder: (_, state) =>
+              Text('providers-for-${state.pathParameters['serviceId']}'),
         ),
         GoRoute(
           path: '/categories/:categoryId/providers',
-          builder: (_, state) => Text('providers-for-category-${state.pathParameters['categoryId']}'),
+          builder: (_, state) => Text(
+            'providers-for-category-${state.pathParameters['categoryId']}',
+          ),
         ),
       ],
     );
     return MaterialApp.router(routerConfig: router);
   }
 
-  testWidgets('a matched service navigates to the providers-for-service screen', (tester) async {
+  testWidgets(
+    'a matched service navigates to the providers-for-service screen',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            aiServiceProvider.overrideWithValue(
+              FakeAIService(
+                const AiSearchResult(matched: true, serviceId: 'service-1'),
+              ),
+            ),
+          ],
+          child: wrap(const AiSearchScreen(), initialLocation: '/ai-search'),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'I need a plumber');
+      await tester.tap(find.text('Ask'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('providers-for-service-1'), findsOneWidget);
+    },
+  );
+
+  testWidgets('an unmatched query shows the clarification question', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           aiServiceProvider.overrideWithValue(
-            FakeAIService(const AiSearchResult(matched: true, serviceId: 'service-1')),
-          ),
-        ],
-        child: wrap(const AiSearchScreen(), initialLocation: '/ai-search'),
-      ),
-    );
-
-    await tester.enterText(find.byType(TextField), 'I need a plumber');
-    await tester.tap(find.text('Ask'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('providers-for-service-1'), findsOneWidget);
-  });
-
-  testWidgets('an unmatched query shows the clarification question', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          aiServiceProvider.overrideWithValue(
-            FakeAIService(const AiSearchResult(
-              matched: false,
-              clarificationQuestion: 'What kind of service do you need?',
-            )),
+            FakeAIService(
+              const AiSearchResult(
+                matched: false,
+                clarificationQuestion: 'What kind of service do you need?',
+              ),
+            ),
           ),
         ],
         child: wrap(const AiSearchScreen(), initialLocation: '/ai-search'),

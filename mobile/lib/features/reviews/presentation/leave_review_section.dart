@@ -7,7 +7,11 @@ import 'review_providers.dart';
 /// Renders nothing if they've already reviewed it (server is still the
 /// real authority — this just avoids showing a form that would be rejected).
 class LeaveReviewSection extends ConsumerStatefulWidget {
-  const LeaveReviewSection({required this.bookingId, required this.providerId, super.key});
+  const LeaveReviewSection({
+    required this.bookingId,
+    required this.providerId,
+    super.key,
+  });
 
   final String bookingId;
   final String providerId;
@@ -30,7 +34,9 @@ class _LeaveReviewSectionState extends ConsumerState<LeaveReviewSection> {
   Future<void> _submit() async {
     setState(() => _submitting = true);
     try {
-      await ref.read(reviewRepositoryProvider).submitReview(
+      await ref
+          .read(reviewRepositoryProvider)
+          .submitReview(
             bookingId: widget.bookingId,
             providerId: widget.providerId,
             rating: _rating,
@@ -42,7 +48,9 @@ class _LeaveReviewSectionState extends ConsumerState<LeaveReviewSection> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
         );
       }
     } finally {
@@ -65,7 +73,10 @@ class _LeaveReviewSectionState extends ConsumerState<LeaveReviewSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Your review', style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    'Your review',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 4),
                   _StarRow(rating: existing.rating),
                   if (existing.comment != null) Text(existing.comment!),
@@ -85,7 +96,10 @@ class _LeaveReviewSectionState extends ConsumerState<LeaveReviewSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Leave a review', style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  'Leave a review',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: List.generate(5, (index) {
@@ -101,7 +115,9 @@ class _LeaveReviewSectionState extends ConsumerState<LeaveReviewSection> {
                 ),
                 TextField(
                   controller: _commentController,
-                  decoration: const InputDecoration(hintText: 'Comment (optional)'),
+                  decoration: const InputDecoration(
+                    hintText: 'Comment (optional)',
+                  ),
                   maxLines: 2,
                 ),
                 const SizedBox(height: 8),

@@ -16,23 +16,29 @@ void main() {
       routes: [
         GoRoute(
           path: '/providers/:providerId',
-          builder: (_, state) =>
-              ProviderProfileScreen(providerId: state.pathParameters['providerId']!),
+          builder: (_, state) => ProviderProfileScreen(
+            providerId: state.pathParameters['providerId']!,
+          ),
         ),
         GoRoute(
           path: '/providers/:providerId/book',
-          builder: (_, state) => Text('book-${state.pathParameters['providerId']}'),
+          builder: (_, state) =>
+              Text('book-${state.pathParameters['providerId']}'),
         ),
       ],
     );
     return MaterialApp.router(routerConfig: router);
   }
 
-  testWidgets('shows business name, rating, and a working Book button', (tester) async {
+  testWidgets('shows business name, rating, and a working Book button', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          providerRepositoryProvider.overrideWithValue(FakeProviderRepository()),
+          providerRepositoryProvider.overrideWithValue(
+            FakeProviderRepository(),
+          ),
           reviewRepositoryProvider.overrideWithValue(FakeReviewRepository()),
         ],
         child: wrap(),

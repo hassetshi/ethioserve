@@ -88,8 +88,8 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                 onPressed: isLoading
                     ? null
                     : () => ref
-                        .read(otpControllerProvider.notifier)
-                        .resend(widget.phone),
+                          .read(otpControllerProvider.notifier)
+                          .resend(widget.phone),
                 child: const Text('Resend code'),
               ),
             ],

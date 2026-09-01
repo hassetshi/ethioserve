@@ -6,7 +6,8 @@ class FakeReviewRepository implements ReviewRepository {
   Review? myReview;
 
   @override
-  Future<List<Review>> getReviewsForProvider(String providerId) async => reviews;
+  Future<List<Review>> getReviewsForProvider(String providerId) async =>
+      reviews;
 
   @override
   Future<Review?> getMyReviewForBooking(String bookingId) async => myReview;

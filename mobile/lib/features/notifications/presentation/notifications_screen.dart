@@ -27,8 +27,9 @@ class NotificationsScreen extends ConsumerWidget {
       ),
       body: notificationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            const Center(child: Text('Something went wrong. Please try again.')),
+        error: (_, _) => const Center(
+          child: Text('Something went wrong. Please try again.'),
+        ),
         data: (notifications) {
           if (notifications.isEmpty) {
             return const Center(child: Text('No notifications yet.'));
@@ -41,7 +42,8 @@ class NotificationsScreen extends ConsumerWidget {
               return ListTile(
                 tileColor: notification.isRead
                     ? null
-                    : Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    : Theme.of(context).colorScheme.primaryContainer
+                          .withValues(alpha: 0.3),
                 title: Text(notification.title),
                 subtitle: Text(notification.body),
                 onTap: () async {
@@ -52,7 +54,8 @@ class NotificationsScreen extends ConsumerWidget {
                     ref.invalidate(myNotificationsProvider);
                   }
                   if (notification.notificationType == 'booking_requested' ||
-                      notification.notificationType == 'booking_status_changed') {
+                      notification.notificationType ==
+                          'booking_status_changed') {
                     if (context.mounted && notification.referenceId != null) {
                       context.push('/bookings/${notification.referenceId}');
                     }

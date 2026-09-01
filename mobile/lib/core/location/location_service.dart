@@ -30,12 +30,18 @@ class LocationService {
       }
 
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+        ),
       );
       return LatLng(position.latitude, position.longitude);
     } catch (e, st) {
       AppLogger.warning('getCurrentLocation failed: $e');
-      AppLogger.error('getCurrentLocation error detail', error: e, stackTrace: st);
+      AppLogger.error(
+        'getCurrentLocation error detail',
+        error: e,
+        stackTrace: st,
+      );
       return null;
     }
   }

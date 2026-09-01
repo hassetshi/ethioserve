@@ -142,8 +142,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           serviceId: state.pathParameters['serviceId']!,
         ),
       ),
-      GoRoute(path: '/search', builder: (context, state) => const SearchScreen()),
-      GoRoute(path: '/ai-search', builder: (context, state) => const AiSearchScreen()),
+      GoRoute(
+        path: '/search',
+        builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/ai-search',
+        builder: (context, state) => const AiSearchScreen(),
+      ),
       GoRoute(
         path: '/providers/:providerId',
         builder: (context, state) => ProviderProfileScreen(
@@ -180,9 +186,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/bookings/:bookingId',
-        builder: (context, state) => BookingDetailsScreen(
-          bookingId: state.pathParameters['bookingId']!,
-        ),
+        builder: (context, state) =>
+            BookingDetailsScreen(bookingId: state.pathParameters['bookingId']!),
       ),
       GoRoute(
         path: '/bookings/:bookingId/confirmation',
@@ -192,9 +197,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/provider/bookings',
-        builder: (context, state) => ProviderBookingRequestsScreen(
-          providerId: state.extra! as String,
-        ),
+        builder: (context, state) =>
+            ProviderBookingRequestsScreen(providerId: state.extra! as String),
       ),
       GoRoute(
         path: '/notifications',
@@ -202,9 +206,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/bookings/:bookingId/chat',
-        builder: (context, state) => ChatScreen(
-          bookingId: state.pathParameters['bookingId']!,
-        ),
+        builder: (context, state) =>
+            ChatScreen(bookingId: state.pathParameters['bookingId']!),
       ),
     ],
   );

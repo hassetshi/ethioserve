@@ -26,8 +26,9 @@ class BookingDetailsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Booking')),
       body: bookingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            const Center(child: Text('Something went wrong. Please try again.')),
+        error: (_, _) => const Center(
+          child: Text('Something went wrong. Please try again.'),
+        ),
         data: (booking) => _BookingDetailsBody(booking: booking),
       ),
     );
@@ -47,7 +48,9 @@ class _BookingDetailsBody extends ConsumerWidget {
     double? finalPrice,
   }) async {
     try {
-      await ref.read(bookingRepositoryProvider).updateStatus(
+      await ref
+          .read(bookingRepositoryProvider)
+          .updateStatus(
             booking.id,
             status,
             cancellationReason: cancellationReason,
@@ -55,12 +58,15 @@ class _BookingDetailsBody extends ConsumerWidget {
           );
     } on ValidationException catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.userMessage)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.userMessage)));
       }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
         );
       }
     }
@@ -99,7 +105,9 @@ class _BookingDetailsBody extends ConsumerWidget {
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Final price (ETB, optional)'),
+          decoration: const InputDecoration(
+            labelText: 'Final price (ETB, optional)',
+          ),
         ),
         actions: [
           TextButton(
@@ -108,7 +116,8 @@ class _BookingDetailsBody extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () =>
-                Navigator.of(context).pop(double.tryParse(controller.text.trim())),
+                Navigator.of(context)
+                    .pop(double.tryParse(controller.text.trim())),
             child: const Text('Confirm'),
           ),
         ],
@@ -122,8 +131,10 @@ class _BookingDetailsBody extends ConsumerWidget {
     final currentUser = ref.watch(currentUserProvider).valueOrNull;
     final myProviderId = ref.watch(myProviderIdProvider).valueOrNull;
 
-    final isCustomerView = currentUser != null && booking.customerId == currentUser.id;
-    final isProviderView = myProviderId != null && booking.providerId == myProviderId;
+    final isCustomerView =
+        currentUser != null && booking.customerId == currentUser.id;
+    final isProviderView =
+        myProviderId != null && booking.providerId == myProviderId;
 
     return SafeArea(
       child: ListView(
@@ -144,9 +155,12 @@ class _BookingDetailsBody extends ConsumerWidget {
           const SizedBox(height: 8),
           if (booking.providerBusinessName != null)
             Text('Provider: ${booking.providerBusinessName}'),
-          if (booking.customerPhone != null) Text('Customer: ${booking.customerPhone}'),
+          if (booking.customerPhone != null)
+            Text('Customer: ${booking.customerPhone}'),
           const SizedBox(height: 8),
-          Text('${booking.scheduledDate} at ${booking.scheduledTime.substring(0, 5)}'),
+          Text(
+            '${booking.scheduledDate} at ${booking.scheduledTime.substring(0, 5)}',
+          ),
           const SizedBox(height: 4),
           Text(booking.address),
           if (booking.description != null) ...[
@@ -161,9 +175,13 @@ class _BookingDetailsBody extends ConsumerWidget {
             const SizedBox(height: 12),
             Text('Reason: ${booking.cancellationReason}'),
           ],
-          if (booking.status == BookingStatus.completed && (isCustomerView || isProviderView)) ...[
+          if (booking.status == BookingStatus.completed &&
+              (isCustomerView || isProviderView)) ...[
             const SizedBox(height: 16),
-            PaymentSection(bookingId: booking.id, isProviderView: isProviderView),
+            PaymentSection(
+              bookingId: booking.id,
+              isProviderView: isProviderView,
+            ),
           ],
           const SizedBox(height: 16),
           if (isCustomerView || isProviderView)
@@ -174,10 +192,14 @@ class _BookingDetailsBody extends ConsumerWidget {
             ),
           const SizedBox(height: 8),
           if (isProviderView) ..._providerActions(context, ref),
-          if (isCustomerView && !booking.status.isTerminal) _cancelAction(context, ref),
+          if (isCustomerView && !booking.status.isTerminal)
+            _cancelAction(context, ref),
           if (isCustomerView && booking.status == BookingStatus.completed) ...[
             const SizedBox(height: 16),
-            LeaveReviewSection(bookingId: booking.id, providerId: booking.providerId),
+            LeaveReviewSection(
+              bookingId: booking.id,
+              providerId: booking.providerId,
+            ),
           ],
         ],
       ),
@@ -189,16 +211,24 @@ class _BookingDetailsBody extends ConsumerWidget {
       case BookingStatus.requested:
         return [
           FilledButton(
-            onPressed: () => _updateStatus(context, ref, BookingStatus.accepted),
+            onPressed: () =>
+                _updateStatus(context, ref, BookingStatus.accepted),
             child: const Text('Accept'),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
             onPressed: () async {
-              final reason = await _promptForReason(context, 'Decline this request?');
+              final reason = await _promptForReason(
+                context,
+                'Decline this request?',
+              );
               if (reason != null && context.mounted) {
-                await _updateStatus(context, ref, BookingStatus.declined,
-                    cancellationReason: reason.isEmpty ? null : reason);
+                await _updateStatus(
+                  context,
+                  ref,
+                  BookingStatus.declined,
+                  cancellationReason: reason.isEmpty ? null : reason,
+                );
               }
             },
             child: const Text('Decline'),
@@ -207,14 +237,16 @@ class _BookingDetailsBody extends ConsumerWidget {
       case BookingStatus.accepted:
         return [
           FilledButton(
-            onPressed: () => _updateStatus(context, ref, BookingStatus.onTheWay),
+            onPressed: () =>
+                _updateStatus(context, ref, BookingStatus.onTheWay),
             child: const Text("I'm on the way"),
           ),
         ];
       case BookingStatus.onTheWay:
         return [
           FilledButton(
-            onPressed: () => _updateStatus(context, ref, BookingStatus.inProgress),
+            onPressed: () =>
+                _updateStatus(context, ref, BookingStatus.inProgress),
             child: const Text('Start job'),
           ),
         ];
@@ -224,7 +256,12 @@ class _BookingDetailsBody extends ConsumerWidget {
             onPressed: () async {
               final price = await _promptForFinalPrice(context);
               if (context.mounted) {
-                await _updateStatus(context, ref, BookingStatus.completed, finalPrice: price);
+                await _updateStatus(
+                  context,
+                  ref,
+                  BookingStatus.completed,
+                  finalPrice: price,
+                );
               }
             },
             child: const Text('Mark completed'),
@@ -240,8 +277,12 @@ class _BookingDetailsBody extends ConsumerWidget {
       onPressed: () async {
         final reason = await _promptForReason(context, 'Cancel this booking?');
         if (reason != null && context.mounted) {
-          await _updateStatus(context, ref, BookingStatus.cancelled,
-              cancellationReason: reason.isEmpty ? null : reason);
+          await _updateStatus(
+            context,
+            ref,
+            BookingStatus.cancelled,
+            cancellationReason: reason.isEmpty ? null : reason,
+          );
         }
       },
       child: const Text('Cancel booking'),

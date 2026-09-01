@@ -21,8 +21,9 @@ class ProviderProfileScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Provider')),
       body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            const Center(child: Text('Something went wrong. Please try again.')),
+        error: (_, _) => const Center(
+          child: Text('Something went wrong. Please try again.'),
+        ),
         data: (provider) => _ProviderProfileBody(
           provider: provider,
           languageCode: languageCode,
@@ -47,7 +48,10 @@ class ProviderProfileScreen extends ConsumerWidget {
 }
 
 class _ProviderProfileBody extends ConsumerWidget {
-  const _ProviderProfileBody({required this.provider, required this.languageCode});
+  const _ProviderProfileBody({
+    required this.provider,
+    required this.languageCode,
+  });
 
   final ProviderDetail provider;
   final String languageCode;
@@ -78,7 +82,9 @@ class _ProviderProfileBody extends ConsumerWidget {
                   fit: BoxFit.cover,
                   errorBuilder: (_, _, _) => const SizedBox(
                     width: 220,
-                    child: Center(child: Icon(Icons.image_not_supported_outlined)),
+                    child: Center(
+                      child: Icon(Icons.image_not_supported_outlined),
+                    ),
                   ),
                 ),
               ),
@@ -102,7 +108,9 @@ class _ProviderProfileBody extends ConsumerWidget {
           children: [
             const Icon(Icons.star, size: 18, color: Colors.amber),
             const SizedBox(width: 4),
-            Text('${provider.rating.toStringAsFixed(1)} (${provider.reviewCount} reviews)'),
+            Text(
+              '${provider.rating.toStringAsFixed(1)} (${provider.reviewCount} reviews)',
+            ),
             if (_cityName != null) ...[
               const SizedBox(width: 12),
               const Icon(Icons.location_on_outlined, size: 18),
@@ -142,7 +150,8 @@ class _ProviderProfileBody extends ConsumerWidget {
         'From ${service.minPrice!.toStringAsFixed(0)} ETB',
       _ when service.minPrice != null && service.maxPrice != null =>
         '${service.minPrice!.toStringAsFixed(0)}–${service.maxPrice!.toStringAsFixed(0)} ETB',
-      _ when service.minPrice != null => '${service.minPrice!.toStringAsFixed(0)} ETB',
+      _ when service.minPrice != null =>
+        '${service.minPrice!.toStringAsFixed(0)} ETB',
       _ => 'Price on request',
     };
   }

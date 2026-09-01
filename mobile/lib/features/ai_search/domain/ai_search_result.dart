@@ -12,9 +12,9 @@ class AiSearchResult {
   final String? clarificationQuestion;
 
   factory AiSearchResult.fromJson(Map<String, dynamic> json) => AiSearchResult(
-        matched: json['matched'] as bool,
-        categoryId: json['categoryId'] as String?,
-        serviceId: json['serviceId'] as String?,
-        clarificationQuestion: json['clarificationQuestion'] as String?,
-      );
+    matched: json['matched'] as bool,
+    categoryId: json['categoryId'] as String?,
+    serviceId: json['serviceId'] as String?,
+    clarificationQuestion: json['clarificationQuestion'] as String?,
+  );
 }

@@ -27,7 +27,9 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuth),
           bookingRepositoryProvider.overrideWithValue(FakeBookingRepository()),
-          messagingRepositoryProvider.overrideWithValue(FakeMessagingRepository()),
+          messagingRepositoryProvider.overrideWithValue(
+            FakeMessagingRepository(),
+          ),
         ],
         child: const MaterialApp(home: ChatScreen(bookingId: 'booking-1')),
       ),

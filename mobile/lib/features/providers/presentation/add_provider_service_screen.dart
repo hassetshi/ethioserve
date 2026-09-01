@@ -18,7 +18,8 @@ class AddProviderServiceScreen extends ConsumerStatefulWidget {
       _AddProviderServiceScreenState();
 }
 
-class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScreen> {
+class _AddProviderServiceScreenState
+    extends ConsumerState<AddProviderServiceScreen> {
   String? _categoryId;
   String? _serviceId;
   String _pricingType = 'starting_from';
@@ -46,7 +47,9 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
     });
 
     try {
-      await ref.read(providerRepositoryProvider).addOfferedService(
+      await ref
+          .read(providerRepositoryProvider)
+          .addOfferedService(
             providerId: widget.providerId,
             serviceId: _serviceId!,
             pricingType: _pricingType,
@@ -56,7 +59,9 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
       ref.invalidate(providerDetailProvider(widget.providerId));
       if (mounted) context.pop();
     } catch (_) {
-      if (mounted) setState(() => _errorText = 'Something went wrong. Please try again.');
+      if (mounted) {
+        setState(() => _errorText = 'Something went wrong. Please try again.');
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -66,8 +71,9 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
   Widget build(BuildContext context) {
     final languageCode = ref.watch(localeProvider)?.languageCode ?? 'en';
     final categoriesAsync = ref.watch(categoriesProvider);
-    final servicesAsync =
-        _categoryId == null ? null : ref.watch(servicesByCategoryProvider(_categoryId!));
+    final servicesAsync = _categoryId == null
+        ? null
+        : ref.watch(servicesByCategoryProvider(_categoryId!));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Add a service')),
@@ -77,7 +83,8 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
           children: [
             categoriesAsync.when(
               loading: () => const LinearProgressIndicator(),
-              error: (_, _) => const Text('Something went wrong. Please try again.'),
+              error: (_, _) =>
+                  const Text('Something went wrong. Please try again.'),
               data: (categories) => DropdownButtonFormField<String>(
                 initialValue: _categoryId,
                 decoration: const InputDecoration(
@@ -85,10 +92,12 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
                   border: OutlineInputBorder(),
                 ),
                 items: categories
-                    .map((c) => DropdownMenuItem(
-                          value: c.id,
-                          child: Text(c.localizedName(languageCode)),
-                        ))
+                    .map(
+                      (c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(c.localizedName(languageCode)),
+                      ),
+                    )
                     .toList(),
                 onChanged: (value) => setState(() {
                   _categoryId = value;
@@ -100,7 +109,8 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
             if (servicesAsync != null)
               servicesAsync.when(
                 loading: () => const LinearProgressIndicator(),
-                error: (_, _) => const Text('Something went wrong. Please try again.'),
+                error: (_, _) =>
+                    const Text('Something went wrong. Please try again.'),
                 data: (services) => DropdownButtonFormField<String>(
                   initialValue: _serviceId,
                   decoration: const InputDecoration(
@@ -108,10 +118,12 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
                     border: OutlineInputBorder(),
                   ),
                   items: services
-                      .map((s) => DropdownMenuItem(
-                            value: s.id,
-                            child: Text(s.localizedName(languageCode)),
-                          ))
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s.id,
+                          child: Text(s.localizedName(languageCode)),
+                        ),
+                      )
                       .toList(),
                   onChanged: (value) => setState(() => _serviceId = value),
                 ),
@@ -124,9 +136,12 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
                 border: OutlineInputBorder(),
               ),
               items: _pricingTypes
-                  .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                  .map(
+                    (type) => DropdownMenuItem(value: type, child: Text(type)),
+                  )
                   .toList(),
-              onChanged: (value) => setState(() => _pricingType = value ?? _pricingType),
+              onChanged: (value) =>
+                  setState(() => _pricingType = value ?? _pricingType),
             ),
             if (_pricingType != 'quote') ...[
               const SizedBox(height: 16),
@@ -150,7 +165,10 @@ class _AddProviderServiceScreenState extends ConsumerState<AddProviderServiceScr
             ],
             if (_errorText != null) ...[
               const SizedBox(height: 12),
-              Text(_errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Text(
+                _errorText!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
             ],
             const SizedBox(height: 24),
             FilledButton(

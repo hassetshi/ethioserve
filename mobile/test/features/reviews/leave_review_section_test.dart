@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../fakes/fake_review_repository.dart';
 
 void main() {
-  testWidgets('submitting a review shows it back as "your review"', (tester) async {
+  testWidgets('submitting a review shows it back as "your review"', (
+    tester,
+  ) async {
     final fakeRepo = FakeReviewRepository();
 
     await tester.pumpWidget(
@@ -15,7 +17,10 @@ void main() {
         overrides: [reviewRepositoryProvider.overrideWithValue(fakeRepo)],
         child: const MaterialApp(
           home: Scaffold(
-            body: LeaveReviewSection(bookingId: 'booking-1', providerId: 'provider-1'),
+            body: LeaveReviewSection(
+              bookingId: 'booking-1',
+              providerId: 'provider-1',
+            ),
           ),
         ),
       ),

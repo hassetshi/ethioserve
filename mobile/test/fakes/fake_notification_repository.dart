@@ -8,7 +8,8 @@ class FakeNotificationRepository implements NotificationRepository {
       title: 'New booking request',
       body: 'You have a new booking request.',
       notificationType: 'booking_requested',
-      referenceId: null, // keeps this fixture from triggering router navigation in tests
+      referenceId:
+          null, // keeps this fixture from triggering router navigation in tests
       isRead: false,
       createdAt: DateTime(2026, 8, 31),
     ),
@@ -18,7 +19,8 @@ class FakeNotificationRepository implements NotificationRepository {
   Future<List<AppNotification>> getMyNotifications() async => notifications;
 
   @override
-  Stream<int> watchUnreadCount() => Stream.value(notifications.where((n) => !n.isRead).length);
+  Stream<int> watchUnreadCount() =>
+      Stream.value(notifications.where((n) => !n.isRead).length);
 
   @override
   Future<void> markAsRead(String notificationId) async {

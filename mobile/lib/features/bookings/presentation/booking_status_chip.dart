@@ -8,12 +8,12 @@ class BookingStatusChip extends StatelessWidget {
   final BookingStatus status;
 
   Color _color(BuildContext context) => switch (status) {
-        BookingStatus.requested => Colors.orange,
-        BookingStatus.accepted || BookingStatus.onTheWay => Colors.blue,
-        BookingStatus.inProgress => Colors.indigo,
-        BookingStatus.completed => Colors.green,
-        BookingStatus.declined || BookingStatus.cancelled => Colors.grey,
-      };
+    BookingStatus.requested => Colors.orange,
+    BookingStatus.accepted || BookingStatus.onTheWay => Colors.blue,
+    BookingStatus.inProgress => Colors.indigo,
+    BookingStatus.completed => Colors.green,
+    BookingStatus.declined || BookingStatus.cancelled => Colors.grey,
+  };
 
   @override
   Widget build(BuildContext context) {

@@ -24,15 +24,17 @@ class Payment {
   final DateTime? paidAt;
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
-        id: json['id'] as String,
-        bookingId: json['booking_id'] as String,
-        amount: (json['amount'] as num).toDouble(),
-        platformFee: (json['platform_fee'] as num).toDouble(),
-        providerAmount: (json['provider_amount'] as num).toDouble(),
-        currency: json['currency'] as String,
-        paymentProvider: json['payment_provider'] as String,
-        transactionReference: json['transaction_reference'] as String?,
-        status: json['status'] as String,
-        paidAt: json['paid_at'] == null ? null : DateTime.parse(json['paid_at'] as String),
-      );
+    id: json['id'] as String,
+    bookingId: json['booking_id'] as String,
+    amount: (json['amount'] as num).toDouble(),
+    platformFee: (json['platform_fee'] as num).toDouble(),
+    providerAmount: (json['provider_amount'] as num).toDouble(),
+    currency: json['currency'] as String,
+    paymentProvider: json['payment_provider'] as String,
+    transactionReference: json['transaction_reference'] as String?,
+    status: json['status'] as String,
+    paidAt: json['paid_at'] == null
+        ? null
+        : DateTime.parse(json['paid_at'] as String),
+  );
 }

@@ -30,8 +30,11 @@ class SupabaseCatalogRepository implements CatalogRepository {
   @override
   Future<Category> getCategory(String categoryId) async {
     try {
-      final row =
-          await _client.from('categories').select().eq('id', categoryId).single();
+      final row = await _client
+          .from('categories')
+          .select()
+          .eq('id', categoryId)
+          .single();
       return Category.fromJson(row);
     } on PostgrestException catch (e, st) {
       AppLogger.error('getCategory failed', error: e, stackTrace: st);

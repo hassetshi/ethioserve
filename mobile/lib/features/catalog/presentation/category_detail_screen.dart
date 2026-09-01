@@ -29,18 +29,22 @@ class CategoryDetailScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: OutlinedButton(
-              onPressed: () => context.push('/categories/$categoryId/providers'),
+              onPressed: () =>
+                  context.push('/categories/$categoryId/providers'),
               child: const Text('View all providers in this category'),
             ),
           ),
           Expanded(
             child: servicesAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) =>
-                  const Center(child: Text('Something went wrong. Please try again.')),
+              error: (_, _) => const Center(
+                child: Text('Something went wrong. Please try again.'),
+              ),
               data: (services) {
                 if (services.isEmpty) {
-                  return const Center(child: Text('No services in this category yet.'));
+                  return const Center(
+                    child: Text('No services in this category yet.'),
+                  );
                 }
                 return ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -51,10 +55,15 @@ class CategoryDetailScreen extends ConsumerWidget {
                     return ListTile(
                       title: Text(service.localizedName(languageCode)),
                       subtitle: languageCode == 'am'
-                          ? (service.descriptionAm != null ? Text(service.descriptionAm!) : null)
-                          : (service.descriptionEn != null ? Text(service.descriptionEn!) : null),
+                          ? (service.descriptionAm != null
+                                ? Text(service.descriptionAm!)
+                                : null)
+                          : (service.descriptionEn != null
+                                ? Text(service.descriptionEn!)
+                                : null),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.push('/services/${service.id}/providers'),
+                      onTap: () =>
+                          context.push('/services/${service.id}/providers'),
                     );
                   },
                 );

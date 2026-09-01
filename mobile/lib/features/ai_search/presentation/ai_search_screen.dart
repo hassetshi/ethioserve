@@ -35,8 +35,9 @@ class _AiSearchScreenState extends ConsumerState<AiSearchScreen> {
     });
 
     try {
-      final AiSearchResult result =
-          await ref.read(aiServiceProvider).interpretSearchQuery(query);
+      final AiSearchResult result = await ref
+          .read(aiServiceProvider)
+          .interpretSearchQuery(query);
 
       if (!mounted) return;
 
@@ -47,7 +48,8 @@ class _AiSearchScreenState extends ConsumerState<AiSearchScreen> {
       } else {
         setState(() {
           _clarificationQuestion =
-              result.clarificationQuestion ?? 'Could you describe what service you need?';
+              result.clarificationQuestion ??
+              'Could you describe what service you need?';
         });
       }
     } catch (_) {
@@ -106,7 +108,10 @@ class _AiSearchScreenState extends ConsumerState<AiSearchScreen> {
               ],
               if (_errorText != null) ...[
                 const SizedBox(height: 16),
-                Text(_errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                Text(
+                  _errorText!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
               ],
             ],
           ),

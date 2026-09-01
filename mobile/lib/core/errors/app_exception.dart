@@ -14,7 +14,7 @@ sealed class AppException implements Exception {
 
 class NetworkException extends AppException {
   const NetworkException({super.debugDetail})
-      : super('Something went wrong. Please try again.');
+    : super('Something went wrong. Please try again.');
 }
 
 /// Named `AppAuthException` (not `AuthException`) to avoid colliding with
@@ -30,5 +30,5 @@ class ValidationException extends AppException {
 
 class UnknownAppException extends AppException {
   const UnknownAppException({super.debugDetail})
-      : super('Something went wrong. Please try again.');
+    : super('Something went wrong. Please try again.');
 }

@@ -15,7 +15,8 @@ class FakeProviderRepository implements ProviderRepository {
   Future<String?> getMyProviderId() async => myProviderId;
 
   @override
-  Future<ProviderDetail> getProviderDetail(String providerId) async => const ProviderDetail(
+  Future<ProviderDetail> getProviderDetail(String providerId) async =>
+      const ProviderDetail(
         id: 'provider-1',
         businessName: 'Test Provider',
         rating: 4.5,
@@ -46,8 +47,7 @@ class FakeProviderRepository implements ProviderRepository {
     bool verifiedOnly = true,
     int limit = 20,
     int offset = 0,
-  }) async =>
-      searchResults;
+  }) async => searchResults;
 
   @override
   Future<String> registerAsProvider({

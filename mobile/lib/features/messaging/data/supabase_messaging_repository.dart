@@ -55,7 +55,8 @@ class SupabaseMessagingRepository implements MessagingRepository {
     required Uint8List bytes,
     required String fileExtension,
   }) async {
-    final path = '$bookingId/${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
+    final path =
+        '$bookingId/${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
     try {
       await _client.storage.from('chat-images').uploadBinary(path, bytes);
       await _client.from('messages').insert({
@@ -66,7 +67,11 @@ class SupabaseMessagingRepository implements MessagingRepository {
         'message_type': 'image',
       });
     } on StorageException catch (e, st) {
-      AppLogger.error('sendImageMessage (storage) failed', error: e, stackTrace: st);
+      AppLogger.error(
+        'sendImageMessage (storage) failed',
+        error: e,
+        stackTrace: st,
+      );
       throw const NetworkException();
     } on PostgrestException catch (e, st) {
       AppLogger.error('sendImageMessage (db) failed', error: e, stackTrace: st);
@@ -77,7 +82,10 @@ class SupabaseMessagingRepository implements MessagingRepository {
   @override
   Future<void> markAsRead(String messageId) async {
     try {
-      await _client.from('messages').update({'is_read': true}).eq('id', messageId);
+      await _client
+          .from('messages')
+          .update({'is_read': true})
+          .eq('id', messageId);
     } on PostgrestException catch (e, st) {
       AppLogger.error('markAsRead failed', error: e, stackTrace: st);
       throw const NetworkException();
@@ -87,7 +95,9 @@ class SupabaseMessagingRepository implements MessagingRepository {
   @override
   Future<String> getSignedImageUrl(String storagePath) async {
     try {
-      return await _client.storage.from('chat-images').createSignedUrl(storagePath, 3600);
+      return await _client.storage
+          .from('chat-images')
+          .createSignedUrl(storagePath, 3600);
     } on StorageException catch (e, st) {
       AppLogger.error('getSignedImageUrl failed', error: e, stackTrace: st);
       throw const NetworkException();

@@ -9,7 +9,7 @@ final messagingRepositoryProvider = Provider<MessagingRepository>((ref) {
   return SupabaseMessagingRepository(Supabase.instance.client);
 });
 
-final messagesStreamProvider =
-    StreamProvider.autoDispose.family<List<ChatMessage>, String>((ref, bookingId) {
-  return ref.watch(messagingRepositoryProvider).watchMessages(bookingId);
-});
+final messagesStreamProvider = StreamProvider.autoDispose
+    .family<List<ChatMessage>, String>((ref, bookingId) {
+      return ref.watch(messagingRepositoryProvider).watchMessages(bookingId);
+    });

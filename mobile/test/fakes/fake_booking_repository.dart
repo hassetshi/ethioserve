@@ -2,7 +2,8 @@ import 'package:ethioserve/features/bookings/domain/booking.dart';
 import 'package:ethioserve/features/bookings/domain/booking_repository.dart';
 import 'package:ethioserve/features/bookings/domain/booking_status.dart';
 
-Booking _testBooking({BookingStatus status = BookingStatus.requested}) => Booking(
+Booking _testBooking({BookingStatus status = BookingStatus.requested}) =>
+    Booking(
       id: 'booking-1',
       customerId: 'customer-1',
       providerId: 'provider-1',
@@ -32,21 +33,25 @@ class FakeBookingRepository implements BookingRepository {
     double? latitude,
     double? longitude,
     String? description,
-  }) async =>
-      _testBooking();
+  }) async => _testBooking();
 
   @override
-  Future<List<Booking>> getMyBookingsAsCustomer() async => [_testBooking(status: currentStatus)];
+  Future<List<Booking>> getMyBookingsAsCustomer() async => [
+    _testBooking(status: currentStatus),
+  ];
 
   @override
-  Future<List<Booking>> getMyBookingsAsProvider(String providerId) async =>
-      [_testBooking(status: currentStatus)];
+  Future<List<Booking>> getMyBookingsAsProvider(String providerId) async => [
+    _testBooking(status: currentStatus),
+  ];
 
   @override
-  Future<Booking> getBookingDetail(String bookingId) async => _testBooking(status: currentStatus);
+  Future<Booking> getBookingDetail(String bookingId) async =>
+      _testBooking(status: currentStatus);
 
   @override
-  Stream<Booking> watchBooking(String bookingId) => Stream.value(_testBooking(status: currentStatus));
+  Stream<Booking> watchBooking(String bookingId) =>
+      Stream.value(_testBooking(status: currentStatus));
 
   @override
   Future<void> updateStatus(

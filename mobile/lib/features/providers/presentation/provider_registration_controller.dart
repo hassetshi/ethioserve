@@ -16,7 +16,9 @@ class ProviderRegistrationController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     String? providerId;
     state = await AsyncValue.guard(() async {
-      providerId = await ref.read(providerRepositoryProvider).registerAsProvider(
+      providerId = await ref
+          .read(providerRepositoryProvider)
+          .registerAsProvider(
             businessName: businessName,
             descriptionEn: description,
             phone: phone,
@@ -33,5 +35,5 @@ class ProviderRegistrationController extends AsyncNotifier<void> {
 
 final providerRegistrationControllerProvider =
     AsyncNotifierProvider<ProviderRegistrationController, void>(
-  ProviderRegistrationController.new,
-);
+      ProviderRegistrationController.new,
+    );

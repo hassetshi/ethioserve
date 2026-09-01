@@ -16,13 +16,13 @@ class Service {
   final String? descriptionAm;
 
   factory Service.fromJson(Map<String, dynamic> json) => Service(
-        id: json['id'] as String,
-        categoryId: json['category_id'] as String,
-        nameEn: json['name_en'] as String,
-        nameAm: json['name_am'] as String,
-        descriptionEn: json['description_en'] as String?,
-        descriptionAm: json['description_am'] as String?,
-      );
+    id: json['id'] as String,
+    categoryId: json['category_id'] as String,
+    nameEn: json['name_en'] as String,
+    nameAm: json['name_am'] as String,
+    descriptionEn: json['description_en'] as String?,
+    descriptionAm: json['description_am'] as String?,
+  );
 
   String localizedName(String languageCode) =>
       languageCode == 'am' ? nameAm : nameEn;

@@ -317,7 +317,19 @@ Following the spec's phase order (section 48):
     and standing up a Deno test toolchain for one function felt like more
     new infrastructure than the incremental coverage justified; worth
     revisiting if the Edge Function surface grows.
-14. CI/CD
+14. **CI/CD** — done: two path-filtered GitHub Actions workflows
+    (`.github/workflows/mobile-ci.yml`, `admin-web-ci.yml`), each running on
+    every PR and on pushes to `develop`/`staging`/`main`. Mobile runs
+    `dart format --set-exit-if-changed`, `flutter analyze`, `flutter test`;
+    admin-web runs `oxlint` then `tsc -b && vite build`. Neither needs real
+    Supabase secrets — both apps' env-config modules degrade to
+    unconfigured rather than throwing when the corresponding
+    `--dart-define`/`VITE_*` values are absent, so CI builds/tests the same
+    source a real deployment would use with nothing sensitive in the
+    workflow files. Branch protection on `main` (require these checks +
+    review, spec section 26) is a GitHub repo Settings change, not
+    expressible as a file in this repo — left as a manual step, documented
+    in DEPLOYMENT.md. See DEPLOYMENT.md for the full breakdown.
 15. Staging deployment
 16. Production deployment
 17. Google Play / Apple App Store release
