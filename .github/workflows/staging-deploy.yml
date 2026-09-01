@@ -30,6 +30,19 @@ jobs:
         with:
           version: latest
 
+      # Temporary diagnostic: prints only lengths, never the values, to
+      # confirm the three repository secrets are actually reaching this
+      # workflow before trusting the real deploy steps. Remove once
+      # confirmed non-zero.
+      - name: Diagnose secret resolution
+        run: |
+          echo "SUPABASE_ACCESS_TOKEN length: ${#SUPABASE_ACCESS_TOKEN}"
+          echo "SUPABASE_PROJECT_REF length: ${#PROJECT_REF}"
+          echo "SUPABASE_DB_PASSWORD length: ${#DB_PASSWORD}"
+        env:
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
       - name: Link project
         run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
 
