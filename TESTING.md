@@ -95,6 +95,15 @@ responding is rejected; a provider setting only `provider_response`
 succeeds without touching the rating. The Leave-a-review UI is covered by a
 widget test (`FakeReviewRepository`).
 
+Phase 10's admin-web was verified live end-to-end in a real browser (not
+just API calls, since this is a UI-first app): logged in as a real admin
+account and confirmed the Dashboard's stat cards showed exactly the
+expected counts from the dev project's actual data (1 customer, 1 provider,
+0 pending verifications, 2 bookings) — real numbers, not placeholders. No
+automated test suite exists yet for admin-web (unlike `mobile/`, which has
+Flutter's widget-test tooling already wired up); worth adding Vitest +
+React Testing Library in a future pass if admin-web's page count grows.
+
 ## Planned (spec section 28), added as each phase lands
 
 - **Unit tests**: business logic, booking state transitions (the Postgres

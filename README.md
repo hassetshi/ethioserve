@@ -7,7 +7,7 @@ Ethiopian services marketplace connecting customers with local service providers
 ```
 EthioServe/
 ├── mobile/            Flutter app (customer + provider), Android primary, iOS secondary
-├── admin-web/         Admin web application (added in Phase 10)
+├── admin-web/         Admin web app (React + Vite + TypeScript + Tailwind), Phase 10
 ├── supabase/          Postgres migrations, RLS policies, Edge Functions
 ├── docs/              Design/reference docs that don't fit the top-level *.md files
 ├── .env.example       Reference list of every config value used across the project
@@ -92,6 +92,17 @@ its own rating-recalculation side effect. Both fixed and verified live with
 two real test identities (see ARCHITECTURE.md for the full story, including
 a first fix attempt that turned out to be wrong for Supabase's actual
 connection model). 30 tests passing.
+
+Phase 10 adds `admin-web/`: a separate React + Vite + TypeScript + Tailwind
+app (spec section 13 requires this be a different codebase from the mobile
+app, never folded into it) covering the MVP admin scope — dashboard, users,
+provider verification (review submitted documents, approve/reject/suspend),
+categories, services, bookings. Getting it actually working end-to-end
+turned into a genuine debugging saga — see ARCHITECTURE.md's Phase 10
+section for the full story of ruling out a known supabase-js bug, a Fast
+Refresh/duplicate-client issue, and finally landing on the real cause: the
+dev machine's system clock was ~3 hours off from real time, which broke
+Supabase's token-freshness check regardless of any code here.
 
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 

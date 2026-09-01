@@ -197,7 +197,66 @@ Following the spec's phase order (section 48):
    0.00/0" provider went to the correct `5.00/1` after a real review
    insert; a provider attempt to alter the rating while responding was
    rejected; a provider setting only `provider_response` succeeded.
-10. Admin dashboard (`admin-web/`)
+10. **Admin dashboard (`admin-web/`)** — done for MVP scope (spec section
+    46: provider approval, users, providers, categories, services, bookings).
+    Separate React + Vite + TypeScript + Tailwind app (decision documented in
+    `admin-web/README.md`, same pattern as the mobile Riverpod decision) —
+    a completely different codebase from `mobile/`, per spec section 13.
+    Real authorization is RLS (`is_admin()`), same as everywhere else; the
+    client-side `ProtectedRoute` check only decides what the UI shows.
+    Provider verification review (viewing submitted documents via signed
+    URLs, approve/reject/suspend) is the centerpiece, since that's the one
+    piece of the whole system nothing else could do — every other admin
+    MVP page (Users, Categories, Services, Bookings) is close to plain CRUD
+    over tables whose RLS was already admin-ready since Phase 1.
+
+    **A genuinely hard bug, worth recording in full because the fix had
+    nothing to do with any code in this repo:** admin login worked at the
+    API level but the browser kept bouncing back to the login screen. The
+    browser console showed a storm of `TOKEN_REFRESHED` events (every
+    ~120ms) ending in a 429 from Supabase's rate limiter and a forced
+    sign-out. The investigation went through several wrong turns before
+    landing on the real cause:
+    1. First suspected [supabase-js#2126](https://github.com/supabase/supabase-js/issues/2126),
+       a known race triggered by ECC (P-256) JWT signing keys — the
+       project's active key *was* ES256, matching the report exactly.
+       Rotated it back to HS256 (the format it used before an automatic
+       migration 16 hours earlier). No change in behavior.
+    2. Then suspected `AuthContext.tsx` exporting both a component and a
+       hook, which breaks Vite Fast Refresh and was confirmed (via the dev
+       server log) to have left two live `GoTrueClient` instances racing
+       over the same stored session ("Multiple GoTrueClient instances
+       detected"). Fixed the file structure and did a full server restart.
+       Still no change, even in a brand new browser profile.
+    3. Set `autoRefreshToken: false`, reasoning the background refresh
+       ticker was the culprit. No change — the loop continued.
+    4. Set `persistSession: false` too, removing any stored session for an
+       on-demand refresh path to act on. **Still no change**, even in a
+       completely different browser (Chrome instead of Edge) with a fully
+       fresh profile — which is what finally proved the cause couldn't be
+       anything in this app's code or its browser storage at all.
+    5. Reading `auth-js`'s source directly (rather than guessing further)
+       showed `__loadSession()` treats a session as needing refresh whenever
+       `expires_at * 1000 - Date.now() < 90_000ms` — a check that runs on
+       *every* `getSession()` call (i.e. before every database query),
+       completely independently of the `autoRefreshToken` option. Testing
+       login + an immediate refresh directly against the API showed both
+       responses' `expires_at` were **~2-3 hours in the past** relative to
+       the value `Date.now()` was producing locally. The dev machine's
+       system clock was running about 3 hours ahead of real UTC time,
+       confirmed by comparing it directly to Supabase's own `Date` response
+       header. Every token — including ones issued seconds earlier — looked
+       already expired to the skewed local clock, so every database query
+       triggered an immediate refresh, forever, until the rate limiter cut
+       it off. Fixed by resyncing the machine's clock (Settings → Time &
+       Language → Date & Time → Sync now); confirmed by re-comparing local
+       vs. server time before declaring it fixed, not just by re-testing
+       login and hoping.
+    The `autoRefreshToken: false` / `persistSession: false` client config
+    changes from steps 3–4 were kept even after finding the real cause —
+    they don't fix clock skew, but they stop this specific app from turning
+    any future skew into a broken login loop, which is a reasonable
+    defensive posture for an admin tool regardless.
 11. AI search
 12. Payment integration
 13. Testing (continuous, but hardened/expanded here)
