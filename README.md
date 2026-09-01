@@ -119,6 +119,16 @@ configurable rate (never hard-coded). Digital payment (Chapa/Telebirr/etc.)
 sits behind the same interface, currently returning a clear "not available
 yet" until a real provider is configured. 34 tests passing.
 
+Phase 13 hardens the test suite: widget tests for the two screens that had
+none (login, provider profile), a full integration test driving the real
+app through language selection → login → OTP → browsing → booking request →
+confirmation, and `scripts/security-tests.mjs` — 18 automated RLS/
+authorization checks formalizing what had been verified ad-hoc since Phase
+4, confirmed idempotent. Writing the integration test surfaced a real bug
+in `FakeAuthRepository` (a non-reactive fake stream was silently hiding
+login-triggered navigation from every earlier test); fixed and documented
+in ARCHITECTURE.md. 38 tests passing.
+
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 
 - Android SDK isn't installed, so the app can't yet be run/built for Android

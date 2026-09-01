@@ -290,7 +290,33 @@ Following the spec's phase order (section 48):
     hard-code one Ethiopian payment provider"). Verified live: correct
     100/900 split on a 1000 ETB booking, a customer attempting to record
     their own payment rejected, a duplicate payment attempt rejected.
-13. Testing (continuous, but hardened/expanded here)
+13. **Testing hardening** — done: filled the gaps spec section 28 calls out
+    by name. Added widget tests for the two screens with zero prior coverage
+    (`LoginScreen`, `ProviderProfileScreen`); added a full integration test
+    (`test/integration/customer_booking_journey_test.dart`) driving the real
+    app through language → login → OTP → home → category → service →
+    provider → profile → booking request → confirmation → details, matching
+    spec's own example journey through the booking-creation step (provider
+    accept/complete and the review step are intentionally left to their own
+    existing, more focused tests rather than chained into one giant fake-
+    wired scenario). Writing that integration test caught a real bug: the
+    reusable `FakeAuthRepository` test double used `Stream.value(_user)` for
+    `watchCurrentUser()`, which captures `_user` once and never re-emits
+    when it changes later — every *earlier* test happened to start already
+    logged in or stay logged out for its whole duration, so this never
+    surfaced until a test needed to observe the unauthenticated → authenticated
+    transition live. Fixed with a proper broadcast stream. Also added
+    `scripts/security-tests.mjs`, turning the RLS/authorization checks that
+    had been verified ad-hoc throughout every phase since 4 into one
+    repeatable suite (18 checks: unauthenticated REST/RPC access, booking
+    actor-authorization, payment authorization) — confirmed idempotent by
+    running it twice in a row against the live dev project. Not added: a
+    dedicated Deno unit test for the `ai-search` Edge Function's output-
+    validation logic (spec section 28 names "AI response validation"
+    explicitly) — its behavior is already verified live (AI.md, Phase 11),
+    and standing up a Deno test toolchain for one function felt like more
+    new infrastructure than the incremental coverage justified; worth
+    revisiting if the Edge Function surface grows.
 14. CI/CD
 15. Staging deployment
 16. Production deployment

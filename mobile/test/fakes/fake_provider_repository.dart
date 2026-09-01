@@ -6,9 +6,10 @@ import 'package:ethioserve/features/providers/domain/provider_repository.dart';
 import 'package:ethioserve/features/providers/domain/provider_summary.dart';
 
 class FakeProviderRepository implements ProviderRepository {
-  FakeProviderRepository({this.myProviderId});
+  FakeProviderRepository({this.myProviderId, this.searchResults = const []});
 
   String? myProviderId;
+  final List<ProviderSummary> searchResults;
 
   @override
   Future<String?> getMyProviderId() async => myProviderId;
@@ -20,7 +21,16 @@ class FakeProviderRepository implements ProviderRepository {
         rating: 4.5,
         reviewCount: 10,
         verificationStatus: 'pending',
-        services: [],
+        services: [
+          ProviderOfferedService(
+            serviceId: 'service-1',
+            nameEn: 'Pipe Repair',
+            nameAm: 'የቧንቧ ጥገና',
+            minPrice: 300,
+            maxPrice: 800,
+            pricingType: 'starting_from',
+          ),
+        ],
         photoUrls: [],
       );
 
@@ -37,7 +47,7 @@ class FakeProviderRepository implements ProviderRepository {
     int limit = 20,
     int offset = 0,
   }) async =>
-      [];
+      searchResults;
 
   @override
   Future<String> registerAsProvider({

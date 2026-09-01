@@ -5,7 +5,7 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # 34 tests passing as of Phase 12
+flutter test      # 38 tests passing as of Phase 13
 ```
 
 - `test/widget_test.dart`: app-shell + router redirect behavior — language
@@ -119,6 +119,47 @@ attempt on the same booking was rejected (the unique constraint doing its
 job). The Flutter side is covered by a widget test
 (`FakePaymentRepository`) for both the provider's record-payment action and
 the customer's read-only view.
+
+## Phase 13: hardening
+
+Added the two screens with zero prior widget-test coverage
+(`test/features/auth/login_screen_test.dart`,
+`test/features/providers/provider_profile_screen_test.dart`) and a full
+integration test
+(`test/integration/customer_booking_journey_test.dart`) driving the actual
+app — not a screen in isolation — through language selection, login, OTP,
+home, category browsing, search results, provider profile, booking request,
+confirmation, and back to the booking's own details screen. Deliberately
+stops there rather than also simulating provider acceptance and the review
+step within the same test; those already have focused coverage elsewhere
+and chaining a second identity's actions into one fake-wired scenario would
+add a lot of complexity for limited extra confidence.
+
+Writing that integration test found a real bug in the test infrastructure
+itself: `FakeAuthRepository.watchCurrentUser()` used `Stream.value(_user)`,
+which evaluates `_user` once at call time and never re-emits when it
+changes later. Every prior test happened to start either already
+authenticated or to stay logged out for its entire duration, so nothing had
+ever exercised the "log in partway through the test" path that would have
+exposed this — the router kept reading a stale "logged out" value after a
+successful OTP verification and bounced back to `/login`. Fixed with a
+proper broadcast stream (see the comment in `test/fakes/fake_auth_repository.dart`).
+
+`scripts/security-tests.mjs` formalizes the RLS/authorization verification
+that had been done ad-hoc via one-off commands throughout Phases 4-12 into
+one repeatable, re-runnable suite: 7 unauthenticated REST/RPC access checks,
+5 booking actor-authorization checks (creating and cleaning up its own
+disposable test booking), and 4 payment authorization checks (ditto) — 18
+checks total, confirmed idempotent by running it twice in a row against the
+live dev project with identical results both times.
+
+**Known gap**: spec section 28 names "AI response validation" as a unit-test
+target. That logic (verifying the AI's returned category/service ids
+against the real catalog before trusting them) is exercised live against
+the deployed Edge Function (see AI.md), but has no dedicated Deno unit test
+— standing up a Deno test toolchain for one function's pure-logic slice
+wasn't judged worth it yet; revisit if `supabase/functions/` grows more
+functions with similar validation logic worth testing in isolation.
 
 ## Planned (spec section 28), added as each phase lands
 
