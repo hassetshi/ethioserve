@@ -7,7 +7,8 @@ name: Staging Deploy
 # (feature/* -> develop -> staging -> main -> production).
 on:
   push:
-    branches: [staging]
+    branches:
+      - staging
     paths:
       - 'supabase/**'
       - '.github/workflows/staging-deploy.yml'
