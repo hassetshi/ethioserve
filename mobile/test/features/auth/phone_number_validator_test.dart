@@ -41,6 +41,29 @@ void main() {
     });
   });
 
+  group('PhoneNumberValidator.normalize (US)', () {
+    test('normalizes bare 10-digit US number', () {
+      expect(PhoneNumberValidator.normalize('2025551234'), '+12025551234');
+    });
+
+    test('normalizes US number with leading 1', () {
+      expect(PhoneNumberValidator.normalize('12025551234'), '+12025551234');
+    });
+
+    test('normalizes already-international US format with +', () {
+      expect(PhoneNumberValidator.normalize('+12025551234'), '+12025551234');
+    });
+
+    test('strips formatting characters (parens, dashes, spaces)', () {
+      expect(PhoneNumberValidator.normalize('(202) 555-1234'), '+12025551234');
+    });
+
+    test('rejects a US number with an area code starting with 0 or 1', () {
+      expect(PhoneNumberValidator.normalize('0205551234'), isNull);
+      expect(PhoneNumberValidator.normalize('11025551234'), isNull);
+    });
+  });
+
   group('PhoneNumberValidator.isValid', () {
     test('true for a valid number', () {
       expect(PhoneNumberValidator.isValid('0912345678'), isTrue);

@@ -9,8 +9,10 @@ abstract class CatalogRepository {
 
   Future<Category> getCategory(String categoryId);
 
-  /// Active launch cities (spec section 3: only Addis Ababa is active at
-  /// launch; future cities are additive rows here, not schema changes).
+  /// Active launch cities (spec section 3: only Washington, DC is active at
+  /// launch — the initial market is Ethiopian-American businesses/customers
+  /// in the US; future cities, including an eventual return to Ethiopia
+  /// itself, are additive rows here, not schema changes).
   Future<List<City>> getCities();
 
   /// Services whose name matches [query] (English or Amharic), for the

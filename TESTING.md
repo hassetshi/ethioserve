@@ -112,7 +112,7 @@ widget test using `FakeAIService` for both the matched and
 needs-clarification branches.
 
 Phase 12's payment logic — real money math, so it got the same live-verification
-treatment as bookings/reviews: a 1000 ETB cash payment on the test booking
+treatment as bookings/reviews: a 1000 USD cash payment on the test booking
 correctly split into 100/900 (the seeded 10% commission rate); a customer
 attempting to record their own payment was rejected; a second payment
 attempt on the same booking was rejected (the unique constraint doing its

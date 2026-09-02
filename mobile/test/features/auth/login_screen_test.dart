@@ -38,7 +38,7 @@ void main() {
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Enter a valid Ethiopian phone number.'), findsOneWidget);
+    expect(find.text('Enter a valid US or Ethiopian phone number.'), findsOneWidget);
     expect(find.byType(LoginScreen), findsOneWidget);
   });
 

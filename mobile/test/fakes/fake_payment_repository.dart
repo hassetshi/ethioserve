@@ -12,7 +12,7 @@ class FakePaymentRepository implements PaymentRepository {
       amount: 1000,
       platformFee: 100,
       providerAmount: 900,
-      currency: 'ETB',
+      currency: 'USD',
       paymentProvider: 'cash',
       status: 'completed',
       paidAt: DateTime.now(),

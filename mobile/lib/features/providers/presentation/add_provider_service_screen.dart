@@ -149,7 +149,7 @@ class _AddProviderServiceScreenState
                 controller: _minPriceController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Min price (ETB)',
+                  labelText: 'Min price (USD)',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -158,7 +158,7 @@ class _AddProviderServiceScreenState
                 controller: _maxPriceController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Max price (ETB, optional)',
+                  labelText: 'Max price (USD, optional)',
                   border: OutlineInputBorder(),
                 ),
               ),

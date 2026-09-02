@@ -106,7 +106,7 @@ class _BookingDetailsBody extends ConsumerWidget {
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(
-            labelText: 'Final price (ETB, optional)',
+            labelText: 'Final price (USD, optional)',
           ),
         ),
         actions: [
@@ -169,7 +169,7 @@ class _BookingDetailsBody extends ConsumerWidget {
           ],
           if (booking.finalPrice != null) ...[
             const SizedBox(height: 12),
-            Text('Final price: ${booking.finalPrice!.toStringAsFixed(0)} ETB'),
+            Text('Final price: \$${booking.finalPrice!.toStringAsFixed(2)}'),
           ],
           if (booking.cancellationReason != null) ...[
             const SizedBox(height: 12),

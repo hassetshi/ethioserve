@@ -145,13 +145,12 @@ class _ProviderProfileBody extends ConsumerWidget {
     return switch (service.pricingType) {
       'quote' => 'By quote',
       'hourly' when service.minPrice != null =>
-        '${service.minPrice!.toStringAsFixed(0)} ETB/hr',
+        '\$${service.minPrice!.toStringAsFixed(0)}/hr',
       'starting_from' when service.minPrice != null =>
-        'From ${service.minPrice!.toStringAsFixed(0)} ETB',
+        'From \$${service.minPrice!.toStringAsFixed(0)}',
       _ when service.minPrice != null && service.maxPrice != null =>
-        '${service.minPrice!.toStringAsFixed(0)}–${service.maxPrice!.toStringAsFixed(0)} ETB',
-      _ when service.minPrice != null =>
-        '${service.minPrice!.toStringAsFixed(0)} ETB',
+        '\$${service.minPrice!.toStringAsFixed(0)}–\$${service.maxPrice!.toStringAsFixed(0)}',
+      _ when service.minPrice != null => '\$${service.minPrice!.toStringAsFixed(0)}',
       _ => 'Price on request',
     };
   }

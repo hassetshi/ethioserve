@@ -11,8 +11,8 @@ abstract class AuthRepository {
   Future<AppUser?> getCurrentUser();
 
   /// Sends an OTP to [phone]. [phone] must already be in E.164 format
-  /// (e.g. +2519XXXXXXXX) — normalization happens in the UI layer via
-  /// [PhoneNumberValidator] before this is called.
+  /// (e.g. +12025551234 or +2519XXXXXXXX) — normalization happens in the UI
+  /// layer via [PhoneNumberValidator] before this is called.
   Future<void> sendOtp(String phone);
 
   /// Verifies [code] sent to [phone]. Throws [AppException] on failure.

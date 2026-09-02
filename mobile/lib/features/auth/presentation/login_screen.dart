@@ -35,7 +35,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       setState(() {
         _errorText = state.hasError
             ? 'Something went wrong. Please try again.'
-            : 'Enter a valid Ethiopian phone number.';
+            : 'Enter a valid US or Ethiopian phone number.';
       });
       return;
     }

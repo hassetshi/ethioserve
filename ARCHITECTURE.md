@@ -1,5 +1,37 @@
 # Architecture
 
+## Product pivot: US-based Ethiopian-American market (post-Phase 16)
+
+Originally built strictly for Ethiopia (Addis Ababa launch, ETB currency,
+Ethiopian phone numbers only). Changed after manual testing revealed the
+practical blocker: no way to test the real OTP flow without an Ethiopian
+phone number. The decision made was broader than a workaround — target
+Ethiopian-American businesses and customers in the US first, prove the
+model, then expand back to Ethiopia itself later. That reframing touches
+several places that had Ethiopia hard-coded rather than configurable:
+
+- **Currency**: `payments`/`subscriptions.currency` had a DB-level
+  `CHECK (currency = 'ETB')` — changed to `USD` via
+  `supabase/migrations/20260901000023_currency_usd.sql` (existing rows
+  migrated, constraint names looked up dynamically since they were never
+  explicitly named).
+- **Phone validation**: `PhoneNumberValidator` only accepted Ethiopian
+  numbers (national number starting with 7/9). Extended — not replaced — to
+  accept both US (NANP, +1) and Ethiopian (+251) formats, since the plan is
+  to serve Ethiopia again later, not abandon that market.
+- **Location data**: `cities` seed data was Addis Ababa and other Ethiopian
+  cities. `supabase/migrations/20260901000024_us_cities.sql` deactivates
+  those (kept, not deleted — the eventual return to Ethiopia is a data
+  change, not a migration) and seeds major US Ethiopian-American population
+  centers, with Washington, DC / Silver Spring, MD as the single active
+  launch city.
+- **Payments**: this is also what resolved Phase 12's "architecture only"
+  deferral — Chapa/Telebirr never made sense for a US-based customer base
+  anyway. Stripe is the real provider going forward (see the payments
+  section below once built).
+- Bilingual English/Amharic UI is unchanged — Ethiopian-American users are
+  exactly the audience Amharic support serves.
+
 ## Technology stack
 
 | Layer | Choice | Why |
@@ -288,7 +320,7 @@ Following the spec's phase order (section 48):
     swapping in a real provider later is an implementation change behind
     that interface, not an architecture change (spec section 20: "Do not
     hard-code one Ethiopian payment provider"). Verified live: correct
-    100/900 split on a 1000 ETB booking, a customer attempting to record
+    100/900 split on a 1000 USD booking, a customer attempting to record
     their own payment rejected, a duplicate payment attempt rejected.
 13. **Testing hardening** — done: filled the gaps spec section 28 calls out
     by name. Added widget tests for the two screens with zero prior coverage

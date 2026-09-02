@@ -33,10 +33,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.textContaining('1000 ETB (cash) — completed'),
+        find.textContaining('1000 USD (cash) — completed'),
         findsOneWidget,
       );
-      expect(find.textContaining('You receive: 900 ETB'), findsOneWidget);
+      expect(find.textContaining('You receive: 900 USD'), findsOneWidget);
     },
   );
 

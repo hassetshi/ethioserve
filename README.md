@@ -1,6 +1,9 @@
 # EthioServe
 
-Ethiopian services marketplace connecting customers with local service providers, starting in Addis Ababa.
+Services marketplace connecting Ethiopian-American customers with Ethiopian-owned service
+providers in the US, starting in the Washington, DC metro area — with a planned expansion
+back to Ethiopia itself once the model is proven (see the "Product pivot" note in
+ARCHITECTURE.md).
 
 ## Repository layout
 

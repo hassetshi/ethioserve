@@ -94,7 +94,8 @@ Deno.serve(async (req) => {
         {
           role: 'user',
           content:
-            `A customer of an Ethiopian services marketplace typed this search (it may be in ` +
+            `A customer of a services marketplace for Ethiopian-American businesses in the US ` +
+            `typed this search (it may be in ` +
             `English or Amharic): "${query}"\n\n` +
             `Here is the platform's current catalog:\n${catalogText}\n\n` +
             `Pick the single best-matching category and, if identifiable, service, using ONLY the ` +

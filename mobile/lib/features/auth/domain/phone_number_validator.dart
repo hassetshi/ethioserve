@@ -1,33 +1,46 @@
-/// Normalizes Ethiopian phone numbers to E.164 (+251XXXXXXXXX) for Supabase
-/// phone auth, and validates the result.
+/// Normalizes phone numbers to E.164 for Supabase phone auth, and validates
+/// the result.
 ///
-/// Accepts local format (09XXXXXXXX / 07XXXXXXXX), already-international
-/// format (+2519XXXXXXXX), or the same without the leading '+'.
+/// Supports US (NANP, +1) and Ethiopian (+251) numbers: the initial market
+/// is Ethiopian-American businesses/customers in the US, with a planned
+/// expansion back to Ethiopia itself, so both formats need to keep working
+/// rather than picking one and dropping the other.
 class PhoneNumberValidator {
   const PhoneNumberValidator._();
 
-  static const String _countryCode = '251';
+  static final RegExp _ethiopianNational = RegExp(r'^[79]\d{8}$');
+  static final RegExp _usNational = RegExp(r'^[2-9]\d{9}$');
 
-  /// Returns the E.164 form, or `null` if [input] isn't a recognizable
+  /// Returns the E.164 form, or `null` if [input] isn't a recognizable US or
   /// Ethiopian mobile number.
   static String? normalize(String input) {
     final digits = input.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.isEmpty) return null;
 
-    String national;
-    if (digits.startsWith(_countryCode) && digits.length == 12) {
-      national = digits.substring(_countryCode.length);
+    // Ethiopia: +251XXXXXXXXX (12 digits with country code), 0XXXXXXXXX
+    // (10-digit local form), or the bare 9-digit national number.
+    if (digits.startsWith('251') && digits.length == 12) {
+      final national = digits.substring(3);
+      if (_ethiopianNational.hasMatch(national)) return '+251$national';
     } else if (digits.startsWith('0') && digits.length == 10) {
-      national = digits.substring(1);
-    } else if (digits.length == 9) {
-      national = digits;
-    } else {
-      return null;
+      final national = digits.substring(1);
+      if (_ethiopianNational.hasMatch(national)) return '+251$national';
+    } else if (digits.length == 9 && _ethiopianNational.hasMatch(digits)) {
+      return '+251$digits';
     }
 
-    if (!RegExp(r'^[79]\d{8}$').hasMatch(national)) return null;
+    // US/Canada (NANP): +1XXXXXXXXXX (11 digits with country code), or the
+    // bare 10-digit national number. Area code can't start with 0 or 1,
+    // which also keeps this from colliding with Ethiopia's 10-digit local
+    // form above (that one always starts with '0').
+    if (digits.startsWith('1') && digits.length == 11) {
+      final national = digits.substring(1);
+      if (_usNational.hasMatch(national)) return '+1$national';
+    } else if (digits.length == 10 && _usNational.hasMatch(digits)) {
+      return '+1$digits';
+    }
 
-    return '+$_countryCode$national';
+    return null;
   }
 
   static bool isValid(String input) => normalize(input) != null;
