@@ -150,7 +150,8 @@ class _ProviderProfileBody extends ConsumerWidget {
         'From \$${service.minPrice!.toStringAsFixed(0)}',
       _ when service.minPrice != null && service.maxPrice != null =>
         '\$${service.minPrice!.toStringAsFixed(0)}–\$${service.maxPrice!.toStringAsFixed(0)}',
-      _ when service.minPrice != null => '\$${service.minPrice!.toStringAsFixed(0)}',
+      _ when service.minPrice != null =>
+        '\$${service.minPrice!.toStringAsFixed(0)}',
       _ => 'Price on request',
     };
   }
