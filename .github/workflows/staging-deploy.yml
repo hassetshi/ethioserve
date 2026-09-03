@@ -36,8 +36,12 @@ jobs:
       - name: Push database migrations
         run: supabase db push --password "${{ secrets.SUPABASE_DB_PASSWORD }}"
 
-      # ai-search's own secrets (ANTHROPIC_API_KEY, etc.) were set once via
+      # Deploys every function under supabase/functions/. Each function's
+      # JWT verification setting comes from supabase/config.toml
+      # ([functions.<name>] verify_jwt), not a per-deploy flag, so this one
+      # command applies the right setting to each. Provider secrets
+      # (ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, etc.) were set once via
       # `supabase secrets set` and persist on the project - no need to
       # re-set them on every deploy, only to redeploy the function code.
       - name: Deploy edge functions
-        run: supabase functions deploy ai-search --no-verify-jwt
+        run: supabase functions deploy

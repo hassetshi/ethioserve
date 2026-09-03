@@ -115,6 +115,17 @@ await test('register_as_provider rejects an unauthenticated caller', async () =>
   assert(status === 400, `expected 400, got ${status}`);
 });
 
+await test('stripe-create-payment-intent rejects a call with no Authorization header', async () => {
+  // Deployed with verify_jwt = true (supabase/config.toml) — Supabase's own
+  // gateway should reject this before the function body ever runs.
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-create-payment-intent`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ bookingId: 'test' }),
+  });
+  assert(res.status === 401, `expected 401, got ${res.status}`);
+});
+
 await test('log_admin_action RPC rejects an unauthenticated caller', async () => {
   // Postgres grants EXECUTE to PUBLIC by default, so `grant ... to
   // authenticated` (20260901000022_admin_audit_log_rpc.sql) doesn't
