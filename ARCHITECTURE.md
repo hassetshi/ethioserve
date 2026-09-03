@@ -363,11 +363,31 @@ Following the spec's phase order (section 48):
     card" once a booking is completed; the provider still sees "Mark as
     paid (cash)".
 
-    **Web caveat**: `flutter_stripe`'s web support (`flutter_stripe_web`) is
-    officially experimental with only a subset of PaymentSheet's features
-    implemented — noted here because at the time this was built, Android
-    SDK wasn't yet installed locally (see README.md), so initial manual
-    testing happened on the web target rather than a real device.
+    **Web caveat, confirmed live**: `flutter_stripe`'s web support
+    (`flutter_stripe_web`) is officially experimental with only a subset of
+    PaymentSheet's features implemented — noted here because at the time
+    this was built, Android SDK wasn't yet installed locally (see
+    README.md), so initial manual testing happened on the web target rather
+    than a real device. That manual test confirmed exactly the split this
+    caveat predicts: the Network tab showed `stripe-create-payment-intent`
+    returning 200 on every attempt (auth check, ownership check, and the
+    real Stripe API call all correct), but `presentPaymentSheet()` then threw
+    something other than `StripeException` — not caught by that specific
+    `catch` clause, surfacing as the generic "Something went wrong" — which
+    is the web plugin's own PaymentSheet gap, not a bug in this code. Decided
+    not to build a web-specific fallback (e.g. a simpler CardField form);
+    the full click-through of the actual payment UI is deferred to real
+    Android/iOS testing once the SDK gap closes, where `flutter_stripe`'s
+    native support is complete.
+
+    That same manual test also caught a real, separate bug: neither
+    Edge Function sent CORS headers, which native Android/iOS never
+    notices (CORS is a browser-only mechanism) but which silently breaks
+    every browser-based call — including `ai-search` from Phase 11, which
+    had only ever been verified via direct server-to-server fetch calls,
+    never through an actual browser client. Fixed both via a shared
+    `supabase/functions/_shared/cors.ts` helper (`stripe-webhook` doesn't
+    need it — Stripe calls it server-to-server, not from a browser).
 13. **Testing hardening** — done: filled the gaps spec section 28 calls out
     by name. Added widget tests for the two screens with zero prior coverage
     (`LoginScreen`, `ProviderProfileScreen`); added a full integration test

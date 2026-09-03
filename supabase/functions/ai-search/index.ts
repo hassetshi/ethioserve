@@ -12,10 +12,18 @@
 // Runs server-side because it needs ANTHROPIC_API_KEY, which must never
 // reach the Flutter app (same reasoning as the Supabase service-role key).
 import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { corsHeaders, handleCorsPreflight } from '../_shared/cors.ts'
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'content-type': 'application/json' },
+  })
+}
 
 const CLASSIFY_TOOL = {
   name: 'classify_search_query',
@@ -38,8 +46,11 @@ const CLASSIFY_TOOL = {
 }
 
 Deno.serve(async (req) => {
+  const preflight = handleCorsPreflight(req)
+  if (preflight) return preflight
+
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'POST only' }), { status: 405 })
+    return json({ error: 'POST only' }, 405)
   }
 
   let query: string
@@ -47,14 +58,14 @@ Deno.serve(async (req) => {
     const body = await req.json()
     query = String(body.query ?? '').trim()
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 })
+    return json({ error: 'Invalid JSON body' }, 400)
   }
 
   if (!query) {
-    return new Response(JSON.stringify({ error: 'query is required' }), { status: 400 })
+    return json({ error: 'query is required' }, 400)
   }
   if (query.length > 500) {
-    return new Response(JSON.stringify({ error: 'query too long' }), { status: 400 })
+    return json({ error: 'query too long' }, 400)
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -66,7 +77,7 @@ Deno.serve(async (req) => {
     ])
 
   if (categoriesError || servicesError) {
-    return new Response(JSON.stringify({ error: 'Failed to load catalog' }), { status: 500 })
+    return json({ error: 'Failed to load catalog' }, 500)
   }
 
   const catalogText = [
@@ -110,16 +121,14 @@ Deno.serve(async (req) => {
   if (!anthropicResponse.ok) {
     const detail = await anthropicResponse.text()
     console.error('Anthropic API error', anthropicResponse.status, detail)
-    return new Response(JSON.stringify({ error: 'AI service unavailable' }), { status: 502 })
+    return json({ error: 'AI service unavailable' }, 502)
   }
 
   const anthropicResult = await anthropicResponse.json()
   const toolUse = anthropicResult.content?.find((block: { type: string }) => block.type === 'tool_use')
 
   if (!toolUse) {
-    return new Response(JSON.stringify({ error: 'AI did not return a structured result' }), {
-      status: 502,
-    })
+    return json({ error: 'AI did not return a structured result' }, 502)
   }
 
   const raw = toolUse.input as {
@@ -148,7 +157,5 @@ Deno.serve(async (req) => {
           raw.clarification_question ?? 'Could you describe what service you need?',
       }
 
-  return new Response(JSON.stringify(result), {
-    headers: { 'content-type': 'application/json' },
-  })
+  return json(result)
 })

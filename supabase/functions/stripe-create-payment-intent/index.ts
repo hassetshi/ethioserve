@@ -5,19 +5,30 @@
 // below so the booking lookup can only ever see the caller's own bookings.
 // Ownership is enforced by Postgres RLS, not re-implemented here.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { corsHeaders, handleCorsPreflight } from '../_shared/cors.ts'
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
 
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'content-type': 'application/json' },
+  })
+}
+
 Deno.serve(async (req) => {
+  const preflight = handleCorsPreflight(req)
+  if (preflight) return preflight
+
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'POST only' }), { status: 405 })
+    return json({ error: 'POST only' }, 405)
   }
 
   const authHeader = req.headers.get('Authorization')
   if (!authHeader) {
-    return new Response(JSON.stringify({ error: 'Missing Authorization header' }), { status: 401 })
+    return json({ error: 'Missing Authorization header' }, 401)
   }
 
   let bookingId: string
@@ -25,10 +36,10 @@ Deno.serve(async (req) => {
     const body = await req.json()
     bookingId = String(body.bookingId ?? '')
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 })
+    return json({ error: 'Invalid JSON body' }, 400)
   }
   if (!bookingId) {
-    return new Response(JSON.stringify({ error: 'bookingId is required' }), { status: 400 })
+    return json({ error: 'bookingId is required' }, 400)
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -37,7 +48,7 @@ Deno.serve(async (req) => {
 
   const { data: userData, error: userError } = await supabase.auth.getUser()
   if (userError || !userData.user) {
-    return new Response(JSON.stringify({ error: 'Invalid session' }), { status: 401 })
+    return json({ error: 'Invalid session' }, 401)
   }
 
   const { data: booking, error: bookingError } = await supabase
@@ -48,22 +59,19 @@ Deno.serve(async (req) => {
 
   if (bookingError) {
     console.error('Booking lookup failed', bookingError)
-    return new Response(JSON.stringify({ error: 'Failed to look up booking' }), { status: 500 })
+    return json({ error: 'Failed to look up booking' }, 500)
   }
   if (!booking) {
-    return new Response(JSON.stringify({ error: 'Booking not found' }), { status: 404 })
+    return json({ error: 'Booking not found' }, 404)
   }
   if (booking.customer_id !== userData.user.id) {
-    return new Response(
-      JSON.stringify({ error: 'Only the customer can pay for this booking' }),
-      { status: 403 },
-    )
+    return json({ error: 'Only the customer can pay for this booking' }, 403)
   }
   if (booking.status !== 'completed') {
-    return new Response(JSON.stringify({ error: 'Booking is not completed yet' }), { status: 400 })
+    return json({ error: 'Booking is not completed yet' }, 400)
   }
   if (booking.final_price == null) {
-    return new Response(JSON.stringify({ error: 'Booking has no final price set' }), { status: 400 })
+    return json({ error: 'Booking has no final price set' }, 400)
   }
 
   const { data: existingPayment } = await supabase
@@ -72,10 +80,7 @@ Deno.serve(async (req) => {
     .eq('booking_id', bookingId)
     .maybeSingle()
   if (existingPayment) {
-    return new Response(
-      JSON.stringify({ error: 'This booking already has a payment record' }),
-      { status: 400 },
-    )
+    return json({ error: 'This booking already has a payment record' }, 400)
   }
 
   const amountCents = Math.round(Number(booking.final_price) * 100)
@@ -97,12 +102,10 @@ Deno.serve(async (req) => {
   if (!stripeResponse.ok) {
     const detail = await stripeResponse.text()
     console.error('Stripe PaymentIntent creation failed', stripeResponse.status, detail)
-    return new Response(JSON.stringify({ error: 'Payment provider error' }), { status: 502 })
+    return json({ error: 'Payment provider error' }, 502)
   }
 
   const paymentIntent = await stripeResponse.json()
 
-  return new Response(JSON.stringify({ clientSecret: paymentIntent.client_secret }), {
-    headers: { 'content-type': 'application/json' },
-  })
+  return json({ clientSecret: paymentIntent.client_secret })
 })
