@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug-build-only (src/debug, never merged into a release build). Trusts
+  user-installed CA certificates in addition to the system store, needed to
+  develop behind local TLS-intercepting software (antivirus/corporate proxy
+  SSL scanning) that Windows itself trusts via its own certificate store but
+  the emulator's isolated Android OS has no way to know about. Never do this
+  in a release network security config - it would let any user-installed
+  certificate intercept the app's traffic in production.
+-->
+<network-security-config>
+    <base-config>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

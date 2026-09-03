@@ -168,10 +168,19 @@ now, via two Edge Functions (`stripe-create-payment-intent`,
 ARCHITECTURE.md's "Product pivot" section and its "Digital payments:
 Stripe" note under Phase 12 for the full story.
 
-Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
-
-- Android SDK isn't installed, so the app can't yet be run/built for Android
-  (the primary target platform) — static analysis, unit/widget tests, and
-  Flutter's web/Windows desktop targets work today.
+**Phase 17 (in progress).** The Android SDK is now installed and the app runs
+on a real Android emulator for the first time — which immediately caught two
+real bugs no amount of web/Windows testing ever would have: `flutter_stripe`
+needs `MainActivity` to be a `FlutterFragmentActivity` (confirmed fix — the
+crash it caused went away), and the *release* manifest was missing
+`android.permission.INTERNET` entirely (invisible during normal debug
+testing since Flutter's own template grants it separately for debug builds
+only — a release build would have shipped with zero network access). Both
+fixed. Full click-through testing (login → booking → Stripe) is currently
+blocked on the dev machine by local antivirus software intercepting HTTPS in
+a way the emulator's isolated Android OS doesn't trust — the one issue
+present through every attempt in this phase — see LOCAL_DEVELOPMENT.md for
+the diagnostic and ARCHITECTURE.md's Phase 17 entry for the full story. Real
+store accounts, signed release builds, and listings are still ahead.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the full phase plan (Phases 2–17).

@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Every Supabase/Stripe/AI call the app makes needs this - without it
+         Android silently blocks all sockets. Never surfaced until the app
+         actually ran on Android for the first time (web/Windows targets
+         don't use this manifest, so every prior "it works" was on a
+         platform this permission doesn't apply to). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Nearby provider search / distance sort (Phase 5). Requested at
          runtime only when the user opts in, never on app start. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>

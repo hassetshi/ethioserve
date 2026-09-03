@@ -186,6 +186,20 @@ the deployed Edge Function (see AI.md), but has no dedicated Deno unit test
 wasn't judged worth it yet; revisit if `supabase/functions/` grows more
 functions with similar validation logic worth testing in isolation.
 
+## Phase 17: first real Android run
+
+The Android SDK + an emulator are now set up (see LOCAL_DEVELOPMENT.md), and
+the app has run on real Android for the first time. That alone caught two
+real bugs — see ARCHITECTURE.md's Phase 17 entry for the full story
+(`FlutterFragmentActivity`, the missing `INTERNET` permission). Full manual
+click-through (login → OTP → booking → Stripe PaymentSheet) on Android is
+not yet completed on the current dev machine — blocked by local antivirus
+software intercepting HTTPS in a way the emulator's isolated OS doesn't
+trust, unrelated to the app itself (diagnostic steps in
+LOCAL_DEVELOPMENT.md). This is the one manual test still outstanding before
+Phase 17 can be considered done; everything else (automated suite, live
+Supabase/Stripe backend verification) already passes.
+
 ## Planned (spec section 28), added as each phase lands
 
 - **Unit tests**: business logic, booking state transitions (the Postgres
