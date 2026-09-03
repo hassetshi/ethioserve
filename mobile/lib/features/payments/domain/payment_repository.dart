@@ -12,11 +12,13 @@ abstract class PaymentRepository {
   /// booking's final_price — the client cannot set either.
   Future<Payment> recordCashPayment(String bookingId);
 
-  /// Not yet available: no digital payment provider (Chapa/Telebirr/etc.)
-  /// is configured. Throws a [ValidationException]-style error with a
-  /// message safe to show the user. Exists now so a real implementation
-  /// swaps in later without touching call sites (spec section 20: "Do not
-  /// hard-code one Ethiopian payment provider").
+  /// Card payment via Stripe (the US-market pivot's provider — see
+  /// ARCHITECTURE.md's "Product pivot" note on why Chapa/Telebirr no longer
+  /// made sense). Presents Stripe's native payment sheet; throws a
+  /// [ValidationException]-style error with a message safe to show the user
+  /// if the customer cancels or the charge fails. The interface stayed
+  /// stable across that swap (spec section 20: "Do not hard-code one
+  /// payment provider") — only the implementation changed.
   Future<Payment> initializeDigitalPayment(String bookingId);
 
   Future<Payment?> getPaymentForBooking(String bookingId);

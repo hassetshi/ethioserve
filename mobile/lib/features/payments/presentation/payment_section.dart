@@ -4,10 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/app_exception.dart';
 import 'payment_providers.dart';
 
-/// Shown on Booking Details once a booking is completed. Only the provider
-/// gets an action here (recording cash received) — this mirrors who's
-/// physically present to collect payment in an in-home service model; the
-/// customer sees a read-only status.
+/// Shown on Booking Details once a booking is completed. The provider can
+/// record cash collected in person; the customer can pay by card via
+/// Stripe — each side only gets the action that's actually theirs to take.
 class PaymentSection extends ConsumerStatefulWidget {
   const PaymentSection({
     required this.bookingId,
@@ -23,10 +22,10 @@ class PaymentSection extends ConsumerStatefulWidget {
 }
 
 class _PaymentSectionState extends ConsumerState<PaymentSection> {
-  bool _recording = false;
+  bool _busy = false;
 
   Future<void> _recordCash() async {
-    setState(() => _recording = true);
+    setState(() => _busy = true);
     try {
       await ref
           .read(paymentRepositoryProvider)
@@ -46,8 +45,46 @@ class _PaymentSectionState extends ConsumerState<PaymentSection> {
         );
       }
     } finally {
-      if (mounted) setState(() => _recording = false);
+      if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _payWithCard() async {
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(paymentRepositoryProvider)
+          .initializeDigitalPayment(widget.bookingId);
+      ref.invalidate(paymentForBookingProvider(widget.bookingId));
+    } on ValidationException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.userMessage)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Widget _busyButton({required VoidCallback onPressed, required String label}) {
+    return FilledButton(
+      onPressed: _busy ? null : onPressed,
+      child: _busy
+          ? const SizedBox(
+              height: 18,
+              width: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Text(label),
+    );
   }
 
   @override
@@ -84,15 +121,6 @@ class _PaymentSectionState extends ConsumerState<PaymentSection> {
           );
         }
 
-        if (!widget.isProviderView) {
-          return const Card(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Text('Payment pending.'),
-            ),
-          );
-        }
-
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -101,21 +129,13 @@ class _PaymentSectionState extends ConsumerState<PaymentSection> {
               children: [
                 Text('Payment', style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: 8),
-                FilledButton(
-                  onPressed: _recording ? null : _recordCash,
-                  child: _recording
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Mark as paid (cash)'),
-                ),
-                const SizedBox(height: 4),
-                const OutlinedButton(
-                  onPressed: null,
-                  child: Text('Digital payment (coming soon)'),
-                ),
+                if (widget.isProviderView)
+                  _busyButton(
+                    onPressed: _recordCash,
+                    label: 'Mark as paid (cash)',
+                  )
+                else
+                  _busyButton(onPressed: _payWithCard, label: 'Pay with card'),
               ],
             ),
           ),

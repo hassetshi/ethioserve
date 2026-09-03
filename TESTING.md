@@ -120,6 +120,23 @@ job). The Flutter side is covered by a widget test
 (`FakePaymentRepository`) for both the provider's record-payment action and
 the customer's read-only view.
 
+## Post-Phase 16: Stripe digital payments
+
+Widget-level: `payment_section_test.dart` covers the customer's "Pay with
+card" action against `FakePaymentRepository` (unchanged pattern — the fake
+never touches Stripe). Live end-to-end verification of the real integration
+needs manual testing with Stripe's test card (`4242 4242 4242 4242`, any
+future expiry, any CVC) run through the actual PaymentSheet — not something
+an automated widget test can drive, since it's Stripe's own native UI.
+`scripts/security-tests.mjs` doesn't cover the Stripe Edge Functions
+directly (they need a real booking + a real Stripe test-mode charge to
+exercise meaningfully, not just an unauthenticated-rejection check), but the
+same "only the customer, only for their own completed booking" ownership
+check that protects `record_cash_payment` is enforced in
+`stripe-create-payment-intent` via an RLS-scoped Supabase client plus an
+explicit `customer_id` check — see ARCHITECTURE.md for why RLS alone isn't
+quite enough there (the assigned provider can also read their own booking).
+
 ## Phase 13: hardening
 
 Added the two screens with zero prior widget-test coverage

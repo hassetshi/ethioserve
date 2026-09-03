@@ -101,8 +101,14 @@ Run before every release to production, not just the first one:
 - [ ] Branch protection on `main` is on (see DEPLOYMENT.md).
 - [ ] Twilio phone auth verified working against the production project
       with a real phone number, not just dev/staging's.
-- [ ] Payment provider still architecture-only per Phase 12's scope
-      decision, or a real provider has since been integrated and tested
-      end-to-end with real (small) transactions before going live with it.
+- [ ] Stripe switched from test-mode to live-mode keys
+      (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`), and a **new** live-mode
+      webhook endpoint registered in the Stripe Dashboard pointed at the
+      production project's `stripe-webhook` URL with its own live-mode
+      `STRIPE_WEBHOOK_SECRET` — test-mode and live-mode webhook secrets are
+      different values pointing at different Stripe environments, easy to
+      leave on test-mode by mistake if not checked explicitly.
+- [ ] At least one real (small) end-to-end Stripe transaction tested
+      against live-mode keys before real customers rely on it.
 - [ ] Mobile app actually builds and runs on a real Android device — not
       yet true as of Phase 16 (Android SDK gap, see README.md).

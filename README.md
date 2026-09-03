@@ -118,9 +118,9 @@ Phase 12 adds payments — architecture-only per the spec's own MVP scope
 allowance, but with cash payments genuinely working end-to-end (no external
 provider needed for that): a `record_cash_payment` RPC only the assigned
 provider can call, computing the commission split server-side from a
-configurable rate (never hard-coded). Digital payment (Chapa/Telebirr/etc.)
-sits behind the same interface, currently returning a clear "not available
-yet" until a real provider is configured. 34 tests passing.
+configurable rate (never hard-coded). Digital payment sat behind the same
+interface as a "not available yet" stub until the US-market pivot (see
+below) made Stripe the real provider. 34 tests passing.
 
 Phase 13 hardens the test suite: widget tests for the two screens that had
 none (login, provider profile), a full integration test driving the real
@@ -154,6 +154,19 @@ since Phase 10; neither had actually shipped. Both are fixed now (15-minute
 inactivity auto-sign-out; every admin action writes to `audit_logs` via a
 SECURITY DEFINER RPC, the table's only insert path). MFA is still open,
 tracked as a launch-blocker in PRODUCTION.md.
+
+**Product pivot + real digital payments.** Manual testing surfaced a hard
+blocker (no way to log in without an Ethiopian phone number), which led to
+a real product-direction change rather than a workaround: the initial
+market is now Ethiopian-American businesses/customers in the US, with a
+planned expansion back to Ethiopia later. Currency moved to USD (DB-level,
+not just display), phone validation now accepts US numbers alongside
+Ethiopian ones, and Washington, DC is the new active launch city. That pivot
+also resolved Phase 12's digital-payment stub: Stripe is the real provider
+now, via two Edge Functions (`stripe-create-payment-intent`,
+`stripe-webhook`) and `flutter_stripe`'s PaymentSheet on the client. See
+ARCHITECTURE.md's "Product pivot" section and its "Digital payments:
+Stripe" note under Phase 12 for the full story.
 
 Not yet done (tracked toolchain gap — see the note in LOCAL_DEVELOPMENT.md):
 

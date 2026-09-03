@@ -57,6 +57,16 @@ dependencies:
   # only when the user opts into distance sorting, never on app start.
   geolocator: ^13.0.2
 
+  # Digital payments (Stripe). Only the publishable key is compiled into the
+  # app — the secret key stays server-side in the stripe-create-payment-intent
+  # Edge Function, same reasoning as the Supabase service-role key.
+  flutter_stripe: ^12.6.0
+  # Web-platform implementation for flutter_stripe — officially experimental
+  # per Stripe's own docs, only a subset of PaymentSheet features work on
+  # web. Needed for local testing before Android SDK is set up; native
+  # Android/iOS builds use flutter_stripe's real native SDKs instead.
+  flutter_stripe_web: ^7.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

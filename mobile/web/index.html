@@ -31,6 +31,11 @@
 
   <title>ethioserve</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Required by flutter_stripe_web for the payment sheet to work on the
+       web target (native Android/iOS builds use Stripe's native SDKs
+       instead and don't need this). -->
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
   <!--

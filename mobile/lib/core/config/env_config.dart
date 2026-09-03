@@ -30,7 +30,12 @@ class EnvConfig {
 
   static const String mapsApiKey = String.fromEnvironment('MAPS_API_KEY');
 
-  static const String paymentApiUrl = String.fromEnvironment('PAYMENT_API_URL');
+  /// Publishable key only — safe to compile into the app, same reasoning as
+  /// SUPABASE_ANON_KEY. The Stripe *secret* key never leaves the
+  /// stripe-create-payment-intent Edge Function.
+  static const String stripePublishableKey = String.fromEnvironment(
+    'STRIPE_PUBLISHABLE_KEY',
+  );
 
   static bool get isConfigured =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;

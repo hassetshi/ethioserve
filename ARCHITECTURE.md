@@ -314,14 +314,60 @@ Following the spec's phase order (section 48):
     (`record_cash_payment()`, a `SECURITY DEFINER` RPC only the assigned
     provider can call, only for a completed booking, computing the split
     server-side from `final_price`). Cash needed no external provider to be
-    real, so it's built for real rather than stubbed. Digital payment
-    (Chapa/Telebirr/etc.) is behind the same `PaymentRepository` interface
-    but its method currently throws a clear "not yet available" error —
-    swapping in a real provider later is an implementation change behind
-    that interface, not an architecture change (spec section 20: "Do not
-    hard-code one Ethiopian payment provider"). Verified live: correct
-    100/900 split on a 1000 USD booking, a customer attempting to record
-    their own payment rejected, a duplicate payment attempt rejected.
+    real, so it's built for real rather than stubbed. Digital payment was
+    originally left as an interface-only stub (spec section 20: "Do not
+    hard-code one payment provider") until the US-market pivot — Stripe is
+    the real provider now (see "Digital payments: Stripe" below), swapped in
+    behind the same `PaymentRepository` interface without touching call
+    sites, exactly as that spec line intended. Cash-path verified live:
+    correct 100/900 split on a 1000 USD booking, a customer attempting to
+    record their own payment rejected, a duplicate payment attempt rejected.
+
+    **Digital payments: Stripe.** Two Edge Functions, mirroring the "trusted
+    server code only" comment already on the `payments` table's own DDL:
+    - `stripe-create-payment-intent` (JWT-verified — Supabase rejects the
+      request before this code even runs unless the caller has a valid
+      session): forwards the caller's Authorization header into an
+      RLS-scoped Supabase client, so the booking lookup can only ever see
+      the caller's own bookings — ownership is enforced by Postgres, not
+      re-implemented in the function. Explicitly checks `customer_id`
+      matches the caller too (RLS alone would also let the *assigned
+      provider* read their own booking, which isn't who should be paying).
+      Creates a Stripe PaymentIntent for `final_price` in cents, returns the
+      `client_secret`.
+    - `stripe-webhook` (`--no-verify-jwt` — Stripe never sends a Supabase
+      session, it sends its own `Stripe-Signature` header instead, verified
+      manually via HMAC-SHA256 over `${timestamp}.${rawBody}` using
+      `STRIPE_WEBHOOK_SECRET` — that signature check is the actual security
+      boundary here). On `payment_intent.succeeded`, uses the service-role
+      key to write the `payments` row — the same commission split via
+      `calculate_commission()`, `payment_provider = 'stripe'`,
+      `transaction_reference` = the PaymentIntent id. Idempotent: a repeat
+      delivery of the same webhook (Stripe does this) is a no-op if a
+      payment row already exists for that booking.
+
+    The Flutter side uses `flutter_stripe`'s PaymentSheet, initialized with
+    only the *publishable* key (`EnvConfig.stripePublishableKey`) — the
+    secret key never leaves the Edge Function. Because the `payments` row is
+    written asynchronously by the webhook rather than synchronously by the
+    client, `initializeDigitalPayment()` polls `getPaymentForBooking` briefly
+    (up to 5 seconds) after the sheet reports success rather than assuming
+    the row already exists.
+
+    `PaymentSection`'s UI was also restructured as part of this: the
+    original scaffolding put both "mark as paid (cash)" and the
+    then-disabled "digital payment" button under the *provider's* view,
+    which conflated "recording that a payment happened" (the provider's
+    job, for cash they physically collected) with "actually paying" (the
+    *customer's* job, for a card charge). The customer now sees "Pay with
+    card" once a booking is completed; the provider still sees "Mark as
+    paid (cash)".
+
+    **Web caveat**: `flutter_stripe`'s web support (`flutter_stripe_web`) is
+    officially experimental with only a subset of PaymentSheet's features
+    implemented — noted here because at the time this was built, Android
+    SDK wasn't yet installed locally (see README.md), so initial manual
+    testing happened on the web target rather than a real device.
 13. **Testing hardening** — done: filled the gaps spec section 28 calls out
     by name. Added widget tests for the two screens with zero prior coverage
     (`LoginScreen`, `ProviderProfileScreen`); added a full integration test

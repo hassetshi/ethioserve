@@ -40,24 +40,36 @@ void main() {
     },
   );
 
-  testWidgets('customer sees a read-only pending message, no action button', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          paymentRepositoryProvider.overrideWithValue(FakePaymentRepository()),
-        ],
-        child: const MaterialApp(
-          home: Scaffold(
-            body: PaymentSection(bookingId: 'booking-1', isProviderView: false),
+  testWidgets(
+    'customer can pay with card and sees the resulting payment status',
+    (tester) async {
+      final fakeRepo = FakePaymentRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [paymentRepositoryProvider.overrideWithValue(fakeRepo)],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: PaymentSection(
+                bookingId: 'booking-1',
+                isProviderView: false,
+              ),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Payment pending.'), findsOneWidget);
-    expect(find.text('Mark as paid (cash)'), findsNothing);
-  });
+      expect(find.text('Pay with card'), findsOneWidget);
+      expect(find.text('Mark as paid (cash)'), findsNothing);
+
+      await tester.tap(find.text('Pay with card'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('1000 USD (stripe) — completed'),
+        findsOneWidget,
+      );
+    },
+  );
 }

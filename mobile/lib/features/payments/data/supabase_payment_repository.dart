@@ -1,3 +1,4 @@
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/errors/app_exception.dart';
@@ -30,10 +31,68 @@ class SupabasePaymentRepository implements PaymentRepository {
     }
   }
 
+  // Card payment via Stripe's PaymentSheet. The `payments` row itself isn't
+  // written here — stripe-webhook does that once Stripe confirms the charge
+  // server-side (see that function's own comment on why), so this method
+  // polls briefly after the sheet reports success rather than assuming the
+  // row already exists.
   @override
   Future<Payment> initializeDigitalPayment(String bookingId) async {
+    final FunctionResponse response;
+    try {
+      response = await _client.functions.invoke(
+        'stripe-create-payment-intent',
+        body: {'bookingId': bookingId},
+      );
+    } on FunctionException catch (e, st) {
+      AppLogger.error(
+        'stripe-create-payment-intent failed',
+        error: e,
+        stackTrace: st,
+      );
+      final details = e.details;
+      final message = details is Map && details['error'] is String
+          ? details['error'] as String
+          : 'Could not start the payment. Please try again.';
+      throw ValidationException(message);
+    }
+
+    final clientSecret = (response.data as Map)['clientSecret'] as String?;
+    if (clientSecret == null) {
+      throw const ValidationException(
+        'Could not start the payment. Please try again.',
+      );
+    }
+
+    try {
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: 'EthioServe',
+        ),
+      );
+      await Stripe.instance.presentPaymentSheet();
+    } on StripeException catch (e, st) {
+      AppLogger.error('Stripe payment sheet failed', error: e, stackTrace: st);
+      throw ValidationException(
+        e.error.localizedMessage ?? 'Payment was not completed.',
+      );
+    }
+
+    // The webhook that writes the `payments` row usually lands within a
+    // second or two of the charge succeeding, but it's a separate async
+    // request from Stripe to our Edge Function, not something this call can
+    // wait on directly - so poll briefly rather than assuming it's already
+    // there.
+    for (var attempt = 0; attempt < 5; attempt++) {
+      final payment = await getPaymentForBooking(bookingId);
+      if (payment != null) return payment;
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
     throw const ValidationException(
-      'Digital payments are not yet available. Please pay in cash for now.',
+      'Payment succeeded, but confirmation is taking longer than expected. '
+      'Please check back shortly.',
     );
   }
 

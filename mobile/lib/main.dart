@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
@@ -22,6 +23,16 @@ Future<void> main() async {
     AppLogger.warning(
       'Supabase is not configured (no SUPABASE_URL/SUPABASE_ANON_KEY '
       'dart-define). Running with backend features disabled.',
+    );
+  }
+
+  if (EnvConfig.stripePublishableKey.isNotEmpty) {
+    Stripe.publishableKey = EnvConfig.stripePublishableKey;
+    await Stripe.instance.applySettings();
+  } else {
+    AppLogger.warning(
+      'Stripe is not configured (no STRIPE_PUBLISHABLE_KEY dart-define). '
+      'Digital payment will be unavailable.',
     );
   }
 

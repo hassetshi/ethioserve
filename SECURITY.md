@@ -39,6 +39,11 @@ ships in the Flutter app or the admin-web client bundle (spec sections 7, 20, 31
   is what actually protects data, not secrecy of this key.
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only (Edge Functions, admin-web backend
   if it has one). Never in `mobile/`, never in a client bundle, never committed.
+- `STRIPE_PUBLISHABLE_KEY`: same category as the Supabase anon key — safe to
+  compile into the app, designed to be public.
+- `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`: server-only, set via
+  `supabase secrets set` for the `stripe-create-payment-intent` and
+  `stripe-webhook` Edge Functions. Never in `mobile/`, never committed.
 - All real secrets live in gitignored files (`mobile/env/*.json`,
   `admin-web/.env*`) or the CI/CD secret store — never in git history. See
   `.env.example` for the full list of names.

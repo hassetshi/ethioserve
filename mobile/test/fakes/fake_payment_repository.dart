@@ -21,8 +21,19 @@ class FakePaymentRepository implements PaymentRepository {
   }
 
   @override
-  Future<Payment> initializeDigitalPayment(String bookingId) {
-    throw UnimplementedError();
+  Future<Payment> initializeDigitalPayment(String bookingId) async {
+    payment = Payment(
+      id: 'payment-1',
+      bookingId: bookingId,
+      amount: 1000,
+      platformFee: 100,
+      providerAmount: 900,
+      currency: 'USD',
+      paymentProvider: 'stripe',
+      status: 'completed',
+      paidAt: DateTime.now(),
+    );
+    return payment!;
   }
 
   @override
