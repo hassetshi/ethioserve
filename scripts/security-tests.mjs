@@ -284,6 +284,64 @@ if (!DB_URL) {
     await client.query('delete from public.audit_logs where id = $1', [logId]);
   });
 
+  console.log('\n--- Subscription-gated search ---');
+
+  // search_providers now requires an active professional/premium
+  // subscription in addition to verification (20260901000025). This
+  // temporarily removes the test provider's real active subscription(s) (if
+  // any) to test the negative case, then restores them exactly afterward -
+  // never leaves real dev data deleted, matching this script's "safe to
+  // re-run" contract.
+  let savedActiveSubscriptions;
+  await test("setup: temporarily remove the test provider's active subscription(s)", async () => {
+    const { rows } = await client.query(
+      `select * from public.subscriptions where provider_id = $1 and status = 'active'`,
+      [PROVIDER_ID],
+    );
+    savedActiveSubscriptions = rows;
+    if (rows.length > 0) {
+      await client.query(
+        `delete from public.subscriptions where provider_id = $1 and status = 'active'`,
+        [PROVIDER_ID],
+      );
+    }
+  });
+
+  await test('an unsubscribed but verified provider is excluded from search', async () => {
+    const { body } = await restPost('rpc/search_providers', { p_verified_only: true });
+    const ids = (body ?? []).map((row) => row.provider_id);
+    assert(!ids.includes(PROVIDER_ID), `expected ${PROVIDER_ID} to be excluded, got ${JSON.stringify(ids)}`);
+  });
+
+  let testSubscriptionId;
+  await test('a verified provider WITH an active subscription appears in search', async () => {
+    const { rows } = await client.query(
+      `insert into public.subscriptions (provider_id, plan, price, status, current_period_end)
+       values ($1, 'professional', 29, 'active', now() + interval '30 days')
+       returning id`,
+      [PROVIDER_ID],
+    );
+    testSubscriptionId = rows[0].id;
+    const { body } = await restPost('rpc/search_providers', { p_verified_only: true });
+    const ids = (body ?? []).map((row) => row.provider_id);
+    assert(ids.includes(PROVIDER_ID), `expected ${PROVIDER_ID} to be included, got ${JSON.stringify(ids)}`);
+  });
+
+  await test('cleanup: remove the disposable subscription and restore any prior one(s)', async () => {
+    if (testSubscriptionId) {
+      await client.query('delete from public.subscriptions where id = $1', [testSubscriptionId]);
+    }
+    for (const row of savedActiveSubscriptions ?? []) {
+      const columns = Object.keys(row);
+      const values = columns.map((c) => row[c]);
+      const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+      await client.query(
+        `insert into public.subscriptions (${columns.join(', ')}) values (${placeholders})`,
+        values,
+      );
+    }
+  });
+
   await client.end();
 }
 
