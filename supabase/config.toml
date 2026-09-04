@@ -393,6 +393,9 @@ verify_jwt = false
 [functions.stripe-create-payment-intent]
 verify_jwt = true
 
+[functions.stripe-create-subscription]
+verify_jwt = true
+
 [functions.stripe-webhook]
 verify_jwt = false
 
