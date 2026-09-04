@@ -25,8 +25,9 @@ import '../fakes/fake_provider_repository.dart';
 
 void main() {
   testWidgets(
-    'customer: language -> login -> OTP -> home -> category -> service -> '
-    'provider -> profile -> booking request -> confirmation -> details',
+    'customer: language -> home -> category -> service -> provider -> '
+    'profile -> book (login-gated) -> login -> OTP -> booking request -> '
+    'confirmation -> details',
     (tester) async {
       final fakeProviders = FakeProviderRepository(
         searchResults: const [
@@ -57,21 +58,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Language selection.
+      // Language selection lands straight on free discovery home - no
+      // login required to browse.
       expect(find.text('Choose your language'), findsOneWidget);
       await tester.tap(find.text('English'));
-      await tester.pumpAndSettle();
-
-      // Login.
-      expect(find.text('Enter your phone number'), findsOneWidget);
-      await tester.enterText(find.byType(TextField), '0912345678');
-      await tester.tap(find.text('Continue'));
-      await tester.pumpAndSettle();
-
-      // OTP.
-      expect(find.text('Verify your number'), findsOneWidget);
-      await tester.enterText(find.byType(TextField), '123456');
-      await tester.tap(find.text('Verify'));
       await tester.pumpAndSettle();
 
       // Home, with real categories from the fake catalog.
@@ -90,7 +80,7 @@ void main() {
       await tester.tap(find.text('Addis Plumbing Experts'));
       await tester.pumpAndSettle();
 
-      // Provider profile.
+      // Provider profile is viewable without an account too.
       expect(
         find.text('Test Provider'),
         findsOneWidget,
@@ -98,7 +88,21 @@ void main() {
       await tester.tap(find.text('Book'));
       await tester.pumpAndSettle();
 
-      // Booking request: fill the minimum required fields.
+      // Booking is login-gated: tapping Book while anonymous bounces to
+      // login, remembering where to return.
+      expect(find.text('Enter your phone number'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), '0912345678');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      // OTP.
+      expect(find.text('Verify your number'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), '123456');
+      await tester.tap(find.text('Verify'));
+      await tester.pumpAndSettle();
+
+      // Verifying returns the customer to the booking screen they were
+      // headed to, not the home screen. Fill the minimum required fields.
       expect(find.text('Request a booking'), findsOneWidget);
       await tester.tap(find.byType(DropdownButtonFormField<String>));
       await tester.pumpAndSettle();

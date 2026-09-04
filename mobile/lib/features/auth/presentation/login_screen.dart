@@ -40,7 +40,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    context.push('/otp', extra: normalized);
+    final redirect = GoRouterState.of(context).uri.queryParameters['redirect'];
+    final otpPath = redirect == null
+        ? '/otp'
+        : '/otp?redirect=${Uri.encodeComponent(redirect)}';
+    context.push(otpPath, extra: normalized);
   }
 
   @override

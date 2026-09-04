@@ -27,24 +27,33 @@ void main() {
     expect(find.text('አማርኛ'), findsOneWidget);
   });
 
-  testWidgets('selecting a language with no session redirects to login', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
-        ],
-        child: const EthioServeApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'selecting a language with no session lands on free discovery home',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+            catalogRepositoryProvider.overrideWithValue(
+              FakeCatalogRepository(),
+            ),
+          ],
+          child: const EthioServeApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('English'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('English'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Enter your phone number'), findsOneWidget);
-  });
+      // Discovery (search, categories) is reachable without logging in...
+      expect(find.text('What service do you need?'), findsOneWidget);
+      expect(find.text('Plumbing'), findsOneWidget);
+      // ...but account-only affordances are replaced by a single Log in entry.
+      expect(find.text('Log in'), findsOneWidget);
+      expect(find.byTooltip('Profile'), findsNothing);
+    },
+  );
 
   testWidgets('an already-authenticated user lands on home with categories', (
     tester,

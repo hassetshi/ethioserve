@@ -5,9 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'otp_controller.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
-  const OtpVerificationScreen({required this.phone, super.key});
+  const OtpVerificationScreen({required this.phone, this.redirectTo, super.key});
 
   final String phone;
+
+  /// Where to send the user after a successful verify, if they were
+  /// bounced here from a login-gated route. Defaults to `/home`.
+  final String? redirectTo;
 
   @override
   ConsumerState<OtpVerificationScreen> createState() =>
@@ -29,7 +33,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
         .verify(phone: widget.phone, code: _codeController.text.trim());
 
     if (!mounted || !success) return;
-    context.go('/home');
+    context.go(widget.redirectTo ?? '/home');
   }
 
   @override

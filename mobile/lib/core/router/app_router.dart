@@ -27,6 +27,7 @@ import '../../features/providers/presentation/provider_registration_screen.dart'
 import '../../features/providers/presentation/provider_search_results_screen.dart';
 import '../../features/providers/presentation/provider_verification_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
+import '../../features/subscriptions/presentation/subscription_plan_screen.dart';
 import '../providers/locale_provider.dart';
 
 /// Bridges Riverpod state changes into go_router's `refreshListenable`, so
@@ -37,6 +38,19 @@ class _RouterRefreshNotifier extends ChangeNotifier {
     ref.listen(localeProvider, (_, _) => notifyListeners());
     ref.listen(currentUserProvider, (_, _) => notifyListeners());
   }
+}
+
+/// Routes a logged-out customer can reach: free discovery (search/AI-search/
+/// categories/provider profiles). Booking, account, and provider/admin
+/// surfaces are not in this list, so they fall through to the login gate.
+bool _isPublicDiscoveryRoute(String path) {
+  const publicExact = {'/home', '/search', '/ai-search'};
+  if (publicExact.contains(path)) return true;
+  if (path.startsWith('/categories/')) return true;
+  if (path.startsWith('/services/')) return true;
+  // Provider profile view (e.g. /providers/abc123), but not the booking
+  // sub-route (/providers/abc123/book), which stays login-gated.
+  return RegExp(r'^/providers/[^/]+$').hasMatch(path);
 }
 
 /// Single source of truth for "where should this user be." Every route
@@ -79,8 +93,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = path == '/login' || path == '/otp';
 
       if (user == null) {
-        if (path == '/' || !isAuthRoute) return '/login';
-        return null;
+        // Anonymous customers land on free discovery, not a login wall.
+        if (path == '/') return '/home';
+        if (isAuthRoute || _isPublicDiscoveryRoute(path)) return null;
+        return '/login?redirect=${Uri.encodeComponent(path)}';
       }
 
       // Logged in past this point.
@@ -112,8 +128,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/otp',
-        builder: (context, state) =>
-            OtpVerificationScreen(phone: state.extra! as String),
+        builder: (context, state) => OtpVerificationScreen(
+          phone: state.extra! as String,
+          redirectTo: state.uri.queryParameters['redirect'],
+        ),
       ),
       GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
       GoRoute(
@@ -163,6 +181,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/provider',
         builder: (context, state) => const ProviderDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/provider/subscribe',
+        builder: (context, state) => SubscriptionPlanScreen(
+          providerId: state.uri.queryParameters['providerId'] ?? '',
+        ),
       ),
       GoRoute(
         path: '/provider/services/add',

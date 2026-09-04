@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/locale_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../auth/presentation/auth_providers.dart';
 import '../../catalog/presentation/catalog_providers.dart';
 import '../../notifications/presentation/notification_bell.dart';
 
@@ -18,23 +19,31 @@ class HomeScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final languageCode = ref.watch(localeProvider)?.languageCode ?? 'en';
     final categoriesAsync = ref.watch(categoriesProvider);
+    final isLoggedIn = ref.watch(currentUserProvider).valueOrNull != null;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appName),
-        actions: [
-          const NotificationBell(),
-          IconButton(
-            onPressed: () => context.push('/bookings'),
-            icon: const Icon(Icons.calendar_month_outlined),
-            tooltip: 'My Bookings',
-          ),
-          IconButton(
-            onPressed: () => context.push('/profile'),
-            icon: const Icon(Icons.person_outline),
-            tooltip: 'Profile',
-          ),
-        ],
+        actions: isLoggedIn
+            ? [
+                const NotificationBell(),
+                IconButton(
+                  onPressed: () => context.push('/bookings'),
+                  icon: const Icon(Icons.calendar_month_outlined),
+                  tooltip: 'My Bookings',
+                ),
+                IconButton(
+                  onPressed: () => context.push('/profile'),
+                  icon: const Icon(Icons.person_outline),
+                  tooltip: 'Profile',
+                ),
+              ]
+            : [
+                TextButton(
+                  onPressed: () => context.push('/login'),
+                  child: const Text('Log in'),
+                ),
+              ],
       ),
       body: SafeArea(
         child: ListView(
