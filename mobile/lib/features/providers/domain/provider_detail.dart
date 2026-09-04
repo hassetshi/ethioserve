@@ -37,6 +37,9 @@ class ProviderDetail {
     this.address,
     this.cityNameEn,
     this.cityNameAm,
+    this.phone,
+    this.latitude,
+    this.longitude,
     required this.rating,
     required this.reviewCount,
     required this.verificationStatus,
@@ -51,6 +54,9 @@ class ProviderDetail {
   final String? address;
   final String? cityNameEn;
   final String? cityNameAm;
+  final String? phone;
+  final double? latitude;
+  final double? longitude;
   final double rating;
   final int reviewCount;
   final String verificationStatus;
@@ -73,6 +79,9 @@ class ProviderDetail {
       address: json['address'] as String?,
       cityNameEn: city?['name_en'] as String?,
       cityNameAm: city?['name_am'] as String?,
+      phone: json['phone'] as String?,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       rating: (json['rating'] as num).toDouble(),
       reviewCount: json['review_count'] as int,
       verificationStatus: json['verification_status'] as String,

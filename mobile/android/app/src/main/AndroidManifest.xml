@@ -9,6 +9,9 @@
          runtime only when the user opts in, never on app start. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- Voice input for AI search (Amharic/English). Requested at runtime
+         only when the user taps the mic, never on app start. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
         android:label="ethioserve"
         android:name="${applicationName}"

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/locale_provider.dart';
 import '../../reviews/presentation/provider_reviews_section.dart';
@@ -62,6 +63,8 @@ class _ProviderProfileBody extends ConsumerWidget {
   String? get _cityName =>
       languageCode == 'am' ? provider.cityNameAm : provider.cityNameEn;
 
+  bool get _hasLocation => provider.latitude != null && provider.longitude != null;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
@@ -119,6 +122,32 @@ class _ProviderProfileBody extends ConsumerWidget {
             ],
           ],
         ),
+        if (provider.phone != null || _hasLocation) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            children: [
+              if (provider.phone != null)
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      launchUrl(Uri(scheme: 'tel', path: provider.phone)),
+                  icon: const Icon(Icons.call_outlined),
+                  label: const Text('Call'),
+                ),
+              if (_hasLocation)
+                OutlinedButton.icon(
+                  onPressed: () => launchUrl(
+                    Uri.parse(
+                      'https://www.google.com/maps/search/?api=1&query='
+                      '${provider.latitude},${provider.longitude}',
+                    ),
+                  ),
+                  icon: const Icon(Icons.directions_outlined),
+                  label: const Text('Get directions'),
+                ),
+            ],
+          ),
+        ],
         if (_description != null) ...[
           const SizedBox(height: 16),
           Text(_description!),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers/locale_provider.dart';
+import '../../../core/speech/speech_providers.dart';
 import '../domain/ai_search_result.dart';
 import 'ai_service_providers.dart';
 
@@ -15,6 +17,7 @@ class AiSearchScreen extends ConsumerStatefulWidget {
 class _AiSearchScreenState extends ConsumerState<AiSearchScreen> {
   final _controller = TextEditingController();
   bool _loading = false;
+  bool _listening = false;
   String? _clarificationQuestion;
   String? _errorText;
 
@@ -61,6 +64,35 @@ class _AiSearchScreenState extends ConsumerState<AiSearchScreen> {
     }
   }
 
+  Future<void> _startVoiceInput() async {
+    final languageCode = ref.read(localeProvider)?.languageCode ?? 'en';
+
+    setState(() {
+      _listening = true;
+      _errorText = null;
+    });
+
+    final text = await ref
+        .read(speechToTextServiceProvider)
+        .listen(languageCode: languageCode);
+
+    if (!mounted) return;
+    setState(() => _listening = false);
+
+    if (text == null) {
+      setState(() {
+        _errorText = languageCode == 'am'
+            ? "Voice input in Amharic isn't supported on this device yet — "
+                  'please type your request, or switch to English.'
+            : "Couldn't hear that — please try again or type your request.";
+      });
+      return;
+    }
+
+    _controller.text = text;
+    await _ask();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,9 +112,20 @@ class _AiSearchScreenState extends ConsumerState<AiSearchScreen> {
                 controller: _controller,
                 autofocus: true,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
                   hintText: 'What service do you need?',
+                  suffixIcon: IconButton(
+                    onPressed: _listening ? null : _startVoiceInput,
+                    tooltip: 'Speak your request',
+                    icon: _listening
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.mic_none),
+                  ),
                 ),
                 onSubmitted: (_) => _loading ? null : _ask(),
               ),

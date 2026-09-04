@@ -67,6 +67,17 @@ dependencies:
   # Android/iOS builds use flutter_stripe's real native SDKs instead.
   flutter_stripe_web: ^7.0.0
 
+  # "Call" / "Get directions" from a provider's profile. Already pulled in
+  # transitively by flutter_stripe, but declared directly since it's now a
+  # first-class feature dependency, not an implementation detail of Stripe.
+  url_launcher: ^6.3.1
+
+  # On-device voice input for AI search (English/Amharic), via the OS's own
+  # speech engine (Android SpeechRecognizer / iOS Speech framework) - no new
+  # cloud STT vendor/backend needed. Amharic may not be recognized on all
+  # devices; see DeviceSpeechToTextService for the fallback behavior.
+  speech_to_text: ^7.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
