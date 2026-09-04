@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../auth/presentation/auth_providers.dart';
 import '../../notifications/presentation/notification_bell.dart';
+import '../../subscriptions/domain/subscription.dart';
+import '../../subscriptions/presentation/subscription_providers.dart';
 import 'provider_providers.dart';
 
 /// Earnings and subscription management (spec section 12) land in Phase 12
@@ -51,6 +53,7 @@ class _DashboardBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(providerDetailProvider(providerId));
+    final subscriptionAsync = ref.watch(mySubscriptionProvider(providerId));
 
     return detailAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -86,6 +89,14 @@ class _DashboardBody extends ConsumerWidget {
                 child: const Text('Verification'),
               ),
             ),
+          ),
+          const SizedBox(height: 16),
+          subscriptionAsync.maybeWhen(
+            data: (subscription) => _SubscriptionStatusCard(
+              subscription: subscription,
+              providerId: providerId,
+            ),
+            orElse: () => const SizedBox.shrink(),
           ),
           const SizedBox(height: 16),
           Row(
@@ -127,4 +138,50 @@ class _DashboardBody extends ConsumerWidget {
     'suspended' => 'Account suspended',
     _ => 'Verification pending',
   };
+}
+
+/// Subscribing is independent of admin verification (spec: a provider can
+/// subscribe any time after registering) — search requires both, so this
+/// card is shown regardless of the verification card's state above.
+class _SubscriptionStatusCard extends StatelessWidget {
+  const _SubscriptionStatusCard({
+    required this.subscription,
+    required this.providerId,
+  });
+
+  final Subscription? subscription;
+  final String providerId;
+
+  @override
+  Widget build(BuildContext context) {
+    final isActive = subscription?.isActive ?? false;
+    final isPending = subscription?.isPending ?? false;
+
+    return Card(
+      child: ListTile(
+        leading: Icon(
+          isActive ? Icons.storefront : Icons.storefront_outlined,
+          color: isActive ? Colors.green : Colors.grey,
+        ),
+        title: Text(
+          isActive
+              ? 'Listed (${subscription!.plan})'
+              : isPending
+              ? 'Subscription processing...'
+              : 'Not listed',
+        ),
+        subtitle: isActive
+            ? null
+            : const Text('Subscribe to appear in customer search results.'),
+        trailing: isActive
+            ? null
+            : TextButton(
+                onPressed: () => context.push(
+                  '/provider/subscribe?providerId=$providerId',
+                ),
+                child: const Text('Subscribe'),
+              ),
+      ),
+    );
+  }
 }

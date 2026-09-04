@@ -65,7 +65,7 @@ class _ProviderRegistrationScreenState
       return;
     }
 
-    context.go('/provider');
+    context.go('/provider/subscribe?providerId=$providerId');
   }
 
   @override
