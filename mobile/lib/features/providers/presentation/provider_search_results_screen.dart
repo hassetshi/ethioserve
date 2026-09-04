@@ -63,6 +63,18 @@ class _ProviderSearchResultsScreenState
     final languageCode = ref.watch(localeProvider)?.languageCode ?? 'en';
     final citiesAsync = ref.watch(citiesProvider);
 
+    // Which category/service the user searched for - shown in the AppBar
+    // title so a selection made via Home's suggestions (or category-browse,
+    // or AI search) is visibly reflected on the results screen, not just
+    // implied by the results list itself.
+    final title = widget.categoryId != null
+        ? ref
+              .watch(categoryProvider(widget.categoryId!))
+              .whenOrNull(data: (category) => category.localizedName(languageCode))
+        : ref
+              .watch(serviceProvider(widget.serviceId!))
+              .whenOrNull(data: (service) => service.localizedName(languageCode));
+
     final filters = (
       categoryId: widget.categoryId,
       serviceId: widget.serviceId,
@@ -74,7 +86,7 @@ class _ProviderSearchResultsScreenState
     final resultsAsync = ref.watch(providerSearchResultsProvider(filters));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Providers')),
+      appBar: AppBar(title: Text(title ?? 'Providers')),
       body: Column(
         children: [
           Padding(

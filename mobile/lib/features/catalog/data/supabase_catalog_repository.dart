@@ -5,6 +5,7 @@ import '../../../core/logging/app_logger.dart';
 import '../domain/catalog_repository.dart';
 import '../domain/category.dart';
 import '../domain/city.dart';
+import '../domain/search_suggestion.dart';
 import '../domain/service.dart';
 
 class SupabaseCatalogRepository implements CatalogRepository {
@@ -38,6 +39,21 @@ class SupabaseCatalogRepository implements CatalogRepository {
       return Category.fromJson(row);
     } on PostgrestException catch (e, st) {
       AppLogger.error('getCategory failed', error: e, stackTrace: st);
+      throw const NetworkException();
+    }
+  }
+
+  @override
+  Future<Service> getService(String serviceId) async {
+    try {
+      final row = await _client
+          .from('services')
+          .select()
+          .eq('id', serviceId)
+          .single();
+      return Service.fromJson(row);
+    } on PostgrestException catch (e, st) {
+      AppLogger.error('getService failed', error: e, stackTrace: st);
       throw const NetworkException();
     }
   }
@@ -109,6 +125,82 @@ class SupabaseCatalogRepository implements CatalogRepository {
       return services;
     } on PostgrestException catch (e, st) {
       AppLogger.error('searchServices failed', error: e, stackTrace: st);
+      throw const NetworkException();
+    }
+  }
+
+  @override
+  Future<List<SearchSuggestion>> searchSuggestions(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return [];
+    try {
+      // Four separate .ilike() calls (rather than an .or() filter string)
+      // for the same reason as searchServices: [query] reaches PostgREST
+      // filter syntax unescaped otherwise.
+      final pattern = '%$trimmed%';
+      final results = await Future.wait([
+        _client
+            .from('categories')
+            .select()
+            .eq('is_active', true)
+            .ilike('name_en', pattern)
+            .limit(8),
+        _client
+            .from('categories')
+            .select()
+            .eq('is_active', true)
+            .ilike('name_am', pattern)
+            .limit(8),
+        _client
+            .from('services')
+            .select()
+            .eq('is_active', true)
+            .ilike('name_en', pattern)
+            .limit(8),
+        _client
+            .from('services')
+            .select()
+            .eq('is_active', true)
+            .ilike('name_am', pattern)
+            .limit(8),
+      ]);
+
+      final seenIds = <String>{};
+      final suggestions = <SearchSuggestion>[];
+      for (final rows in [results[0], results[1]]) {
+        for (final row in rows) {
+          final category = Category.fromJson(row);
+          if (seenIds.add('category:${category.id}')) {
+            suggestions.add(
+              SearchSuggestion(
+                type: SearchSuggestionType.category,
+                id: category.id,
+                nameEn: category.nameEn,
+                nameAm: category.nameAm,
+              ),
+            );
+          }
+        }
+      }
+      for (final rows in [results[2], results[3]]) {
+        for (final row in rows) {
+          final service = Service.fromJson(row);
+          if (seenIds.add('service:${service.id}')) {
+            suggestions.add(
+              SearchSuggestion(
+                type: SearchSuggestionType.service,
+                id: service.id,
+                nameEn: service.nameEn,
+                nameAm: service.nameAm,
+              ),
+            );
+          }
+        }
+      }
+      suggestions.sort((a, b) => a.nameEn.compareTo(b.nameEn));
+      return suggestions.take(10).toList();
+    } on PostgrestException catch (e, st) {
+      AppLogger.error('searchSuggestions failed', error: e, stackTrace: st);
       throw const NetworkException();
     }
   }

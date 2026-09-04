@@ -1,6 +1,7 @@
 import 'package:ethioserve/features/catalog/domain/catalog_repository.dart';
 import 'package:ethioserve/features/catalog/domain/category.dart';
 import 'package:ethioserve/features/catalog/domain/city.dart';
+import 'package:ethioserve/features/catalog/domain/search_suggestion.dart';
 import 'package:ethioserve/features/catalog/domain/service.dart';
 
 class FakeCatalogRepository implements CatalogRepository {
@@ -15,6 +16,12 @@ class FakeCatalogRepository implements CatalogRepository {
   @override
   Future<Category> getCategory(String categoryId) async =>
       categories.firstWhere((c) => c.id == categoryId);
+
+  @override
+  Future<Service> getService(String serviceId) async =>
+      (await getServicesByCategory('cat-1')).firstWhere(
+        (s) => s.id == serviceId,
+      );
 
   @override
   Future<List<Service>> getServicesByCategory(String categoryId) async => [
@@ -37,5 +44,29 @@ class FakeCatalogRepository implements CatalogRepository {
     return services
         .where((s) => s.nameEn.toLowerCase().contains(query.toLowerCase()))
         .toList();
+  }
+
+  @override
+  Future<List<SearchSuggestion>> searchSuggestions(String query) async {
+    final lower = query.toLowerCase();
+    final categoryMatches = categories
+        .where((c) => c.nameEn.toLowerCase().contains(lower))
+        .map(
+          (c) => SearchSuggestion(
+            type: SearchSuggestionType.category,
+            id: c.id,
+            nameEn: c.nameEn,
+            nameAm: c.nameAm,
+          ),
+        );
+    final serviceMatches = (await searchServices(query)).map(
+      (s) => SearchSuggestion(
+        type: SearchSuggestionType.service,
+        id: s.id,
+        nameEn: s.nameEn,
+        nameAm: s.nameAm,
+      ),
+    );
+    return [...categoryMatches, ...serviceMatches];
   }
 }
