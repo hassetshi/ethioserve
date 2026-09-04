@@ -78,8 +78,23 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
+  # Generates Android/iOS launcher icons from assets/icon/icon.png (see the
+  # flutter_launcher_icons: config block below). Dev-only — not needed at
+  # app runtime, just at icon-generation time.
+  flutter_launcher_icons: ^0.14.3
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  web:
+    generate: true
+  # No windows: block - mobile/windows/ doesn't exist as a generated platform
+  # folder in this project yet, so there's nothing for the generator to
+  # update there (it skips it harmlessly either way).
+  image_path: "assets/icon/icon.png"
 
 # The following section is specific to Flutter packages.
 flutter:

@@ -519,6 +519,16 @@ Following the spec's phase order (section 48):
     Android click-through, including Stripe's native PaymentSheet, actually
     works.
 
+    Custom app icon added (all previous icons were Flutter's stock
+    template): `flutter_launcher_icons` generates Android, iOS, and web
+    icons from a single source (`mobile/assets/icon/icon.png`) — see
+    `pubspec.yaml`'s `flutter_launcher_icons:` block. Source image is
+    400×400, smaller than the 1024×1024 some store-listing icon slots
+    prefer, and has text baked into the artwork that won't be legible at
+    small home-screen sizes (48dp and below) — usable now, worth revisiting
+    with a higher-resolution, icon-only (no text) version before actual
+    store submission.
+
     Remaining for this phase: resolve the local certificate interception to
     complete real-device click-through testing (Stripe's PaymentSheet in
     particular, since its web support is separately known-experimental —
