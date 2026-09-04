@@ -522,12 +522,18 @@ Following the spec's phase order (section 48):
     Custom app icon added (all previous icons were Flutter's stock
     template): `flutter_launcher_icons` generates Android, iOS, and web
     icons from a single source (`mobile/assets/icon/icon.png`) — see
-    `pubspec.yaml`'s `flutter_launcher_icons:` block. Source image is
-    400×400, smaller than the 1024×1024 some store-listing icon slots
-    prefer, and has text baked into the artwork that won't be legible at
-    small home-screen sizes (48dp and below) — usable now, worth revisiting
-    with a higher-resolution, icon-only (no text) version before actual
-    store submission.
+    `pubspec.yaml`'s `flutter_launcher_icons:` block (`remove_alpha_ios:
+    true` is required here — Apple rejects App Store icons carrying an
+    alpha channel, even a fully-opaque one, and a cropped PNG picks one up
+    by default). The source logo included baked-in text ("Excellent AI /
+    Automation Solutions") illegible at small home-screen sizes, so the
+    committed `icon.png` is a crop of just the hexagon mark from the
+    original 400×400 artwork (322×322) — no separate icon-only asset was
+    provided, so the crop is constrained by where the text starts in the
+    source image, leaving less bottom padding than ideal (visible at
+    1024×1024: the shape's bottom point sits close to the edge). Good
+    enough to ship for now; a proper vector or higher-resolution
+    icon-only source would remove this constraint entirely.
 
     Remaining for this phase: resolve the local certificate interception to
     complete real-device click-through testing (Stripe's PaymentSheet in

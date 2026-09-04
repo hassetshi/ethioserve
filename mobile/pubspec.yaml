@@ -89,6 +89,11 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
+  # Apple rejects App Store icons that carry an alpha channel, even if fully
+  # opaque - the source crop (assets/icon/icon.png) has one, so strip it for
+  # the iOS output specifically. Android/web keep their own alpha channel;
+  # only iOS has this restriction.
+  remove_alpha_ios: true
   web:
     generate: true
   # No windows: block - mobile/windows/ doesn't exist as a generated platform
