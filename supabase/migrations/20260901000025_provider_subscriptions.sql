@@ -48,7 +48,7 @@ on conflict (key) do nothing;
 -- to a provider deciding whether to subscribe - same bypass pattern as
 -- log_admin_action (20260901000022_admin_audit_log_rpc.sql) for writes.
 create or replace function public.get_subscription_plans()
-returns table (plan text, price_usd numeric, stripe_price_id text, interval text)
+returns table (plan text, price_usd numeric, stripe_price_id text, "interval" text)
 language sql
 stable
 security definer
@@ -58,7 +58,7 @@ as $$
     replace(key, 'subscription_plan_', '') as plan,
     (value ->> 'price_usd')::numeric as price_usd,
     value ->> 'stripe_price_id' as stripe_price_id,
-    value ->> 'interval' as interval
+    value ->> 'interval' as "interval"
   from public.platform_settings
   where key in ('subscription_plan_professional', 'subscription_plan_premium');
 $$;
