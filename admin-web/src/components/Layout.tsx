@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/users', label: 'Users' },
   { to: '/providers', label: 'Providers' },
+  { to: '/subscriptions', label: 'Subscriptions' },
   { to: '/categories', label: 'Categories' },
   { to: '/services', label: 'Services' },
   { to: '/bookings', label: 'Bookings' },
