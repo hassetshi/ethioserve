@@ -1,16 +1,57 @@
 # Production
 
-## Status: pipeline built, project not yet created (Phase 16)
+## Status: project created and bootstrapped, not yet live
 
 Unlike staging (which deliberately shares the dev Supabase project — see
-STAGING.md), production must be a genuinely separate project: real user
-phone numbers, addresses, payment records, and verification documents have
-no business living anywhere near a project that local dev scripts
-(`scripts/dev-db.mjs`) freely mutate. Phase 16 built everything that
-doesn't require the project to exist yet, and deliberately held off on
-actually creating it — there's no reason to stand up and pay for production
-infrastructure before the app can even be installed anywhere (Android SDK
-still isn't set up locally; no store listing exists — see Phase 17).
+STAGING.md), production is a genuinely separate project: real user phone
+numbers, addresses, payment records, and verification documents have no
+business living anywhere near a project that local dev scripts
+(`scripts/dev-db.mjs`) freely mutate. Phase 16 built everything that didn't
+require the project to exist yet and deliberately held off on creating it;
+it was created and bootstrapped in a later session, once real credentials
+(Twilio, Anthropic) were available to configure it properly rather than
+standing up an empty shell.
+
+**The project**: `ethioserve-production` (ref `xkdtseqgwllobhhamezz`,
+region `us-west-1`), in the same `Excellentworkflows` org as dev/staging.
+Three unrelated older projects in that org (`excellent-AI`,
+`AI-Powered-EdTech`, `Elis_care`) were deleted first to stay within the
+free plan's project limit — the org remains on the free plan, which is
+why backups (below) are still an open gap, not yet paid for.
+
+**What's actually live on it right now**, all verified, not just deployed:
+- All 26 migrations applied (`supabase db push`) — matches dev/staging's
+  schema exactly, including both bugs the subscriptions feature's live
+  testing caught and fixed.
+- All 4 Edge Functions deployed (`ai-search`, `stripe-create-payment-intent`,
+  `stripe-create-subscription`, `stripe-webhook`).
+- Secrets set: `ANTHROPIC_API_KEY` (same key as dev/staging — a deliberate
+  choice, see below), `STRIPE_SECRET_KEY` (**test-mode**, deliberately —
+  see the release checklist's live-mode item), `STRIPE_WEBHOOK_SECRET`
+  (its own dedicated webhook endpoint, `we_1UCONnJ4qEJXPhXVM3Bgj9V7`,
+  confirmed to match dev/staging's exact `enabled_events` list rather than
+  a guessed set).
+- `ai-search` smoke-tested live with a real query ("I need a plumber" →
+  correctly matched the Plumbing category).
+- Catalog data confirmed reflecting the US pivot (Washington, DC active,
+  not Addis Ababa) — inherited automatically from the migrations, not a
+  separate step.
+- Twilio phone auth configured to match dev/staging exactly (`twilio_verify`
+  provider, not plain SMS) and verified live: a real OTP was sent to and
+  received on a real US number.
+- Production admin account created (`hassetshi@gmail.com`, Dashboard →
+  Authentication → Users → Add user — never via SQL, see below for why),
+  promoted to `role = 'admin'` in `public.users`, and MFA enrolled and
+  verified on it (real TOTP factor, confirmed `status = 'verified'` in
+  `auth.mfa_factors`).
+
+**Why the admin account can't be created via SQL**: inserting directly
+into `auth.users` bypasses Supabase's own password hashing and the linked
+`auth.identities` row that a real sign-up/Admin-API path creates — the
+account would exist but couldn't actually log in, or would be missing
+invariants the rest of `auth.*` assumes hold. The Dashboard's "Add user"
+(or the Admin API, which needs the `service_role` key — deliberately not
+retrievable through this session, by design) both do this correctly.
 
 ## What's ready now
 
@@ -29,22 +70,26 @@ still isn't set up locally; no store listing exists — see Phase 17).
   once a provider decision was made) MFA via Supabase Auth's built-in TOTP
   support. See SECURITY.md for details.
 
-## Before the production project is created, in order
+## Bootstrap steps and their status
 
-1. Create the Supabase project (separate from dev/staging).
-2. Configure Twilio phone auth on it (same steps as Phase 2, against the new
-   project).
-3. Run `supabase secrets set ANTHROPIC_API_KEY=...` against it (Phase 11's
-   step, repeated for the new project — reuse the same key or issue a
-   separate one, a billing/rate-limit decision, not a technical one).
-4. Add GitHub Actions secrets: `SUPABASE_PROD_PROJECT_REF`,
-   `SUPABASE_PROD_DB_PASSWORD` (reuses the existing `SUPABASE_ACCESS_TOKEN`
-   — that token is account-level, not project-scoped).
-5. Run `Production Deploy` via workflow_dispatch once, verify it succeeds.
-6. Create the production admin account (Dashboard → Authentication → Users,
-   same as Phase 10 — never via SQL, see ARCHITECTURE.md's Phase 10 story
-   for why).
-7. Optionally add required-reviewer protection on the `production`
+1. [x] Create the Supabase project (separate from dev/staging).
+2. [x] Configure Twilio phone auth on it (same steps as Phase 2, against the
+   new project) — done, verified with a real received OTP.
+3. [x] Set `ANTHROPIC_API_KEY` and `STRIPE_SECRET_KEY` (test-mode) via
+   `supabase secrets set` against it.
+4. [ ] Add GitHub Actions secrets: `SUPABASE_PROD_PROJECT_REF`
+   (`xkdtseqgwllobhhamezz`), `SUPABASE_PROD_DB_PASSWORD` (reuses the
+   existing `SUPABASE_ACCESS_TOKEN` — that token is account-level, not
+   project-scoped). Migrations/functions were pushed directly via the CLI
+   for this initial bootstrap instead — this step is what makes the
+   `Production Deploy` GitHub Action usable for every deploy *after* this
+   one.
+5. [ ] Run `Production Deploy` via workflow_dispatch once #4 is done, verify
+   it succeeds (should be a no-op the first time, since the CLI bootstrap
+   already applied everything it would do).
+6. [x] Create the production admin account (Dashboard → Authentication →
+   Users, never via SQL) and enroll MFA on it.
+7. [ ] Optionally add required-reviewer protection on the `production`
    environment (Settings → Environments → production) as a second layer on
    top of the manual dispatch trigger — not load-bearing today since only
    one person has repo access, but cheap to turn on before anyone else gets
@@ -86,25 +131,33 @@ because it doesn't matter:
 
 Run before every release to production, not just the first one:
 
-- [ ] All migrations applied cleanly to the production project (via
-      `Production Deploy`, never by hand).
-- [ ] `ai-search` edge function deployed and smoke-tested with a real query.
+- [x] All migrations applied cleanly to the production project — done via
+      direct CLI push for this initial bootstrap (`Production Deploy` via
+      GitHub Actions isn't wired up yet, see bootstrap step 4 above; use it,
+      not the CLI, for every deploy after this one).
+- [x] `ai-search` edge function deployed and smoke-tested with a real query.
 - [ ] RLS verified on the production project: run
       `node scripts/security-tests.mjs` with `DEV_DATABASE_URL` pointed at
-      *production* — the same 18+ checks that guard dev/staging.
+      *production* — the same 18+ checks that guard dev/staging. Deliberately
+      not run yet: the script's trigger-level tests need fixed dev-seed
+      identities (`scripts/dev-seed-sample-provider.sql` etc.) that
+      production has no equivalent of, and production shouldn't carry
+      permanent fake data — do this as a temporary seed-and-clean-up pass
+      right before real launch, not casually during bootstrap.
 - [ ] No `service_role` key anywhere in `mobile/` or `admin-web/` — grep the
       built bundle, not just the source, before shipping.
-- [ ] Production admin account exists, and its password is not one used
-      anywhere else.
-- [x] MFA on the admin account — built (Supabase Auth TOTP), verified live.
-      See SECURITY.md. Still confirm it on the *production* admin account
-      specifically once that account exists (a fresh account starts
-      unenrolled, same as this one did).
+- [x] Production admin account exists (`hassetshi@gmail.com`), with a
+      password distinct from dev/staging's admin password.
+- [x] MFA on the admin account — built (Supabase Auth TOTP), verified live
+      on both the dev/staging *and* production admin accounts (each starts
+      unenrolled independently — enrolling on one doesn't cover the other).
+      See SECURITY.md.
 - [ ] Backups confirmed active (paid plan) or an external backup schedule
       confirmed running, with at least one successful test restore.
 - [ ] Branch protection on `main` is on (see DEPLOYMENT.md).
-- [ ] Twilio phone auth verified working against the production project
-      with a real phone number, not just dev/staging's.
+- [x] Twilio phone auth verified working against the production project
+      with a real phone number (`twilio_verify` provider, matching
+      dev/staging's configuration).
 - [ ] Stripe switched from test-mode to live-mode keys
       (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`), and a **new** live-mode
       webhook endpoint registered in the Stripe Dashboard pointed at the
