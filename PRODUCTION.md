@@ -24,9 +24,10 @@ still isn't set up locally; no store listing exists — see Phase 17).
   (gitignored) `production.json` once the project exists.
 - Admin-web security hardening that spec section 43 calls for and Phase 10
   never actually delivered despite SECURITY.md claiming otherwise (caught
-  during this phase's checklist review): session-inactivity timeout and
-  admin-action audit logging via `log_admin_action`. See SECURITY.md for
-  what's done and what's still open (MFA).
+  during this phase's checklist review): session-inactivity timeout,
+  admin-action audit logging via `log_admin_action`, and (added later,
+  once a provider decision was made) MFA via Supabase Auth's built-in TOTP
+  support. See SECURITY.md for details.
 
 ## Before the production project is created, in order
 
@@ -95,7 +96,10 @@ Run before every release to production, not just the first one:
       built bundle, not just the source, before shipping.
 - [ ] Production admin account exists, and its password is not one used
       anywhere else.
-- [ ] MFA on the admin account — **blocking until built**, see SECURITY.md.
+- [x] MFA on the admin account — built (Supabase Auth TOTP), verified live.
+      See SECURITY.md. Still confirm it on the *production* admin account
+      specifically once that account exists (a fresh account starts
+      unenrolled, same as this one did).
 - [ ] Backups confirmed active (paid plan) or an external backup schedule
       confirmed running, with at least one successful test restore.
 - [ ] Branch protection on `main` is on (see DEPLOYMENT.md).

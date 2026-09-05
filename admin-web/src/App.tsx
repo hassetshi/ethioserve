@@ -6,6 +6,8 @@ import { BookingsPage } from './pages/BookingsPage'
 import { CategoriesPage } from './pages/CategoriesPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
+import { MfaChallengePage } from './pages/MfaChallengePage'
+import { MfaSetupPage } from './pages/MfaSetupPage'
 import { ProvidersPage } from './pages/ProvidersPage'
 import { ServicesPage } from './pages/ServicesPage'
 import { SubscriptionsPage } from './pages/SubscriptionsPage'
@@ -17,6 +19,8 @@ export function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/mfa-setup" element={<MfaSetupPage />} />
+          <Route path="/mfa-challenge" element={<MfaChallengePage />} />
           <Route
             element={
               <ProtectedRoute>

@@ -88,10 +88,19 @@ Current status:
   activate/deactivate, category/service create and activate/deactivate.
   Failures are logged to the console rather than blocking the action that
   already succeeded — see `admin-web/src/lib/audit.ts`.
-- **MFA**: still not implemented. This is a real launch-blocker, not a
-  formality — it needs an actual provider decision (Supabase Auth's own TOTP
-  support vs. a third-party option) before it can be built, tracked in
-  PRODUCTION.md's pre-launch checklist.
+- **MFA**: implemented using Supabase Auth's own built-in TOTP support (no
+  third-party service needed) — the decision this was blocked on. Mandatory,
+  not opt-in, since every admin-web account is an admin by definition:
+  `AuthContext`'s `mfaStatus` (`'enroll' | 'challenge' | 'ok'`, derived from
+  `supabase.auth.mfa.getAuthenticatorAssuranceLevel()`) gates `ProtectedRoute`
+  the same way `session`/`isAdmin` already did, redirecting to `/mfa-setup`
+  (no verified factor yet — shows a QR code via `enroll()`) or
+  `/mfa-challenge` (factor verified, but this session is still aal1 — a
+  fresh sign-in always needs the per-session code, `signInWithPassword`
+  alone only reaches aal1 even for an already-enrolled user). Verified live:
+  a real factor enrolled and confirmed in `auth.mfa_factors`, and a
+  subsequent sign-out/sign-in correctly required the challenge screen rather
+  than skipping straight to the dashboard or re-showing setup.
 
 ## Storage
 
