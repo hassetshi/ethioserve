@@ -36,11 +36,19 @@ For the mobile app, `mobile/env/staging.json` (gitignored, mirrors
 `--dart-define-from-file=env/staging.json` staging builds — see
 LOCAL_DEVELOPMENT.md.
 
-admin-web has no staging *hosting* deployment yet (Vercel/Netlify/etc.) —
-QA of the admin flow today still means running `npm run dev` locally
-against the shared project. Standing up a public staging URL for admin-web
-is deferred to whenever a non-developer needs to click through it without
-a local checkout.
+admin-web is deployed to Railway (project `ethioserve-admin`, service
+`admin-web`) at its generated `*.up.railway.app` domain, pointed at the
+same shared dev/staging Supabase project as local dev. Deployed manually
+via `railway up` from the `admin-web/` directory (no GitHub-push
+auto-deploy wired up yet, unlike the Supabase pipelines above) — re-run
+that after any admin-web change meant for this URL. `VITE_SUPABASE_URL`/
+`VITE_SUPABASE_ANON_KEY` are set as Railway service variables (build-time
+for Vite, baked into the bundle by `vite build`, not read at runtime).
+Vite's build output is static files with no server, so `admin-web/package.
+json`'s `start` script runs `serve -s dist -l $PORT` — the `-s` flag
+rewrites unmatched routes to `index.html`, needed since react-router uses
+`BrowserRouter` (confirmed live: a deep route like `/providers` returns
+200 with the app shell, not a 404, under Railway's own reverse proxy).
 
 ## Carried forward from the spec (section 24), once staging is truly isolated
 
