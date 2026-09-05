@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
       customer: customerId!,
       'items[0][price]': planRow.stripe_price_id,
       payment_behavior: 'default_incomplete',
-      'expand[0]': 'latest_invoice.payment_intent',
+      'expand[0]': 'latest_invoice.confirmation_secret',
       'metadata[provider_id]': providerId,
     }),
   )
@@ -173,10 +173,16 @@ Deno.serve(async (req) => {
   }
 
   const subscription = await subscriptionResponse.json()
-  const clientSecret = subscription.latest_invoice?.payment_intent?.client_secret
+  // Stripe invoices no longer carry a `payment_intent` field on this
+  // account's API version - confirmed live (the real response had
+  // `latest_invoice.confirmation_secret`, not `.payment_intent`, so the
+  // old field name always read as undefined here). `confirmation_secret`
+  // is the replacement and still has `type: 'payment_intent'` /
+  // `client_secret`, which is all initPaymentSheet needs.
+  const clientSecret = subscription.latest_invoice?.confirmation_secret?.client_secret
   if (!clientSecret) {
     console.error(
-      'Stripe subscription has no payment_intent client_secret',
+      'Stripe subscription has no confirmation_secret client_secret',
       subscription.id,
     )
     return json({ error: 'Payment provider error' }, 502)
