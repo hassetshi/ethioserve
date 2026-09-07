@@ -77,11 +77,14 @@ retrievable through this session, by design) both do this correctly.
    new project) — done, verified with a real received OTP.
 3. [x] Set `ANTHROPIC_API_KEY` and `STRIPE_SECRET_KEY` (test-mode) via
    `supabase secrets set` against it.
-4. [ ] Add GitHub Actions secrets: `SUPABASE_PROD_PROJECT_REF`
+4. [x] Add GitHub Actions secrets: `SUPABASE_PROD_PROJECT_REF`
    (`xkdtseqgwllobhhamezz`), `SUPABASE_PROD_DB_PASSWORD` (reuses the
    existing `SUPABASE_ACCESS_TOKEN` — that token is account-level, not
-   project-scoped). Migrations/functions were pushed directly via the CLI
-   for this initial bootstrap instead — this step is what makes the
+   project-scoped). Set via the GitHub API (libsodium sealed-box encryption
+   against the repo's Actions public key, same scheme `gh secret set` uses
+   internally) using a short-lived fine-grained PAT scoped to just this
+   repo's Secrets permission. Migrations/functions were pushed directly via
+   the CLI for the initial bootstrap itself — this step is what makes the
    `Production Deploy` GitHub Action usable for every deploy *after* this
    one.
 5. [ ] Run `Production Deploy` via workflow_dispatch once #4 is done, verify
