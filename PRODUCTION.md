@@ -156,8 +156,13 @@ Run before every release to production, not just the first one:
       production has no equivalent of, and production shouldn't carry
       permanent fake data — do this as a temporary seed-and-clean-up pass
       right before real launch, not casually during bootstrap.
-- [ ] No `service_role` key anywhere in `mobile/` or `admin-web/` — grep the
-      built bundle, not just the source, before shipping.
+- [x] No `service_role` key anywhere in `mobile/` or `admin-web/` — verified
+      two ways: no source reference to `SERVICE_ROLE`/`service_role` in
+      either `mobile/lib` or `admin-web/src` (so a bundler has nothing to
+      pull in regardless), and confirmed by grepping the actual built
+      output (`flutter build web`, `vite build`) directly — both clean.
+      Re-run this before every release, not just once; a future change
+      could still introduce a reference.
 - [x] Production admin account exists (`hassetshi@gmail.com`), with a
       password distinct from dev/staging's admin password.
 - [x] MFA on the admin account — built (Supabase Auth TOTP), verified live
