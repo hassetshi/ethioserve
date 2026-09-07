@@ -178,14 +178,30 @@ Run before every release to production, not just the first one:
 - [x] Twilio phone auth verified working against the production project
       with a real phone number (`twilio_verify` provider, matching
       dev/staging's configuration).
-- [ ] Stripe switched from test-mode to live-mode keys
-      (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`), and a **new** live-mode
-      webhook endpoint registered in the Stripe Dashboard pointed at the
-      production project's `stripe-webhook` URL with its own live-mode
-      `STRIPE_WEBHOOK_SECRET` — test-mode and live-mode webhook secrets are
-      different values pointing at different Stripe environments, easy to
-      leave on test-mode by mistake if not checked explicitly.
+- [x] Stripe switched from test-mode to live-mode keys. Important
+      correction along the way: the account this project's `STRIPE_SECRET_KEY`
+      had used all along (`acct_1RqIHSJ4qEJXPhXV`, "Excellentworkflows
+      sandbox") is a genuine Stripe **sandbox** — `charges_enabled: false`
+      permanently, not just a test-mode account — so it could never have
+      taken live payments regardless of key swapping. Live mode instead
+      points at the company's real, separate, fully-activated account
+      (`acct_1T9oNlGSzs4e43tI` — confirmed `charges_enabled`,
+      `payouts_enabled`, and `details_submitted` all `true` before wiring
+      anything to it). Set: production's `STRIPE_SECRET_KEY` (live),
+      `STRIPE_PUBLISHABLE_KEY` in `mobile/env/production.json` (gitignored,
+      real values now filled in — see LOCAL_DEVELOPMENT.md's env-file
+      pattern), and a **new** live-mode webhook endpoint
+      (`we_1UD3eRGSzs4e43tIPQ8C9RiD`) pointed at production's
+      `stripe-webhook` URL with its own live `STRIPE_WEBHOOK_SECRET` —
+      confirmed matching the test-mode endpoint's exact `enabled_events` set
+      rather than re-guessed. Dev/staging deliberately stay on the sandbox
+      key; only production's secrets changed.
 - [ ] At least one real (small) end-to-end Stripe transaction tested
-      against live-mode keys before real customers rely on it.
+      against live-mode keys before real customers rely on it. Still
+      blocked on the same thing that blocked the test-mode verification
+      earlier: `flutter_stripe_web`'s PaymentSheet doesn't reliably work in
+      a browser, and real Android testing is still blocked by this dev
+      machine's Norton SSL-interception issue. This is now a **real-money**
+      test once it runs — small, deliberate, and only when you're ready.
 - [ ] Mobile app actually builds and runs on a real Android device — not
       yet true as of Phase 16 (Android SDK gap, see README.md).
