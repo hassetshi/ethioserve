@@ -19,9 +19,8 @@ class FakeCatalogRepository implements CatalogRepository {
 
   @override
   Future<Service> getService(String serviceId) async =>
-      (await getServicesByCategory('cat-1')).firstWhere(
-        (s) => s.id == serviceId,
-      );
+      (await getServicesByCategory('cat-1'))
+          .firstWhere((s) => s.id == serviceId);
 
   @override
   Future<List<Service>> getServicesByCategory(String categoryId) async => [

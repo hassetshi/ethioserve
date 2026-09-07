@@ -176,9 +176,8 @@ class _SubscriptionStatusCard extends StatelessWidget {
         trailing: isActive
             ? null
             : TextButton(
-                onPressed: () => context.push(
-                  '/provider/subscribe?providerId=$providerId',
-                ),
+                onPressed: () =>
+                    context.push('/provider/subscribe?providerId=$providerId'),
                 child: const Text('Subscribe'),
               ),
       ),

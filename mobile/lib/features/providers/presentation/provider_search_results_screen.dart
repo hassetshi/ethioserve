@@ -70,10 +70,14 @@ class _ProviderSearchResultsScreenState
     final title = widget.categoryId != null
         ? ref
               .watch(categoryProvider(widget.categoryId!))
-              .whenOrNull(data: (category) => category.localizedName(languageCode))
+              .whenOrNull(
+                data: (category) => category.localizedName(languageCode),
+              )
         : ref
               .watch(serviceProvider(widget.serviceId!))
-              .whenOrNull(data: (service) => service.localizedName(languageCode));
+              .whenOrNull(
+                data: (service) => service.localizedName(languageCode),
+              );
 
     final filters = (
       categoryId: widget.categoryId,

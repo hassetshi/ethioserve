@@ -16,8 +16,9 @@ void main() {
         GoRoute(path: '/home', builder: (_, _) => child),
         GoRoute(
           path: '/services/:serviceId/providers',
-          builder: (_, state) =>
-              Text('providers-for-service-${state.pathParameters['serviceId']}'),
+          builder: (_, state) => Text(
+            'providers-for-service-${state.pathParameters['serviceId']}',
+          ),
         ),
         GoRoute(
           path: '/categories/:categoryId/providers',

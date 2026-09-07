@@ -63,7 +63,8 @@ class _ProviderProfileBody extends ConsumerWidget {
   String? get _cityName =>
       languageCode == 'am' ? provider.cityNameAm : provider.cityNameEn;
 
-  bool get _hasLocation => provider.latitude != null && provider.longitude != null;
+  bool get _hasLocation =>
+      provider.latitude != null && provider.longitude != null;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

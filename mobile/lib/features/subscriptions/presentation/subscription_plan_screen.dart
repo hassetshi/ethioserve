@@ -32,16 +32,14 @@ class _SubscriptionPlanScreenState
           .subscribe(widget.providerId, plan);
       ref.invalidate(mySubscriptionProvider(widget.providerId));
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("You're now listed!")));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("You're now listed!")));
         Navigator.of(context).maybePop();
       }
     } on ValidationException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.userMessage)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.userMessage)));
       }
     } catch (_) {
       if (mounted) {
@@ -128,9 +126,7 @@ class _PlanCard extends StatelessWidget {
                       width: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(
-                      plan.isAvailable ? 'Subscribe' : 'Not available yet',
-                    ),
+                  : Text(plan.isAvailable ? 'Subscribe' : 'Not available yet'),
             ),
           ],
         ),

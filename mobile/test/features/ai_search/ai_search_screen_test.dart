@@ -125,9 +125,6 @@ void main() {
     await tester.tap(find.byIcon(Icons.mic_none));
     await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining("Couldn't hear that"),
-      findsOneWidget,
-    );
+    expect(find.textContaining("Couldn't hear that"), findsOneWidget);
   });
 }

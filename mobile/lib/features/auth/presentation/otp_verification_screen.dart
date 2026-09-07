@@ -5,7 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'otp_controller.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
-  const OtpVerificationScreen({required this.phone, this.redirectTo, super.key});
+  const OtpVerificationScreen({
+    required this.phone,
+    this.redirectTo,
+    super.key,
+  });
 
   final String phone;
 
