@@ -197,11 +197,21 @@ Run before every release to production, not just the first one:
       rather than re-guessed. Dev/staging deliberately stay on the sandbox
       key; only production's secrets changed.
 - [ ] At least one real (small) end-to-end Stripe transaction tested
-      against live-mode keys before real customers rely on it. Still
-      blocked on the same thing that blocked the test-mode verification
-      earlier: `flutter_stripe_web`'s PaymentSheet doesn't reliably work in
-      a browser, and real Android testing is still blocked by this dev
-      machine's Norton SSL-interception issue. This is now a **real-money**
-      test once it runs — small, deliberate, and only when you're ready.
-- [ ] Mobile app actually builds and runs on a real Android device — not
-      yet true as of Phase 16 (Android SDK gap, see README.md).
+      against live-mode keys before real customers rely on it. The
+      infrastructure blocker that stopped this (real Android testing, see
+      below) is now resolved — `flutter_stripe_web`'s PaymentSheet not
+      working reliably in a browser was never fixable anyway, so a real
+      device/emulator is the only path regardless. This is now a
+      **real-money** test once it runs — small, deliberate, and only when
+      you're ready.
+- [x] Mobile app actually builds and runs on a real Android device/emulator
+      — confirmed live: real categories loaded from the dev Supabase
+      project over HTTPS, with the dev machine's Norton SSL-interception
+      still active. Needed two separate fixes (Android's platform trust
+      store and `dart:io`'s independent one are not the same thing — see
+      LOCAL_DEVELOPMENT.md's "Known gotchas" for the full breakdown),
+      the second of which is shipped in `mobile/lib/main.dart`
+      (debug-only). A physical device wasn't tested, only the emulator —
+      worth a quick sanity check on real hardware before relying on this
+      being fully equivalent, though nothing about the fix is
+      emulator-specific.

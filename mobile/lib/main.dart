@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -10,6 +13,23 @@ import 'core/providers/push_notification_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // dart:io's TLS stack (what Supabase/Stripe's HTTP calls actually use) has
+  // its own independent trust store - it does NOT consult Android's
+  // platform certificate store, so installing a user CA cert for local
+  // TLS-intercepting software (antivirus/corporate proxy SSL scanning) has
+  // no effect here, even though it fixes native Android apps (Chrome,
+  // WebView) via android/app/src/debug/res/xml/network_security_config.xml.
+  // Confirmed live: Chrome succeeded against the real Supabase URL after
+  // installing the intercepting AV's root cert as a user credential: the
+  // Flutter app still failed with the exact same cert installed, because
+  // this is a separate trust store entirely - not a config mistake. Mirrors
+  // that file's scope and reasoning at the Dart layer instead: relax
+  // certificate validation only in debug builds (kDebugMode is compiled out
+  // of release builds entirely), never in release.
+  if (kDebugMode) {
+    HttpOverrides.global = _DevHttpOverrides();
+  }
 
   if (EnvConfig.isConfigured) {
     await Supabase.initialize(
@@ -48,4 +68,13 @@ Future<void> main() async {
       child: const EthioServeApp(),
     ),
   );
+}
+
+/// Debug-only - see the kDebugMode check in main() for why this exists.
+class _DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (cert, host, port) => true;
+  }
 }
