@@ -171,7 +171,10 @@ Run before every release to production, not just the first one:
       See SECURITY.md.
 - [ ] Backups confirmed active (paid plan) or an external backup schedule
       confirmed running, with at least one successful test restore.
-- [ ] Branch protection on `main` is on (see DEPLOYMENT.md).
+- [x] Branch protection on `main` is on (see DEPLOYMENT.md) — requires 1 PR
+      approval and both `analyze-and-test` (mobile) and `lint-and-build`
+      (admin-web) status checks to pass, confirmed live via the branch
+      protection API.
 - [x] Twilio phone auth verified working against the production project
       with a real phone number (`twilio_verify` provider, matching
       dev/staging's configuration).
