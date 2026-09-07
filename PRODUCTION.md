@@ -87,9 +87,17 @@ retrievable through this session, by design) both do this correctly.
    the CLI for the initial bootstrap itself — this step is what makes the
    `Production Deploy` GitHub Action usable for every deploy *after* this
    one.
-5. [ ] Run `Production Deploy` via workflow_dispatch once #4 is done, verify
-   it succeeds (should be a no-op the first time, since the CLI bootstrap
-   already applied everything it would do).
+5. [x] Run `Production Deploy` via workflow_dispatch, verified succeeding
+   (run 34124789600) — a no-op as expected, since the CLI bootstrap already
+   applied everything it would do. This step surfaced a real, unrelated gap
+   along the way: `main` had never actually been merged into since the very
+   first commit (still sitting at Phase 1, 42 commits behind) —
+   `workflow_dispatch` needs a workflow file present on the default branch
+   to even be dispatchable, so `production-deploy.yml` didn't show up as a
+   workflow at all until that first-ever PR into `main` landed. That PR also
+   surfaced 8 files' worth of accumulated `dart format` drift that had been
+   silently failing mobile-ci on every develop/staging push with nothing
+   actually gating on it — fixed as part of getting the PR green.
 6. [x] Create the production admin account (Dashboard → Authentication →
    Users, never via SQL) and enroll MFA on it.
 7. [ ] Optionally add required-reviewer protection on the `production`
@@ -134,10 +142,11 @@ because it doesn't matter:
 
 Run before every release to production, not just the first one:
 
-- [x] All migrations applied cleanly to the production project — done via
-      direct CLI push for this initial bootstrap (`Production Deploy` via
-      GitHub Actions isn't wired up yet, see bootstrap step 4 above; use it,
-      not the CLI, for every deploy after this one).
+- [x] All migrations applied cleanly to the production project — applied
+      via direct CLI push for the initial bootstrap, then confirmed the
+      `Production Deploy` GitHub Action itself works (bootstrap step 5) with
+      a real successful run; use that workflow, not the CLI, for every
+      deploy from here on.
 - [x] `ai-search` edge function deployed and smoke-tested with a real query.
 - [ ] RLS verified on the production project: run
       `node scripts/security-tests.mjs` with `DEV_DATABASE_URL` pointed at
