@@ -6,6 +6,7 @@
     "supabase": "supabase"
   },
   "devDependencies": {
+    "pg": "^8.23.0",
     "supabase": "^2.116.0"
   }
 }

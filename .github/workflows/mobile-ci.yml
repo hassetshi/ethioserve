@@ -1,0 +1,42 @@
+name: Mobile CI
+
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  push:
+    branches: [develop, staging, main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.2'
+          channel: 'stable'
+          cache: true
+
+      - run: flutter pub get
+
+      # No secrets needed: EnvConfig (mobile/lib/core/config/env_config.dart)
+      # falls back to empty strings via String.fromEnvironment when
+      # --dart-define isn't passed, so analyze/test/format run against the
+      # same source tree a real build would use, without touching Supabase.
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Unit + widget + integration tests
+        run: flutter test

@@ -29,7 +29,9 @@ class LanguageSelectionScreen extends ConsumerWidget {
               FilledButton(
                 onPressed: () {
                   ref.read(localeProvider.notifier).select(const Locale('en'));
-                  context.go('/home');
+                  // Router redirect decides where to actually land (login
+                  // vs. home) based on auth state.
+                  context.go('/');
                 },
                 child: const Text('English'),
               ),
@@ -37,7 +39,9 @@ class LanguageSelectionScreen extends ConsumerWidget {
               FilledButton(
                 onPressed: () {
                   ref.read(localeProvider.notifier).select(const Locale('am'));
-                  context.go('/home');
+                  // Router redirect decides where to actually land (login
+                  // vs. home) based on auth state.
+                  context.go('/');
                 },
                 child: const Text('አማርኛ'),
               ),

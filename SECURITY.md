@@ -39,6 +39,11 @@ ships in the Flutter app or the admin-web client bundle (spec sections 7, 20, 31
   is what actually protects data, not secrecy of this key.
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only (Edge Functions, admin-web backend
   if it has one). Never in `mobile/`, never in a client bundle, never committed.
+- `STRIPE_PUBLISHABLE_KEY`: same category as the Supabase anon key — safe to
+  compile into the app, designed to be public.
+- `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`: server-only, set via
+  `supabase secrets set` for the `stripe-create-payment-intent` and
+  `stripe-webhook` Edge Functions. Never in `mobile/`, never committed.
 - All real secrets live in gitignored files (`mobile/env/*.json`,
   `admin-web/.env*`) or the CI/CD secret store — never in git history. See
   `.env.example` for the full list of names.
@@ -59,9 +64,43 @@ never shown to the user (spec section 29).
 
 ## Admin security
 
-Deferred to Phase 10 (admin-web build): MFA, session expiration, and
-restricted-operation logging are implemented then, not simulated now. Tracked
-here so it isn't forgotten — see spec section 43.
+Spec section 43 calls for MFA, session expiration, and restricted-operation
+logging on admin-web. Phase 10 (admin-web build) shipped the app itself but
+not these three — that gap sat undetected until Phase 16's production
+checklist review caught SECURITY.md's own claim not matching reality.
+Current status:
+
+- **Session expiration**: `admin-web/src/hooks/useIdleLogout.ts` signs the
+  admin out after 15 minutes of no mouse/keyboard/scroll/touch activity —
+  the realistic risk on an admin panel handling PII and payment records is
+  an unattended, unlocked tab, not just a long-lived token. This is on top
+  of (not instead of) the Supabase JWT's own 1-hour expiry combined with
+  `autoRefreshToken: false` (`admin-web/src/lib/supabase.ts`), which already
+  means a session can't silently renew itself forever.
+- **Restricted-operation logging**: `log_admin_action` (SECURITY DEFINER
+  RPC, `supabase/migrations/20260901000022_admin_audit_log_rpc.sql`) is the
+  only path admin-web has to `audit_logs` — the table's own RLS has no
+  client insert policy at all, by design, so even a fully compromised admin
+  session can't tamper with its own audit trail via a direct table write.
+  The RPC re-checks `is_admin()` itself (never trusts the caller) and always
+  stamps `user_id` from `auth.uid()` (never a client-supplied value). Wired
+  into every admin-web mutation: provider verify/reject/suspend, user
+  activate/deactivate, category/service create and activate/deactivate.
+  Failures are logged to the console rather than blocking the action that
+  already succeeded — see `admin-web/src/lib/audit.ts`.
+- **MFA**: implemented using Supabase Auth's own built-in TOTP support (no
+  third-party service needed) — the decision this was blocked on. Mandatory,
+  not opt-in, since every admin-web account is an admin by definition:
+  `AuthContext`'s `mfaStatus` (`'enroll' | 'challenge' | 'ok'`, derived from
+  `supabase.auth.mfa.getAuthenticatorAssuranceLevel()`) gates `ProtectedRoute`
+  the same way `session`/`isAdmin` already did, redirecting to `/mfa-setup`
+  (no verified factor yet — shows a QR code via `enroll()`) or
+  `/mfa-challenge` (factor verified, but this session is still aal1 — a
+  fresh sign-in always needs the per-session code, `signInWithPassword`
+  alone only reaches aal1 even for an already-enrolled user). Verified live:
+  a real factor enrolled and confirmed in `auth.mfa_factors`, and a
+  subsequent sign-out/sign-in correctly required the challenge screen rather
+  than skipping straight to the dashboard or re-showing setup.
 
 ## Storage
 

@@ -5,13 +5,200 @@
 ```powershell
 cd mobile
 flutter analyze   # static analysis — currently clean
-flutter test      # unit + widget tests — currently 2 passing (app boot, language → home nav)
+flutter test      # 38 tests passing as of Phase 13
 ```
 
-`test/widget_test.dart` covers the Phase 1 app shell: it boots to language
-selection, and selecting a language navigates to home with the right localized
-text. This is the pattern for widget tests going forward — pump `EthioServeApp`
-inside a `ProviderScope`, override providers as needed for the scenario.
+- `test/widget_test.dart`: app-shell + router redirect behavior — language
+  selection, unauthenticated → login redirect, authenticated → home redirect
+  (now also asserting the categories grid renders with real-shaped data).
+  Uses `test/fakes/fake_auth_repository.dart` and
+  `test/fakes/fake_catalog_repository.dart` (provider overrides in the
+  `ProviderScope`) so these never touch the real Supabase client — this is
+  the pattern for any widget test that depends on remote data going forward.
+- `test/features/auth/phone_number_validator_test.dart`: pure-logic unit tests
+  for Ethiopian phone number normalization/validation.
+- `test/features/catalog/category_detail_screen_test.dart`: services list
+  renders for a given category.
+
+Live OTP delivery is now confirmed working end-to-end (Twilio configured on
+the dev Supabase project) — not covered by an automated test (that would need
+a real phone to receive the SMS), but verified manually via the
+`/auth/v1/otp` endpoint. The Phase 3 browse flow (categories → services →
+providers → profile) was verified the same way: direct REST/RPC calls against
+the live dev project with a seeded sample provider
+(`scripts/dev-seed-sample-provider.sql`), confirming the exact JSON shapes the
+Dart parsing code expects.
+
+Phase 4's `register_as_provider` RPC has its auth guard verified live
+(an unauthenticated call correctly returns a clean `P0001` error, not a raw
+exception) — the full happy path (an actual customer registering and getting
+promoted to provider) needs a real authenticated session, which needs a real
+phone completing OTP login; exercise it by running the app once Android/web
+is available to click through, rather than via API calls.
+
+Phase 5's search was verified live end-to-end: English- and Amharic-substring
+service search, the `min_rating` filter (confirmed it both excludes and
+includes the seeded provider depending on threshold), and real-coordinate
+geospatial filtering (a nearby point returns `distance_km: 0`; a distant
+point with a small radius correctly returns zero results). `LocationService`'s
+permission-request/denial handling isn't covered by an automated test (needs
+a real device/emulator location prompt) — it's structured so every failure
+path returns `null` rather than throwing, which the UI already handles
+(falls back to city/rating filtering only).
+
+Phase 6's booking actor-authorization rules got the most thorough live
+verification yet, because getting this wrong would be a real security bug:
+using a second real test identity (`scripts/dev-seed-second-test-user.sql`,
+a customer, alongside the Phase 3 seed provider), verified directly against
+the live database with the session GUC that Supabase's `auth.uid()` reads
+(`set local request.jwt.claim.sub = '<uuid>'`):
+- a customer accepting their own booking → correctly rejected
+- the assigned provider accepting it → succeeds
+- the customer cancelling an accepted booking → succeeds
+- an invalid value transition (`cancelled → completed`) → still rejected
+  regardless of actor
+- `booking_status_history` correctly attributes each transition to the
+  right `changed_by`
+
+The join queries the Dart repository relies on (`provider_profiles`,
+`services`, `users!bookings_customer_id_fkey` embeds) were verified via an
+equivalent direct SQL join, confirming the exact shape `Booking.fromJson`
+expects. Full authenticated REST-level testing (two real users actually
+logged in via the app, one creating a booking and the other accepting it)
+still needs real app usage to exercise, same caveat as Phases 4-5.
+
+Phase 7's notification triggers were verified live the same way: a fresh
+booking correctly generated a `booking_requested` notification for the
+provider, and accepting it correctly generated a `booking_status_changed`
+notification for the customer. The in-app notification center (list,
+mark-as-read, mark-all-read) is covered by a widget test using
+`FakeNotificationRepository`. Actual push delivery isn't testable at all yet
+since no push provider is wired in (`NoopPushNotificationService`).
+
+Phase 8's messaging RLS got the same live-verification treatment as Phase
+6's booking security: an unauthenticated REST read of a booking's messages
+correctly returns zero rows, and an unauthenticated insert attempting to
+spoof a message from one of the test users is correctly rejected with 401
+`new row violates row-level security policy`. The Chat screen itself is
+covered by a widget test (`FakeMessagingRepository`, a broadcast-stream
+fake) verifying a sent message appears in the thread.
+
+Phase 9's review logic got the most iterative live verification yet, because
+it surfaced two real bugs (see ARCHITECTURE.md for the full story): a
+provider being able to overwrite a customer's rating via the "respond" RLS
+policy, and a completely legitimate review submission being rejected because
+its rating-aggregation cascade collided with an unrelated admin-only guard.
+Verified end-to-end with the two test identities: a real review insert took
+the provider from `0.00/0` to `5.00/1`; a non-completed booking correctly
+rejects a review attempt; a provider trying to change the rating while
+responding is rejected; a provider setting only `provider_response`
+succeeds without touching the rating. The Leave-a-review UI is covered by a
+widget test (`FakeReviewRepository`).
+
+Phase 10's admin-web was verified live end-to-end in a real browser (not
+just API calls, since this is a UI-first app): logged in as a real admin
+account and confirmed the Dashboard's stat cards showed exactly the
+expected counts from the dev project's actual data (1 customer, 1 provider,
+0 pending verifications, 2 bookings) — real numbers, not placeholders. No
+automated test suite exists yet for admin-web (unlike `mobile/`, which has
+Flutter's widget-test tooling already wired up); worth adding Vitest +
+React Testing Library in a future pass if admin-web's page count grows.
+
+Phase 11's AI search was verified live against the deployed Edge Function
+with the spec's own two example queries (English and Amharic), plus a
+deliberately vague query to confirm the clarification path — see AI.md for
+the exact results. The Flutter side (`AiSearchScreen`) is covered by a
+widget test using `FakeAIService` for both the matched and
+needs-clarification branches.
+
+Phase 12's payment logic — real money math, so it got the same live-verification
+treatment as bookings/reviews: a 1000 USD cash payment on the test booking
+correctly split into 100/900 (the seeded 10% commission rate); a customer
+attempting to record their own payment was rejected; a second payment
+attempt on the same booking was rejected (the unique constraint doing its
+job). The Flutter side is covered by a widget test
+(`FakePaymentRepository`) for both the provider's record-payment action and
+the customer's read-only view.
+
+## Post-Phase 16: Stripe digital payments
+
+Widget-level: `payment_section_test.dart` covers the customer's "Pay with
+card" action against `FakePaymentRepository` (unchanged pattern — the fake
+never touches Stripe). `scripts/security-tests.mjs` covers
+`stripe-create-payment-intent`'s unauthenticated rejection (22 checks now).
+
+Live manual testing (real browser, real Stripe test-mode project) confirmed
+the backend end-to-end and surfaced two real bugs, both fixed and
+re-verified:
+
+- Neither Edge Function sent CORS headers — invisible from every prior
+  test because those were all direct server-to-server calls, never an
+  actual browser request. Fixed via `supabase/functions/_shared/cors.ts`.
+- After that fix, the Network tab showed `stripe-create-payment-intent`
+  returning 200 on every attempt — auth check, booking-ownership check, and
+  the real Stripe PaymentIntent creation all correct — but
+  `presentPaymentSheet()` then failed on the web target. This is a known,
+  documented gap in `flutter_stripe_web` (officially experimental, partial
+  PaymentSheet support), not a bug in this code. Decided not to build a
+  web-specific fallback; full click-through of the actual card-entry UI is
+  deferred to real Android/iOS testing, where `flutter_stripe`'s native
+  support is complete. Stripe's test card (`4242 4242 4242 4242`, any
+  future expiry, any CVC) is what to use once that's possible.
+
+## Phase 13: hardening
+
+Added the two screens with zero prior widget-test coverage
+(`test/features/auth/login_screen_test.dart`,
+`test/features/providers/provider_profile_screen_test.dart`) and a full
+integration test
+(`test/integration/customer_booking_journey_test.dart`) driving the actual
+app — not a screen in isolation — through language selection, login, OTP,
+home, category browsing, search results, provider profile, booking request,
+confirmation, and back to the booking's own details screen. Deliberately
+stops there rather than also simulating provider acceptance and the review
+step within the same test; those already have focused coverage elsewhere
+and chaining a second identity's actions into one fake-wired scenario would
+add a lot of complexity for limited extra confidence.
+
+Writing that integration test found a real bug in the test infrastructure
+itself: `FakeAuthRepository.watchCurrentUser()` used `Stream.value(_user)`,
+which evaluates `_user` once at call time and never re-emits when it
+changes later. Every prior test happened to start either already
+authenticated or to stay logged out for its entire duration, so nothing had
+ever exercised the "log in partway through the test" path that would have
+exposed this — the router kept reading a stale "logged out" value after a
+successful OTP verification and bounced back to `/login`. Fixed with a
+proper broadcast stream (see the comment in `test/fakes/fake_auth_repository.dart`).
+
+`scripts/security-tests.mjs` formalizes the RLS/authorization verification
+that had been done ad-hoc via one-off commands throughout Phases 4-12 into
+one repeatable, re-runnable suite: 7 unauthenticated REST/RPC access checks,
+5 booking actor-authorization checks (creating and cleaning up its own
+disposable test booking), and 4 payment authorization checks (ditto) — 18
+checks total, confirmed idempotent by running it twice in a row against the
+live dev project with identical results both times.
+
+**Known gap**: spec section 28 names "AI response validation" as a unit-test
+target. That logic (verifying the AI's returned category/service ids
+against the real catalog before trusting them) is exercised live against
+the deployed Edge Function (see AI.md), but has no dedicated Deno unit test
+— standing up a Deno test toolchain for one function's pure-logic slice
+wasn't judged worth it yet; revisit if `supabase/functions/` grows more
+functions with similar validation logic worth testing in isolation.
+
+## Phase 17: first real Android run
+
+The Android SDK + an emulator are now set up (see LOCAL_DEVELOPMENT.md), and
+the app has run on real Android for the first time. That alone caught two
+real bugs — see ARCHITECTURE.md's Phase 17 entry for the full story
+(`FlutterFragmentActivity`, the missing `INTERNET` permission). Full manual
+click-through (login → OTP → booking → Stripe PaymentSheet) on Android is
+not yet completed on the current dev machine — blocked by local antivirus
+software intercepting HTTPS in a way the emulator's isolated OS doesn't
+trust, unrelated to the app itself (diagnostic steps in
+LOCAL_DEVELOPMENT.md). This is the one manual test still outstanding before
+Phase 17 can be considered done; everything else (automated suite, live
+Supabase/Stripe backend verification) already passes.
 
 ## Planned (spec section 28), added as each phase lands
 

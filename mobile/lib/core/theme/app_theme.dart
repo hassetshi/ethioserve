@@ -9,17 +9,17 @@ class AppTheme {
   static const Color _seedColor = Color(0xFF0F7A5C);
 
   static ThemeData get light => ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: _seedColor),
-        brightness: Brightness.light,
-      );
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(seedColor: _seedColor),
+    brightness: Brightness.light,
+  );
 
   static ThemeData get dark => ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _seedColor,
-          brightness: Brightness.dark,
-        ),
-        brightness: Brightness.dark,
-      );
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: Brightness.dark,
+    ),
+    brightness: Brightness.dark,
+  );
 }

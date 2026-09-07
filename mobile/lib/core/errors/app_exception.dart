@@ -14,11 +14,14 @@ sealed class AppException implements Exception {
 
 class NetworkException extends AppException {
   const NetworkException({super.debugDetail})
-      : super('Something went wrong. Please try again.');
+    : super('Something went wrong. Please try again.');
 }
 
-class AuthException extends AppException {
-  const AuthException(super.userMessage, {super.debugDetail});
+/// Named `AppAuthException` (not `AuthException`) to avoid colliding with
+/// `supabase_flutter`'s own `AuthException`, which repository code needs to
+/// catch separately.
+class AppAuthException extends AppException {
+  const AppAuthException(super.userMessage, {super.debugDetail});
 }
 
 class ValidationException extends AppException {
@@ -27,5 +30,5 @@ class ValidationException extends AppException {
 
 class UnknownAppException extends AppException {
   const UnknownAppException({super.debugDetail})
-      : super('Something went wrong. Please try again.');
+    : super('Something went wrong. Please try again.');
 }

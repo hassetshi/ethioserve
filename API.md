@@ -13,11 +13,29 @@ can't safely live behind plain table access.
 
 ## Edge Functions
 
-None yet. Planned, filled in as their phases land:
+### `ai-search` (Phase 11)
+
+`POST /functions/v1/ai-search`
+
+Request: `{ "query": string }` (max 500 chars, English or Amharic).
+
+Response (200): either
+```json
+{ "matched": true, "categoryId": "uuid", "serviceId": "uuid | null" }
+```
+or
+```json
+{ "matched": false, "clarificationQuestion": "string" }
+```
+
+Calls Claude with the platform's current active categories/services and a
+forced tool-use schema; every id Claude returns is re-checked against that
+same catalog before being trusted (see AI.md). Requires the
+`ANTHROPIC_API_KEY` secret (`supabase secrets set`), never exposed to the
+client. Deployed with `--no-verify-jwt` since it's a stateless classifier
+with no per-user data — any request bearing the project's anon key can call it.
+
+Planned, filled in when its phase lands:
 
 - Payment initialization/verification/webhook handling (Phase 12) — must run
   server-side; the mobile client never confirms its own payment (spec section 20).
-- AI search interpretation (Phase 11) — validates/sanitizes the AI's structured
-  output before it ever reaches a database query (spec section 15).
-
-This file is expanded with request/response shapes as each of these is built.
