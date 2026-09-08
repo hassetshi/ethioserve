@@ -87,9 +87,17 @@ retrievable through this session, by design) both do this correctly.
    the CLI for the initial bootstrap itself — this step is what makes the
    `Production Deploy` GitHub Action usable for every deploy *after* this
    one.
-5. [ ] Run `Production Deploy` via workflow_dispatch once #4 is done, verify
-   it succeeds (should be a no-op the first time, since the CLI bootstrap
-   already applied everything it would do).
+5. [x] Run `Production Deploy` via workflow_dispatch, verified succeeding
+   (run 34124789600) — a no-op as expected, since the CLI bootstrap already
+   applied everything it would do. This step surfaced a real, unrelated gap
+   along the way: `main` had never actually been merged into since the very
+   first commit (still sitting at Phase 1, 42 commits behind) —
+   `workflow_dispatch` needs a workflow file present on the default branch
+   to even be dispatchable, so `production-deploy.yml` didn't show up as a
+   workflow at all until that first-ever PR into `main` landed. That PR also
+   surfaced 8 files' worth of accumulated `dart format` drift that had been
+   silently failing mobile-ci on every develop/staging push with nothing
+   actually gating on it — fixed as part of getting the PR green.
 6. [x] Create the production admin account (Dashboard → Authentication →
    Users, never via SQL) and enroll MFA on it.
 7. [ ] Optionally add required-reviewer protection on the `production`
@@ -134,10 +142,11 @@ because it doesn't matter:
 
 Run before every release to production, not just the first one:
 
-- [x] All migrations applied cleanly to the production project — done via
-      direct CLI push for this initial bootstrap (`Production Deploy` via
-      GitHub Actions isn't wired up yet, see bootstrap step 4 above; use it,
-      not the CLI, for every deploy after this one).
+- [x] All migrations applied cleanly to the production project — applied
+      via direct CLI push for the initial bootstrap, then confirmed the
+      `Production Deploy` GitHub Action itself works (bootstrap step 5) with
+      a real successful run; use that workflow, not the CLI, for every
+      deploy from here on.
 - [x] `ai-search` edge function deployed and smoke-tested with a real query.
 - [ ] RLS verified on the production project: run
       `node scripts/security-tests.mjs` with `DEV_DATABASE_URL` pointed at
@@ -147,8 +156,13 @@ Run before every release to production, not just the first one:
       production has no equivalent of, and production shouldn't carry
       permanent fake data — do this as a temporary seed-and-clean-up pass
       right before real launch, not casually during bootstrap.
-- [ ] No `service_role` key anywhere in `mobile/` or `admin-web/` — grep the
-      built bundle, not just the source, before shipping.
+- [x] No `service_role` key anywhere in `mobile/` or `admin-web/` — verified
+      two ways: no source reference to `SERVICE_ROLE`/`service_role` in
+      either `mobile/lib` or `admin-web/src` (so a bundler has nothing to
+      pull in regardless), and confirmed by grepping the actual built
+      output (`flutter build web`, `vite build`) directly — both clean.
+      Re-run this before every release, not just once; a future change
+      could still introduce a reference.
 - [x] Production admin account exists (`hassetshi@gmail.com`), with a
       password distinct from dev/staging's admin password.
 - [x] MFA on the admin account — built (Supabase Auth TOTP), verified live
@@ -157,18 +171,47 @@ Run before every release to production, not just the first one:
       See SECURITY.md.
 - [ ] Backups confirmed active (paid plan) or an external backup schedule
       confirmed running, with at least one successful test restore.
-- [ ] Branch protection on `main` is on (see DEPLOYMENT.md).
+- [x] Branch protection on `main` is on (see DEPLOYMENT.md) — requires 1 PR
+      approval and both `analyze-and-test` (mobile) and `lint-and-build`
+      (admin-web) status checks to pass, confirmed live via the branch
+      protection API.
 - [x] Twilio phone auth verified working against the production project
       with a real phone number (`twilio_verify` provider, matching
       dev/staging's configuration).
-- [ ] Stripe switched from test-mode to live-mode keys
-      (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`), and a **new** live-mode
-      webhook endpoint registered in the Stripe Dashboard pointed at the
-      production project's `stripe-webhook` URL with its own live-mode
-      `STRIPE_WEBHOOK_SECRET` — test-mode and live-mode webhook secrets are
-      different values pointing at different Stripe environments, easy to
-      leave on test-mode by mistake if not checked explicitly.
+- [x] Stripe switched from test-mode to live-mode keys. Important
+      correction along the way: the account this project's `STRIPE_SECRET_KEY`
+      had used all along (`acct_1RqIHSJ4qEJXPhXV`, "Excellentworkflows
+      sandbox") is a genuine Stripe **sandbox** — `charges_enabled: false`
+      permanently, not just a test-mode account — so it could never have
+      taken live payments regardless of key swapping. Live mode instead
+      points at the company's real, separate, fully-activated account
+      (`acct_1T9oNlGSzs4e43tI` — confirmed `charges_enabled`,
+      `payouts_enabled`, and `details_submitted` all `true` before wiring
+      anything to it). Set: production's `STRIPE_SECRET_KEY` (live),
+      `STRIPE_PUBLISHABLE_KEY` in `mobile/env/production.json` (gitignored,
+      real values now filled in — see LOCAL_DEVELOPMENT.md's env-file
+      pattern), and a **new** live-mode webhook endpoint
+      (`we_1UD3eRGSzs4e43tIPQ8C9RiD`) pointed at production's
+      `stripe-webhook` URL with its own live `STRIPE_WEBHOOK_SECRET` —
+      confirmed matching the test-mode endpoint's exact `enabled_events` set
+      rather than re-guessed. Dev/staging deliberately stay on the sandbox
+      key; only production's secrets changed.
 - [ ] At least one real (small) end-to-end Stripe transaction tested
-      against live-mode keys before real customers rely on it.
-- [ ] Mobile app actually builds and runs on a real Android device — not
-      yet true as of Phase 16 (Android SDK gap, see README.md).
+      against live-mode keys before real customers rely on it. The
+      infrastructure blocker that stopped this (real Android testing, see
+      below) is now resolved — `flutter_stripe_web`'s PaymentSheet not
+      working reliably in a browser was never fixable anyway, so a real
+      device/emulator is the only path regardless. This is now a
+      **real-money** test once it runs — small, deliberate, and only when
+      you're ready.
+- [x] Mobile app actually builds and runs on a real Android device/emulator
+      — confirmed live: real categories loaded from the dev Supabase
+      project over HTTPS, with the dev machine's Norton SSL-interception
+      still active. Needed two separate fixes (Android's platform trust
+      store and `dart:io`'s independent one are not the same thing — see
+      LOCAL_DEVELOPMENT.md's "Known gotchas" for the full breakdown),
+      the second of which is shipped in `mobile/lib/main.dart`
+      (debug-only). A physical device wasn't tested, only the emulator —
+      worth a quick sanity check on real hardware before relying on this
+      being fully equivalent, though nothing about the fix is
+      emulator-specific.

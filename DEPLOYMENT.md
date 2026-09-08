@@ -40,12 +40,16 @@ rather than throwing when the corresponding `--dart-define`/`VITE_*` values
 are absent, so CI exercises the exact same source a real build would use
 without any secrets in the workflow files.
 
-**Not done by YAML, requires the GitHub UI** (spec section 26's "no direct
-pushes to main"): branch protection on `main` — require the CI checks
-above to pass, require at least one PR review, disallow force-pushes —
-needs to be turned on once under Settings → Branches on the actual GitHub
-repo; there's no way to express or verify that from inside this repo's
-files.
+**Done via the GitHub UI**, not expressible in YAML (spec section 26's "no
+direct pushes to main"): branch protection on `main` — requires 1 PR
+approval and both CI checks (`analyze-and-test`, `lint-and-build`) to pass;
+force-pushes and deletions stay off (the default). Confirmed live via
+`GET /repos/hassetshi/ethioserve/branches/main` returning `"protected":
+true`. This was turned on only after the *first* PR into `main` ever
+existed (see PRODUCTION.md's bootstrap notes — `main` had sat at the
+project's very first commit until then), since GitHub needs at least one
+real run of each check's name to offer it as a selectable required status
+check.
 
 ## Staging deploy (Phase 15)
 
