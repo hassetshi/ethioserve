@@ -171,7 +171,10 @@ class _SubscriptionStatusCard extends StatelessWidget {
               : 'Not listed',
         ),
         subtitle: isActive
-            ? null
+            ? (subscription!.plan == 'free' &&
+                      subscription!.currentPeriodEnd != null
+                  ? Text('Free until ${_formatDate(subscription!.currentPeriodEnd!)}')
+                  : null)
             : const Text('Subscribe to appear in customer search results.'),
         trailing: isActive
             ? null
@@ -184,3 +187,6 @@ class _SubscriptionStatusCard extends StatelessWidget {
     );
   }
 }
+
+String _formatDate(DateTime date) =>
+    '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';

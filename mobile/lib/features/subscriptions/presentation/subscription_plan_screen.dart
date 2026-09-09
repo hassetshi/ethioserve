@@ -111,12 +111,41 @@ class _PlanCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              plan.plan[0].toUpperCase() + plan.plan.substring(1),
-              style: Theme.of(context).textTheme.titleMedium,
+            Row(
+              children: [
+                Text(
+                  plan.plan[0].toUpperCase() + plan.plan.substring(1),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                if (plan.plan == 'free') ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Launch offer',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
             const SizedBox(height: 4),
-            Text('\$${plan.priceUsd.toStringAsFixed(0)}/${plan.interval}'),
+            Text(
+              plan.priceUsd == 0
+                  ? 'Free for a limited time'
+                  : '\$${plan.priceUsd.toStringAsFixed(0)}/${plan.interval}',
+            ),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: (busy || !plan.isAvailable) ? null : onSubscribe,
