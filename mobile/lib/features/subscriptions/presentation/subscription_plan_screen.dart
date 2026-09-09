@@ -131,9 +131,9 @@ class _PlanCard extends StatelessWidget {
                     child: Text(
                       'Launch offer',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSecondaryContainer,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSecondaryContainer,
                       ),
                     ),
                   ),

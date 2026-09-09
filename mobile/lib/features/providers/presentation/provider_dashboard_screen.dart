@@ -173,7 +173,9 @@ class _SubscriptionStatusCard extends StatelessWidget {
         subtitle: isActive
             ? (subscription!.plan == 'free' &&
                       subscription!.currentPeriodEnd != null
-                  ? Text('Free until ${_formatDate(subscription!.currentPeriodEnd!)}')
+                  ? Text(
+                      'Free until ${_formatDate(subscription!.currentPeriodEnd!)}',
+                    )
                   : null)
             : const Text('Subscribe to appear in customer search results.'),
         trailing: isActive
