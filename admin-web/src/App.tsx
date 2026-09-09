@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
 import { BookingsPage } from './pages/BookingsPage'
 import { CategoriesPage } from './pages/CategoriesPage'
+import { ClaimRequestsPage } from './pages/ClaimRequestsPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
 import { MfaChallengePage } from './pages/MfaChallengePage'
@@ -31,6 +32,7 @@ export function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/providers" element={<ProvidersPage />} />
+            <Route path="/claims" element={<ClaimRequestsPage />} />
             <Route path="/subscriptions" element={<SubscriptionsPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/services" element={<ServicesPage />} />

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/supabase_provider_repository.dart';
+import '../domain/provider_claim_status.dart';
 import '../domain/provider_detail.dart';
 import '../domain/provider_document.dart';
 import '../domain/provider_repository.dart';
@@ -55,3 +56,21 @@ final myDocumentsProvider = FutureProvider.autoDispose
     .family<List<ProviderDocument>, String>((ref, providerId) {
       return ref.watch(providerRepositoryProvider).getMyDocuments(providerId);
     });
+
+/// Pre-seeded unclaimed listings matching [query], for the "claim your
+/// business" search flow.
+final unclaimedProviderSearchProvider = FutureProvider.autoDispose
+    .family<List<ProviderSummary>, String>((ref, query) {
+      return ref
+          .watch(providerRepositoryProvider)
+          .searchUnclaimedProviders(query);
+    });
+
+/// The current user's most recent claim request, or `null`. Drives the
+/// "Become a provider" entry point's redirect to a status screen when a
+/// claim is already in flight.
+final myClaimStatusProvider = FutureProvider.autoDispose<ProviderClaimStatus?>((
+  ref,
+) {
+  return ref.watch(providerRepositoryProvider).getMyClaimStatus();
+});

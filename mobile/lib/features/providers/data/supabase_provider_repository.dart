@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/logging/app_logger.dart';
+import '../domain/provider_claim_status.dart';
 import '../domain/provider_detail.dart';
 import '../domain/provider_document.dart';
 import '../domain/provider_repository.dart';
@@ -220,6 +221,81 @@ class SupabaseProviderRepository implements ProviderRepository {
         error: e,
         stackTrace: st,
       );
+      throw const NetworkException();
+    }
+  }
+
+  // Plain public read, not an RPC: provider_profiles_select_public already
+  // permits reading any is_active row (claimed or not), and ProviderSummary
+  // expects a provider_id key, so `id` is aliased to match.
+  @override
+  Future<List<ProviderSummary>> searchUnclaimedProviders(String query) async {
+    try {
+      final rows = await _client
+          .from('provider_profiles')
+          .select(
+            'provider_id:id, business_name, description_en, description_am, rating, review_count, verification_status',
+          )
+          .isFilter('user_id', null)
+          .eq('is_active', true)
+          .ilike('business_name', '%$query%')
+          .limit(20);
+      return (rows as List)
+          .map((row) => ProviderSummary.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } on PostgrestException catch (e, st) {
+      AppLogger.error(
+        'searchUnclaimedProviders failed',
+        error: e,
+        stackTrace: st,
+      );
+      throw const NetworkException();
+    }
+  }
+
+  @override
+  Future<ProviderClaimStatus?> getMyClaimStatus() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return null;
+    try {
+      final row = await _client
+          .from('provider_claim_requests')
+          .select(
+            'id, provider_id, status, rejection_reason, provider_profiles(business_name)',
+          )
+          .eq('requester_user_id', userId)
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+      return row == null ? null : ProviderClaimStatus.fromJson(row);
+    } on PostgrestException catch (e, st) {
+      AppLogger.error('getMyClaimStatus failed', error: e, stackTrace: st);
+      throw const NetworkException();
+    }
+  }
+
+  @override
+  Future<void> requestClaim(String providerId) async {
+    try {
+      await _client.rpc(
+        'request_provider_claim',
+        params: {'p_provider_id': providerId},
+      );
+    } on PostgrestException catch (e, st) {
+      AppLogger.error('requestClaim failed', error: e, stackTrace: st);
+      if (e.message.contains('already has a provider profile')) {
+        throw const ValidationException('You already have a provider profile.');
+      }
+      if (e.message.contains('already been claimed')) {
+        throw const ValidationException(
+          'This listing has already been claimed.',
+        );
+      }
+      if (e.message.contains('already have a pending claim')) {
+        throw const ValidationException(
+          'You already submitted a claim for this listing.',
+        );
+      }
       throw const NetworkException();
     }
   }
