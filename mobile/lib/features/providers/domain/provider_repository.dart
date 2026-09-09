@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'provider_claim_status.dart';
 import 'provider_detail.dart';
 import 'provider_document.dart';
 import 'provider_summary.dart';
@@ -60,4 +61,20 @@ abstract class ProviderRepository {
     required Uint8List bytes,
     required String fileExtension,
   });
+
+  /// Pre-seeded businesses with no owner yet (see `provider_leads` /
+  /// `provider_claim_requests`) — searchable by name so a real owner can
+  /// find and claim their listing instead of registering a duplicate.
+  Future<List<ProviderSummary>> searchUnclaimedProviders(String query);
+
+  /// The current user's most recent claim request, or `null` if they've
+  /// never submitted one.
+  Future<ProviderClaimStatus?> getMyClaimStatus();
+
+  /// Submits a request to claim [providerId]. An admin reviews it manually
+  /// (see admin-web's Claim requests page) — this does not transfer
+  /// ownership immediately. Throws [ValidationException]-style errors for
+  /// the caller-facing failure cases (already a provider, already claimed,
+  /// duplicate pending request).
+  Future<void> requestClaim(String providerId);
 }

@@ -153,7 +153,7 @@ class _BecomeProviderSection extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 24),
       child: OutlinedButton(
-        onPressed: () => context.push('/provider/register'),
+        onPressed: () => context.push('/provider/choose'),
         child: const Text('Become a provider'),
       ),
     );

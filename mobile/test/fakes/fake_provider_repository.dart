@@ -1,15 +1,23 @@
 import 'dart:typed_data';
 
+import 'package:ethioserve/features/providers/domain/provider_claim_status.dart';
 import 'package:ethioserve/features/providers/domain/provider_detail.dart';
 import 'package:ethioserve/features/providers/domain/provider_document.dart';
 import 'package:ethioserve/features/providers/domain/provider_repository.dart';
 import 'package:ethioserve/features/providers/domain/provider_summary.dart';
 
 class FakeProviderRepository implements ProviderRepository {
-  FakeProviderRepository({this.myProviderId, this.searchResults = const []});
+  FakeProviderRepository({
+    this.myProviderId,
+    this.searchResults = const [],
+    this.unclaimedResults = const [],
+    this.myClaimStatus,
+  });
 
   String? myProviderId;
   final List<ProviderSummary> searchResults;
+  final List<ProviderSummary> unclaimedResults;
+  ProviderClaimStatus? myClaimStatus;
 
   @override
   Future<String?> getMyProviderId() async => myProviderId;
@@ -83,4 +91,24 @@ class FakeProviderRepository implements ProviderRepository {
     required Uint8List bytes,
     required String fileExtension,
   }) async {}
+
+  @override
+  Future<List<ProviderSummary>> searchUnclaimedProviders(String query) async =>
+      unclaimedResults;
+
+  @override
+  Future<ProviderClaimStatus?> getMyClaimStatus() async => myClaimStatus;
+
+  @override
+  Future<void> requestClaim(String providerId) async {
+    final matches = unclaimedResults.where((p) => p.providerId == providerId);
+    myClaimStatus = ProviderClaimStatus(
+      id: 'claim-1',
+      providerId: providerId,
+      businessName: matches.isEmpty
+          ? 'Test Business'
+          : matches.first.businessName,
+      status: 'pending',
+    );
+  }
 }

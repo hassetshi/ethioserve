@@ -21,6 +21,9 @@ import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/onboarding/presentation/language_selection_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/providers/presentation/add_provider_service_screen.dart';
+import '../../features/providers/presentation/choose_provider_path_screen.dart';
+import '../../features/providers/presentation/provider_claim_search_screen.dart';
+import '../../features/providers/presentation/provider_claim_status_screen.dart';
 import '../../features/providers/presentation/provider_dashboard_screen.dart';
 import '../../features/providers/presentation/provider_profile_screen.dart';
 import '../../features/providers/presentation/provider_registration_screen.dart';
@@ -112,8 +115,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/admin-blocked';
       }
 
-      if (user.role == UserRole.provider && path == '/provider/register') {
-        // Already a provider — nothing to register.
+      if (user.role == UserRole.provider &&
+          (path == '/provider/register' ||
+              path == '/provider/choose' ||
+              path == '/provider/claim/search' ||
+              path == '/provider/claim/status')) {
+        // Already a provider — nothing to register or claim.
         return '/provider';
       }
 
@@ -173,6 +180,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ProviderProfileScreen(
           providerId: state.pathParameters['providerId']!,
         ),
+      ),
+      GoRoute(
+        path: '/provider/choose',
+        builder: (context, state) => const ChooseProviderPathScreen(),
+      ),
+      GoRoute(
+        path: '/provider/claim/search',
+        builder: (context, state) => const ProviderClaimSearchScreen(),
+      ),
+      GoRoute(
+        path: '/provider/claim/status',
+        builder: (context, state) => const ProviderClaimStatusScreen(),
       ),
       GoRoute(
         path: '/provider/register',
