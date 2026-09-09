@@ -42,13 +42,36 @@ class SupabaseSubscriptionRepository implements SubscriptionRepository {
     }
   }
 
-  // The `subscriptions` row itself isn't written here — stripe-webhook does
-  // that once Stripe confirms the invoice server-side (same reasoning as
-  // SupabasePaymentRepository.initializeDigitalPayment), so this polls
-  // briefly after the sheet reports success rather than assuming the row
-  // is already active.
+  // The free plan is a launch promotion with no payment at all, so it skips
+  // Stripe and the edge function entirely — subscribe_free_plan (RLS-scoped
+  // via the RPC's own ownership/promo-window checks) writes the active row
+  // directly and returns it, unlike the paid plans below.
   @override
   Future<Subscription> subscribe(String providerId, String plan) async {
+    if (plan == 'free') {
+      try {
+        final row = await _client.rpc(
+          'subscribe_free_plan',
+          params: {'p_provider_id': providerId},
+        );
+        return Subscription.fromJson(row as Map<String, dynamic>);
+      } on PostgrestException catch (e, st) {
+        AppLogger.error('subscribe_free_plan failed', error: e, stackTrace: st);
+        throw ValidationException(
+          e.message.contains('no longer available')
+              ? 'This offer is no longer available.'
+              : e.message.contains('already has an active subscription')
+              ? "You're already listed."
+              : 'Could not start the subscription. Please try again.',
+        );
+      }
+    }
+
+    // The `subscriptions` row itself isn't written here — stripe-webhook does
+    // that once Stripe confirms the invoice server-side (same reasoning as
+    // SupabasePaymentRepository.initializeDigitalPayment), so this polls
+    // briefly after the sheet reports success rather than assuming the row
+    // is already active.
     final FunctionResponse response;
     try {
       response = await _client.functions.invoke(

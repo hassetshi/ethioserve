@@ -15,7 +15,10 @@ class SubscriptionPlan {
   final String interval;
   final String? stripePriceId;
 
-  bool get isAvailable => stripePriceId != null;
+  /// The free plan needs no Stripe Price at all - it's only offered while
+  /// its launch-promotion window is open (enforced server-side by
+  /// get_subscription_plans, which simply omits it once expired).
+  bool get isAvailable => plan == 'free' || stripePriceId != null;
 
   factory SubscriptionPlan.fromJson(Map<String, dynamic> json) =>
       SubscriptionPlan(

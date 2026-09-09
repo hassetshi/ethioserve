@@ -1,6 +1,8 @@
-/// A provider's listing subscription. `plan == 'free'` (the table's
-/// default) means "never subscribed" — search only considers 'professional'
-/// and 'premium' plans with status 'active'.
+/// A provider's listing subscription. "Never subscribed" is represented by
+/// no row existing at all (`SubscriptionRepository.getMySubscription`
+/// returns `null`), not by `plan == 'free'` — a `free` row with
+/// `status == 'active'` is a real launch-promotion listing and counts in
+/// search alongside 'professional' and 'premium'.
 class Subscription {
   const Subscription({
     required this.id,

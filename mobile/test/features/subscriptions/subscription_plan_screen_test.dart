@@ -61,4 +61,32 @@ void main() {
 
     expect(find.text('Not available yet'), findsOneWidget);
   });
+
+  testWidgets('a free launch-offer plan needs no Stripe price to subscribe', (
+    tester,
+  ) async {
+    final fakeRepo = FakeSubscriptionRepository(
+      plans: const [
+        SubscriptionPlan(plan: 'free', priceUsd: 0, interval: 'month'),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [subscriptionRepositoryProvider.overrideWithValue(fakeRepo)],
+        child: const MaterialApp(
+          home: SubscriptionPlanScreen(providerId: 'provider-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Launch offer'), findsOneWidget);
+    expect(find.text('Free for a limited time'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Subscribe'));
+    await tester.pumpAndSettle();
+
+    expect(fakeRepo.mySubscription, isNotNull);
+    expect(fakeRepo.mySubscription!.plan, 'free');
+  });
 }
