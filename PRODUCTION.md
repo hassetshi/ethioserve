@@ -20,9 +20,11 @@ free plan's project limit — the org remains on the free plan, which is
 why backups (below) are still an open gap, not yet paid for.
 
 **What's actually live on it right now**, all verified, not just deployed:
-- All 26 migrations applied (`supabase db push`) — matches dev/staging's
+- All 31 migrations applied (`supabase db push`) — matches dev/staging's
   schema exactly, including both bugs the subscriptions feature's live
-  testing caught and fixed.
+  testing caught and fixed, plus the free-plan promotion and pre-seeded
+  provider claim workflow (see "Free launch promotion & pre-seeded
+  listings" below).
 - All 4 Edge Functions deployed (`ai-search`, `stripe-create-payment-intent`,
   `stripe-create-subscription`, `stripe-webhook`).
 - Secrets set: `ANTHROPIC_API_KEY` (same key as dev/staging — a deliberate
@@ -52,6 +54,55 @@ account would exist but couldn't actually log in, or would be missing
 invariants the rest of `auth.*` assumes hold. The Dashboard's "Add user"
 (or the Admin API, which needs the `service_role` key — deliberately not
 retrievable through this session, by design) both do this correctly.
+
+## Free launch promotion & pre-seeded listings
+
+Production now carries real supply, not just infrastructure: 73 real
+Ethiopian-owned DC-area businesses (`scripts/data/dc-lead-list.csv`, a
+vetted lead list) were imported as verified, publicly searchable provider
+listings via `scripts/import-dc-lead-list.mjs` — 0 skipped for city or
+category. Each is on the new free launch-promotion plan
+(`platform_settings.subscription_plan_free`, added by
+`20260909000027_free_plan_promotion.sql`), which is offered (and every
+seeded listing's `current_period_end`) through **2026-12-09** — set at
+the moment the migration was applied to *this* project, independently of
+when it ran on dev/staging, since production's is the date that actually
+matters for the real promotion.
+
+This required two schema changes beyond the promotion itself, both
+applied and imported cleanly here:
+- 9 new MD/VA cities plus reactivating Silver Spring, MD
+  (`20260909000028_dmv_cities.sql`) — the lead list spans the DMV region,
+  not just DC proper.
+- 12 new business categories (Restaurant, Grocery, Coffee Shop & Bakery,
+  Driving School, Real Estate, etc. — `20260909000029_dmv_business_categories.sql`)
+  since the existing 5 were all home-services trades with no overlap.
+
+A pre-seeded listing has no owner (`provider_profiles.user_id is null`,
+made nullable by `20260909000030_provider_claims.sql`, which also added
+`provider_claim_requests`/`provider_leads` and the
+`request_provider_claim`/`approve_provider_claim`/`reject_provider_claim`
+RPCs). The real business owner requests to claim their listing from the
+app; an admin reviews and approves/rejects manually in admin-web's new
+**Claim requests** page. This full claim flow — request, admin approval,
+ownership transfer, role promotion, and the approval notification — was
+verified live end-to-end against the **dev/staging** project (not
+production itself); the production database has only been verified for
+the migrations applying cleanly and the 73 listings being live and
+searchable, not for a real claim being submitted/approved against it yet.
+
+**Deploy discipline note**: these 5 migrations were pushed via direct
+`supabase db push` CLI (after explicitly relinking from dev to the
+production ref — the CLI defaults to whatever was last linked, which was
+production from the original bootstrap, so this is a real footgun worth
+double-checking every time), not via the `Production Deploy` GitHub
+Action as the release checklist below otherwise mandates. No GitHub API
+token was available in that session to trigger `workflow_dispatch`. The
+import script (`IMPORT_DATABASE_URL` pointed at production) has no
+GitHub Action equivalent at all — it's a manual, deliberate one-off by
+design (see the script's own comments). Worth reconciling the workflow's
+migration state next time it runs, to confirm it doesn't consider
+anything out of sync.
 
 ## What's ready now
 
@@ -196,6 +247,11 @@ Run before every release to production, not just the first one:
       confirmed matching the test-mode endpoint's exact `enabled_events` set
       rather than re-guessed. Dev/staging deliberately stay on the sandbox
       key; only production's secrets changed.
+- [ ] A real claim request submitted and approved against the *production*
+      database specifically (verified only against dev/staging so far —
+      see "Free launch promotion & pre-seeded listings" above). Low risk
+      since the RPCs/RLS are identical to dev/staging's already-verified
+      versions, but not yet exercised live here.
 - [ ] At least one real (small) end-to-end Stripe transaction tested
       against live-mode keys before real customers rely on it. The
       infrastructure blocker that stopped this (real Android testing, see
