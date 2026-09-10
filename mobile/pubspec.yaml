@@ -78,6 +78,10 @@ dependencies:
   # devices; see DeviceSpeechToTextService for the fallback behavior.
   speech_to_text: ^7.4.0
 
+  # Crash/error reporting. No-ops when EnvConfig.sentryDsn is empty (see
+  # main.dart) - safe to build/run before a real DSN exists.
+  sentry_flutter: ^9.29.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

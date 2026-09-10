@@ -37,6 +37,10 @@ class EnvConfig {
     'STRIPE_PUBLISHABLE_KEY',
   );
 
+  /// Crash/error reporting (Sentry). Empty until a project's real DSN is
+  /// filled in — see LOCAL_DEVELOPMENT.md's env-file pattern.
+  static const String sentryDsn = String.fromEnvironment('SENTRY_DSN');
+
   static bool get isConfigured =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 }

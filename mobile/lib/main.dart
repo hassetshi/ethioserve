@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
@@ -31,6 +32,19 @@ Future<void> main() async {
     HttpOverrides.global = _DevHttpOverrides();
   }
 
+  // No-ops (just calls _runApp directly) until a real Sentry DSN is filled
+  // in via dart-define - see EnvConfig.sentryDsn.
+  if (EnvConfig.sentryDsn.isEmpty) {
+    await _runApp();
+    return;
+  }
+  await SentryFlutter.init((options) {
+    options.dsn = EnvConfig.sentryDsn;
+    options.environment = EnvConfig.environment.name;
+  }, appRunner: _runApp);
+}
+
+Future<void> _runApp() async {
   if (EnvConfig.isConfigured) {
     await Supabase.initialize(
       url: EnvConfig.supabaseUrl,

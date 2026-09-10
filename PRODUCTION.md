@@ -199,13 +199,19 @@ because it doesn't matter:
   errors, database errors, and auth failures with no extra setup — this is
   free and already available on the production project the moment it
   exists. Check it manually; there's no alerting on top of it yet.
-- **Before real users**: wire up crash/error reporting in the Flutter app
-  and admin-web (Sentry's free tier covers both Flutter and browser JS) so
-  app crashes and unhandled AI/payment/booking errors surface without
-  someone having to notice a support complaint first.
+- [x] **Sentry scaffolding built**, same "no-op until configured" pattern as
+  `isSupabaseConfigured`: `mobile`'s `EnvConfig.sentryDsn` /
+  `admin-web`'s `env.sentryDsn`, both wired into their app's entry point
+  (`main.dart`'s `SentryFlutter.init`, `main.tsx`'s `Sentry.init`), reading
+  from a new `SENTRY_DSN` / `VITE_SENTRY_DSN` env key (added to every
+  env file, left empty). **Still needed**: sign up for Sentry's free
+  tier, create one project per app, and fill the two real DSNs into
+  `mobile/env/production.json` and `admin-web/.env.production`
+  (gitignored, same pattern as every other key there) — nothing reports
+  to Sentry until that's done.
 - **Before real users**: a simple external uptime check (e.g. UptimeRobot's
   free tier) against the `ai-search` Edge Function endpoint, so an outage
-  is caught proactively rather than by an angry user.
+  is caught proactively rather than by an angry user. Not started.
 - Slow-query monitoring is a paid-plan Supabase feature (Query Performance)
   — revisit once real query volume exists to make it worth reading.
 
