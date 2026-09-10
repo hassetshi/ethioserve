@@ -1,0 +1,85 @@
+workflows:
+  ios-testflight:
+    name: iOS TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    # Manual trigger only (via Codemagic's "Start new build"), mirroring
+    # this repo's existing "no automatic production deploy" discipline
+    # (see .github/workflows/production-deploy.yml) — every TestFlight
+    # build is a deliberate action, not something every push should burn
+    # free build minutes on.
+    triggering:
+      events: []
+
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      groups:
+        # Create this group in Codemagic's dashboard (Teams > your team >
+        # Environment variables) with these exact names, secured/encrypted:
+        #   SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLISHABLE_KEY,
+        #   SENTRY_DSN (optional, blank is fine), AI_API_URL, MAPS_API_KEY
+        # Use production's real values (see mobile/env/production.json,
+        # gitignored) — this is what gets built and shipped to real
+        # testers, so it should be the real backend, not dev/staging.
+        - ethioserve_production
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ethioserve.ethioserve
+
+    integrations:
+      # Connect your Apple Developer account under Codemagic's Team
+      # settings > Integrations > App Store Connect, then reference that
+      # integration's name here once it's created.
+      app_store_connect: ethioserve_appstore_connect
+
+    scripts:
+      - name: Write production env file for --dart-define-from-file
+        working_directory: mobile
+        script: |
+          cat > env/production.json <<EOF
+          {
+            "ENVIRONMENT": "production",
+            "SUPABASE_URL": "$SUPABASE_URL",
+            "SUPABASE_ANON_KEY": "$SUPABASE_ANON_KEY",
+            "AI_API_URL": "$AI_API_URL",
+            "MAPS_API_KEY": "$MAPS_API_KEY",
+            "STRIPE_PUBLISHABLE_KEY": "$STRIPE_PUBLISHABLE_KEY",
+            "SENTRY_DSN": "$SENTRY_DSN"
+          }
+          EOF
+
+      - name: Get Flutter packages
+        working_directory: mobile
+        script: flutter packages pub get
+
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: Build iOS .ipa for App Store distribution
+        working_directory: mobile
+        script: |
+          flutter build ipa --release \
+            --dart-define-from-file=env/production.json \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - mobile/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        # Internal testers (your own Apple ID, up to 100 people on your
+        # team) get a TestFlight build with no Apple review needed at
+        # all — this is what lets you test on your own iPhone quickly.
+        # Add yourself as an internal tester in App Store Connect first.
+        beta_groups:
+          - EthioServe Internal Testers
