@@ -162,13 +162,32 @@ anything out of sync.
 
 Supabase's automatic daily backups with point-in-time recovery are a
 **paid-plan feature** (Pro tier and above) — the free tier this project has
-used through dev/staging does not include them. This is a real, honest gap:
-**do not launch with real user data on the free tier without either
-upgrading the production project or standing up an external backup
-(`pg_dump` on a schedule).** Once on a plan with backups: document the
-actual retention window shown in the Supabase dashboard here, and test a
-real restore at least once before launch — an untested backup is not a
-backup.
+used through dev/staging does not include them. Chosen fix: an external
+backup instead of upgrading the plan.
+
+[.github/workflows/production-backup.yml](.github/workflows/production-backup.yml)
+runs `pg_dump` against production daily (`0 8 * * *` UTC, plus manual
+`workflow_dispatch`) and uploads a compressed, `pg_restore`-compatible
+dump as a private GitHub Actions artifact, retained 90 days (GitHub's
+maximum for artifacts — a longer archive would need external storage
+instead). Reuses the `SUPABASE_PROD_PROJECT_REF`/`SUPABASE_PROD_DB_PASSWORD`
+secrets `production-deploy.yml` already has; no new secrets needed.
+
+**Known limitations, honestly**: GitHub disables scheduled workflows on
+a repo with no push activity in 60 days, and can delay cron runs during
+high platform load — acceptable for a free safety net, but worth
+actually checking the Actions tab shows recent successful runs before
+trusting it, not just assuming the cron fired. `pg_dump` itself wasn't
+runnable locally to test end-to-end (no PostgreSQL client tools on this
+dev machine) — the connection credentials are proven working (the exact
+same host/user/password this session already used repeatedly via direct
+Postgres access), but **the workflow's first actual run should be
+confirmed manually** (Actions tab → Production Backup → Run workflow →
+check it succeeds and produces a real artifact) rather than assumed
+correct from the file alone.
+[ ] Restore not yet tested — an untested backup is not a backup. Test a
+real `pg_restore` (into a scratch database, never over production or
+dev) at least once before relying on this for real launch.
 
 ## Monitoring and alerting
 
