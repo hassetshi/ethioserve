@@ -86,10 +86,11 @@ RPCs). The real business owner requests to claim their listing from the
 app; an admin reviews and approves/rejects manually in admin-web's new
 **Claim requests** page. This full claim flow — request, admin approval,
 ownership transfer, role promotion, and the approval notification — was
-verified live end-to-end against the **dev/staging** project (not
-production itself); the production database has only been verified for
-the migrations applying cleanly and the 73 listings being live and
-searchable, not for a real claim being submitted/approved against it yet.
+verified live end-to-end against **both** dev/staging and production
+itself: a real claim on "Selam Injera Bakery" was submitted from the
+production mobile app and approved via admin-web's production build,
+confirmed via direct DB query (`user_id` set, `role` promoted, the
+"Claim approved" notification created).
 
 **Deploy discipline note**: these 5 migrations were pushed via direct
 `supabase db push` CLI (after explicitly relinking from dev to the
@@ -247,11 +248,12 @@ Run before every release to production, not just the first one:
       confirmed matching the test-mode endpoint's exact `enabled_events` set
       rather than re-guessed. Dev/staging deliberately stay on the sandbox
       key; only production's secrets changed.
-- [ ] A real claim request submitted and approved against the *production*
-      database specifically (verified only against dev/staging so far —
-      see "Free launch promotion & pre-seeded listings" above). Low risk
-      since the RPCs/RLS are identical to dev/staging's already-verified
-      versions, but not yet exercised live here.
+- [x] A real claim request submitted and approved against the *production*
+      database: `+12024060395` requested "Selam Injera Bakery" from the
+      real mobile app (production env), approved via admin-web's Claim
+      requests page (production build), confirmed live —
+      `provider_profiles.user_id` set, `users.role` promoted to
+      `provider`, and the "Claim approved" notification row created.
 - [ ] At least one real (small) end-to-end Stripe transaction tested
       against live-mode keys before real customers rely on it. The
       infrastructure blocker that stopped this (real Android testing, see
