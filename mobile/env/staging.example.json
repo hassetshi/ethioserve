@@ -4,5 +4,6 @@
   "SUPABASE_ANON_KEY": "",
   "AI_API_URL": "",
   "MAPS_API_KEY": "",
-  "STRIPE_PUBLISHABLE_KEY": ""
+  "STRIPE_PUBLISHABLE_KEY": "",
+  "SENTRY_DSN": ""
 }
