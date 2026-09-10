@@ -200,14 +200,22 @@ Run before every release to production, not just the first one:
       a real successful run; use that workflow, not the CLI, for every
       deploy from here on.
 - [x] `ai-search` edge function deployed and smoke-tested with a real query.
-- [ ] RLS verified on the production project: run
-      `node scripts/security-tests.mjs` with `DEV_DATABASE_URL` pointed at
-      *production* — the same 18+ checks that guard dev/staging. Deliberately
-      not run yet: the script's trigger-level tests need fixed dev-seed
-      identities (`scripts/dev-seed-sample-provider.sql` etc.) that
-      production has no equivalent of, and production shouldn't carry
-      permanent fake data — do this as a temporary seed-and-clean-up pass
-      right before real launch, not casually during bootstrap.
+- [x] RLS verified on production: `security-tests.mjs` (now configurable
+      via `SECURITY_TEST_*` env vars — see the script's own comments) run
+      against production with `DEV_DATABASE_URL` pointed there, using a
+      temporary throwaway customer identity (created via the same direct
+      `auth.users` insert `dev-seed-second-test-user.sql` uses, for RLS
+      simulation only — never a real login) and "Excellent Workflows" as
+      the test provider. 26/26 checks passed after one investigation: the
+      first run showed 25/26, with "a verified provider WITH an active
+      subscription appears in search" failing — root-caused to
+      `search_providers`'s `limit least(p_limit, 50)` cap combined with
+      production now genuinely having 74 eligible providers (the 73 seeded
+      listings + this one), not an RLS gap — confirmed by a direct count
+      query matching the RPC's own `where` clause. Every temporary change
+      (the test provider's `verification_status`, the throwaway identity)
+      was fully reverted/deleted afterward — no permanent fake data left
+      in production.
 - [x] No `service_role` key anywhere in `mobile/` or `admin-web/` — verified
       two ways: no source reference to `SERVICE_ROLE`/`service_role` in
       either `mobile/lib` or `admin-web/src` (so a bundler has nothing to

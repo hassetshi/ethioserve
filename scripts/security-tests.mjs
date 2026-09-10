@@ -11,18 +11,28 @@
 //     (optional — without it, only the REST/RPC-level tests run; the
 //     trigger-level actor-authorization tests need a direct DB connection
 //     to simulate different users via the request.jwt.claim.sub GUC)
+//
+// To run against a different project (e.g. production, right before
+// launch — see PRODUCTION.md's release checklist), override these via env
+// vars rather than editing the defaults below, which stay dev's fixed
+// identities from scripts/dev-seed-sample-provider.sql and
+// scripts/dev-seed-second-test-user.sql:
+//   SECURITY_TEST_SUPABASE_URL, SECURITY_TEST_ANON_KEY,
+//   SECURITY_TEST_CUSTOMER_ID, SECURITY_TEST_PROVIDER_USER_ID,
+//   SECURITY_TEST_PROVIDER_ID, SECURITY_TEST_SERVICE_ID
+// The target project has no equivalent of the dev-seed scripts, so the
+// identities passed in must already exist there — seed and clean up
+// temporary ones around this run rather than leaving permanent fake data.
 import pg from 'pg';
 
-const SUPABASE_URL = 'https://xvcwqkghhkuwvtdrmcey.supabase.co';
-const ANON_KEY = 'sb_publishable_7WU-tvendCOEWQq2QQ7kLg_7P7vQkhW';
+const SUPABASE_URL = process.env.SECURITY_TEST_SUPABASE_URL ?? 'https://xvcwqkghhkuwvtdrmcey.supabase.co';
+const ANON_KEY = process.env.SECURITY_TEST_ANON_KEY ?? 'sb_publishable_7WU-tvendCOEWQq2QQ7kLg_7P7vQkhW';
 const DB_URL = process.env.DEV_DATABASE_URL;
 
-// Fixed dev identities from scripts/dev-seed-sample-provider.sql and
-// scripts/dev-seed-second-test-user.sql.
-const CUSTOMER_ID = '6318f730-9442-450d-a299-5fe2e9e75b39';
-const PROVIDER_USER_ID = 'c93bd671-9168-471a-973a-6b93722ffeb7';
-const PROVIDER_ID = 'f4e3860a-ab67-4b38-977d-80e240c6d18e';
-const SERVICE_ID = '8246d401-4690-458b-ad26-c03984450c0d';
+const CUSTOMER_ID = process.env.SECURITY_TEST_CUSTOMER_ID ?? '6318f730-9442-450d-a299-5fe2e9e75b39';
+const PROVIDER_USER_ID = process.env.SECURITY_TEST_PROVIDER_USER_ID ?? 'c93bd671-9168-471a-973a-6b93722ffeb7';
+const PROVIDER_ID = process.env.SECURITY_TEST_PROVIDER_ID ?? 'f4e3860a-ab67-4b38-977d-80e240c6d18e';
+const SERVICE_ID = process.env.SECURITY_TEST_SERVICE_ID ?? '8246d401-4690-458b-ad26-c03984450c0d';
 
 let passed = 0;
 let failed = 0;
