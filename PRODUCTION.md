@@ -254,14 +254,22 @@ Run before every release to production, not just the first one:
       requests page (production build), confirmed live —
       `provider_profiles.user_id` set, `users.role` promoted to
       `provider`, and the "Claim approved" notification row created.
-- [ ] At least one real (small) end-to-end Stripe transaction tested
-      against live-mode keys before real customers rely on it. The
-      infrastructure blocker that stopped this (real Android testing, see
-      below) is now resolved — `flutter_stripe_web`'s PaymentSheet not
-      working reliably in a browser was never fixable anyway, so a real
-      device/emulator is the only path regardless. This is now a
-      **real-money** test once it runs — small, deliberate, and only when
-      you're ready.
+- [x] A real, live-mode Stripe transaction: "Excellent Workflows"
+      (registered as a genuine new provider, Washington DC-area) subscribed
+      to the Professional plan ($29/month) via the native PaymentSheet on
+      the production build, using a real card. Confirmed via direct DB
+      query — real `cus_`/`sub_` Stripe IDs, `status: active`,
+      `current_period_end` one real month out. This surfaced a real gap
+      along the way: production's `platform_settings` had never had live
+      Stripe Price objects created for the paid plans (only the free plan
+      was configured) — `scripts/create-stripe-subscription-prices.mjs`
+      needs a `service_role` key it's deliberately never had, so the two
+      Products/Prices were created directly via the Stripe API instead
+      (using a narrowly-scoped restricted key, Products+Prices write only,
+      created and revoked for this one-off task) and `stripe_price_id`
+      written straight to `platform_settings` via direct Postgres access.
+      This subscription is intentionally left active, not cancelled —
+      it's a real business's real listing now, not disposable test data.
 - [x] Mobile app actually builds and runs on a real Android device/emulator
       — confirmed live: real categories loaded from the dev Supabase
       project over HTTPS, with the dev machine's Norton SSL-interception
