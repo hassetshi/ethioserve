@@ -36,6 +36,19 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // AGP's "lint vital" task runs on every release build by default and
+    // blocks the build entirely if it can't resolve any of its own
+    // lint-checks dependencies - confirmed live: it failed trying to fetch
+    // com.google.android.gms:play-services-tapandpay:17.1.2, a transitive
+    // lint-only dependency of stripe_android's Tap-to-Pay support (a
+    // feature this app doesn't use), not an actual problem with our code.
+    // `flutter analyze` is this project's real lint gate (mobile-ci.yml);
+    // this only stops that unrelated, unresolvable dependency from being
+    // able to block a release/App Bundle build.
+    lint {
+        checkReleaseBuilds = false
+    }
 }
 
 kotlin {
