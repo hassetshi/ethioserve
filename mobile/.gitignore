@@ -33,6 +33,11 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Gradle's own per-module build output (android/build/, android/app/build/)
+# is separate from Flutter's /build/ above and wasn't previously covered -
+# surfaced when a real (non-debug) signed release build first ran.
+/android/**/build/
+
 # Symbolication related
 app.*.symbols
 
