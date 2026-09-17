@@ -1,5 +1,6 @@
 import 'package:ethioserve/features/catalog/presentation/catalog_providers.dart';
 import 'package:ethioserve/features/home/presentation/home_screen.dart';
+import 'package:ethioserve/features/onboarding/presentation/language_selection_screen.dart';
 import 'package:ethioserve/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,10 @@ void main() {
           builder: (_, state) => Text(
             'providers-for-category-${state.pathParameters['categoryId']}',
           ),
+        ),
+        GoRoute(
+          path: '/language/change',
+          builder: (_, _) => const LanguageSelectionScreen(),
         ),
       ],
     );
@@ -131,4 +136,33 @@ void main() {
 
     expect(find.text('providers-for-category-cat-1'), findsOneWidget);
   });
+
+  testWidgets(
+    'a logged-out guest can still reach language selection from Home',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            catalogRepositoryProvider.overrideWithValue(
+              FakeCatalogRepository(),
+            ),
+            await fakeSharedPreferencesOverride(),
+          ],
+          child: wrap(const HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Guest (no auth override -> currentUserProvider resolves to no
+      // user): Profile is login-gated, so Language must be reachable
+      // without it - this is the only entry point a guest has.
+      expect(find.text('Log in'), findsOneWidget);
+      expect(find.byTooltip('Profile'), findsNothing);
+
+      await tester.tap(find.byTooltip('Language'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LanguageSelectionScreen), findsOneWidget);
+    },
+  );
 }

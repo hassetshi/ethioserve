@@ -27,26 +27,37 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appName),
-        actions: isLoggedIn
-            ? [
-                const NotificationBell(),
-                IconButton(
-                  onPressed: () => context.push('/bookings'),
-                  icon: const Icon(Icons.calendar_month_outlined),
-                  tooltip: 'My Bookings',
-                ),
-                IconButton(
-                  onPressed: () => context.push('/profile'),
-                  icon: const Icon(Icons.person_outline),
-                  tooltip: 'Profile',
-                ),
-              ]
-            : [
-                TextButton(
-                  onPressed: () => context.push('/login'),
-                  child: const Text('Log in'),
-                ),
-              ],
+        actions: [
+          // Language also lives in Profile, but Profile is login-gated and
+          // Home is the one screen every user (guest or signed in) always
+          // reaches - a guest who picked a language on first launch would
+          // otherwise have no way back to it at all.
+          IconButton(
+            onPressed: () => context.push('/language/change'),
+            icon: const Icon(Icons.language),
+            tooltip: 'Language',
+          ),
+          ...isLoggedIn
+              ? [
+                  const NotificationBell(),
+                  IconButton(
+                    onPressed: () => context.push('/bookings'),
+                    icon: const Icon(Icons.calendar_month_outlined),
+                    tooltip: 'My Bookings',
+                  ),
+                  IconButton(
+                    onPressed: () => context.push('/profile'),
+                    icon: const Icon(Icons.person_outline),
+                    tooltip: 'Profile',
+                  ),
+                ]
+              : [
+                  TextButton(
+                    onPressed: () => context.push('/login'),
+                    child: const Text('Log in'),
+                  ),
+                ],
+        ],
       ),
       body: SafeArea(
         child: ListView(
