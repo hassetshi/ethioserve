@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../fakes/fake_catalog_repository.dart';
 import '../../fakes/fake_provider_repository.dart';
+import '../../helpers/shared_preferences_override.dart';
 
 void main() {
   testWidgets('shows the selected service name in the AppBar title', (
@@ -19,6 +20,7 @@ void main() {
           providerRepositoryProvider.overrideWithValue(
             FakeProviderRepository(),
           ),
+          await fakeSharedPreferencesOverride(),
         ],
         child: const MaterialApp(
           home: ProviderSearchResultsScreen(serviceId: 'svc-1'),
@@ -40,6 +42,7 @@ void main() {
           providerRepositoryProvider.overrideWithValue(
             FakeProviderRepository(),
           ),
+          await fakeSharedPreferencesOverride(),
         ],
         child: const MaterialApp(
           home: ProviderSearchResultsScreen(categoryId: 'cat-1'),

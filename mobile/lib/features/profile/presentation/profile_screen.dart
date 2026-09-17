@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers/locale_provider.dart';
 import '../../auth/domain/app_user.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../domain/profile.dart';
@@ -126,12 +127,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           )
                         : const Text('Save'),
                   ),
+                  const _LanguageSection(),
                   const _BecomeProviderSection(),
                 ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Reuses LanguageSelectionScreen (via /language/change) rather than a
+/// separate picker, so there's exactly one place that knows the supported
+/// languages and how selecting one behaves.
+class _LanguageSection extends ConsumerWidget {
+  const _LanguageSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final languageCode = ref.watch(localeProvider)?.languageCode;
+    final languageName = languageCode == 'am' ? 'አማርኛ' : 'English';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: OutlinedButton.icon(
+        onPressed: () => context.push('/language/change'),
+        icon: const Icon(Icons.language),
+        label: Text('Language: $languageName'),
       ),
     );
   }

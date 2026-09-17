@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../fakes/fake_catalog_repository.dart';
+import '../../helpers/shared_preferences_override.dart';
 
 void main() {
   Widget wrap(Widget child) {
@@ -42,6 +43,7 @@ void main() {
       ProviderScope(
         overrides: [
           catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: wrap(const HomeScreen()),
       ),
@@ -62,6 +64,7 @@ void main() {
       ProviderScope(
         overrides: [
           catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: wrap(const HomeScreen()),
       ),
@@ -86,6 +89,7 @@ void main() {
       ProviderScope(
         overrides: [
           catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: wrap(const HomeScreen()),
       ),
@@ -109,6 +113,7 @@ void main() {
       ProviderScope(
         overrides: [
           catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: wrap(const HomeScreen()),
       ),

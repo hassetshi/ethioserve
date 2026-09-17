@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'core/config/env_config.dart';
 import 'core/logging/app_logger.dart';
 import 'core/providers/push_notification_provider.dart';
+import 'core/providers/shared_preferences_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,7 +75,13 @@ Future<void> _runApp() async {
   // A single container, created before runApp so push init can happen
   // ahead of the first frame, then handed to the widget tree via
   // UncontrolledProviderScope rather than creating a second container.
-  final container = ProviderContainer();
+  // sharedPreferencesProvider is overridden here (not left to its default
+  // throwing implementation) because SharedPreferences.getInstance() is
+  // async but LocaleNotifier.build() needs to read it synchronously.
+  final prefs = await SharedPreferences.getInstance();
+  final container = ProviderContainer(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+  );
   await container.read(pushNotificationServiceProvider).initialize();
 
   runApp(

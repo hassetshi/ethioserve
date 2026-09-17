@@ -11,6 +11,9 @@ class ProviderSummary {
     required this.reviewCount,
     required this.verificationStatus,
     this.distanceKm,
+    this.phone,
+    this.address,
+    this.isOpenNow,
   });
 
   final String providerId;
@@ -21,6 +24,12 @@ class ProviderSummary {
   final int reviewCount;
   final String verificationStatus;
   final double? distanceKm;
+  final String? phone;
+  final String? address;
+
+  /// Null means "no hours on file" (most real providers today), not
+  /// "closed" - see 20260916000032_search_providers_contact_and_hours.sql.
+  final bool? isOpenNow;
 
   factory ProviderSummary.fromJson(Map<String, dynamic> json) =>
       ProviderSummary(
@@ -32,5 +41,8 @@ class ProviderSummary {
         reviewCount: json['review_count'] as int,
         verificationStatus: json['verification_status'] as String,
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
+        phone: json['phone'] as String?,
+        address: json['address'] as String?,
+        isOpenNow: json['is_open_now'] as bool?,
       );
 }

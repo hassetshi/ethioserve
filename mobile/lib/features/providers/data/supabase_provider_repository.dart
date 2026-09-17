@@ -234,7 +234,7 @@ class SupabaseProviderRepository implements ProviderRepository {
       final rows = await _client
           .from('provider_profiles')
           .select(
-            'provider_id:id, business_name, description_en, description_am, rating, review_count, verification_status',
+            'provider_id:id, business_name, description_en, description_am, rating, review_count, verification_status, phone, address',
           )
           .isFilter('user_id', null)
           .eq('is_active', true)

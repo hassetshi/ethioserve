@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/locale_provider.dart';
+import '../../../core/providers/location_provider.dart';
+import '../../../core/widgets/responsive_content_width.dart';
 import '../../reviews/presentation/provider_reviews_section.dart';
 import '../domain/provider_detail.dart';
 import 'provider_providers.dart';
@@ -66,107 +68,130 @@ class _ProviderProfileBody extends ConsumerWidget {
   bool get _hasLocation =>
       provider.latitude != null && provider.longitude != null;
 
+  Future<void> _openDirections(WidgetRef ref) async {
+    final origin = await ref.read(locationServiceProvider).getCurrentLocation();
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1'
+      '${origin != null ? '&origin=${origin.latitude},${origin.longitude}' : ''}'
+      '&destination=${provider.latitude},${provider.longitude}'
+      '&travelmode=driving',
+    );
+    launchUrl(uri);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        if (provider.photoUrls.isNotEmpty)
-          SizedBox(
-            height: 160,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: provider.photoUrls.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (context, index) => ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  provider.photoUrls[index],
-                  width: 220,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const SizedBox(
-                    width: 220,
-                    child: Center(
-                      child: Icon(Icons.image_not_supported_outlined),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                provider.businessName,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-            if (provider.isVerified)
-              const Icon(Icons.verified, color: Colors.blue),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            const Icon(Icons.star, size: 18, color: Colors.amber),
-            const SizedBox(width: 4),
-            Text(
-              '${provider.rating.toStringAsFixed(1)} (${provider.reviewCount} reviews)',
-            ),
-            if (_cityName != null) ...[
-              const SizedBox(width: 12),
-              const Icon(Icons.location_on_outlined, size: 18),
-              const SizedBox(width: 2),
-              Text(_cityName!),
-            ],
-          ],
-        ),
-        if (provider.phone != null || _hasLocation) ...[
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
+        ResponsiveContentWidth(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (provider.phone != null)
-                OutlinedButton.icon(
-                  onPressed: () =>
-                      launchUrl(Uri(scheme: 'tel', path: provider.phone)),
-                  icon: const Icon(Icons.call_outlined),
-                  label: const Text('Call'),
+              if (provider.photoUrls.isNotEmpty)
+                SizedBox(
+                  height: 160,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final photoWidth = (constraints.maxWidth * 0.6).clamp(
+                        160.0,
+                        280.0,
+                      );
+                      return ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: provider.photoUrls.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) => ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            provider.photoUrls[index],
+                            width: photoWidth,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => SizedBox(
+                              width: photoWidth,
+                              child: const Center(
+                                child: Icon(Icons.image_not_supported_outlined),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              if (_hasLocation)
-                OutlinedButton.icon(
-                  onPressed: () => launchUrl(
-                    Uri.parse(
-                      'https://www.google.com/maps/search/?api=1&query='
-                      '${provider.latitude},${provider.longitude}',
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      provider.businessName,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
-                  icon: const Icon(Icons.directions_outlined),
-                  label: const Text('Get directions'),
+                  if (provider.isVerified)
+                    const Icon(Icons.verified, color: Colors.blue),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.star, size: 18, color: Colors.amber),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${provider.rating.toStringAsFixed(1)} (${provider.reviewCount} reviews)',
+                  ),
+                  if (_cityName != null) ...[
+                    const SizedBox(width: 12),
+                    const Icon(Icons.location_on_outlined, size: 18),
+                    const SizedBox(width: 2),
+                    Text(_cityName!),
+                  ],
+                ],
+              ),
+              if (provider.phone != null || _hasLocation) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    if (provider.phone != null)
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            launchUrl(Uri(scheme: 'tel', path: provider.phone)),
+                        icon: const Icon(Icons.call_outlined),
+                        label: const Text('Call'),
+                      ),
+                    if (_hasLocation)
+                      OutlinedButton.icon(
+                        onPressed: () => _openDirections(ref),
+                        icon: const Icon(Icons.directions_outlined),
+                        label: const Text('Get directions'),
+                      ),
+                  ],
                 ),
+              ],
+              if (_description != null) ...[
+                const SizedBox(height: 16),
+                Text(_description!),
+              ],
+              const SizedBox(height: 24),
+              Text('Services', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              ...provider.services.map(
+                (service) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    languageCode == 'am' ? service.nameAm : service.nameEn,
+                  ),
+                  trailing: Text(_formatPrice(service)),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text('Reviews', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              ProviderReviewsSection(providerId: provider.id),
             ],
           ),
-        ],
-        if (_description != null) ...[
-          const SizedBox(height: 16),
-          Text(_description!),
-        ],
-        const SizedBox(height: 24),
-        Text('Services', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        ...provider.services.map(
-          (service) => ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(languageCode == 'am' ? service.nameAm : service.nameEn),
-            trailing: Text(_formatPrice(service)),
-          ),
         ),
-        const SizedBox(height: 24),
-        Text('Reviews', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        ProviderReviewsSection(providerId: provider.id),
       ],
     );
   }

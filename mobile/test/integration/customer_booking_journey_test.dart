@@ -22,6 +22,7 @@ import '../fakes/fake_auth_repository.dart';
 import '../fakes/fake_booking_repository.dart';
 import '../fakes/fake_catalog_repository.dart';
 import '../fakes/fake_provider_repository.dart';
+import '../helpers/shared_preferences_override.dart';
 
 void main() {
   testWidgets(
@@ -52,6 +53,7 @@ void main() {
             bookingRepositoryProvider.overrideWithValue(
               FakeBookingRepository(),
             ),
+            await fakeSharedPreferencesOverride(),
           ],
           child: const EthioServeApp(),
         ),

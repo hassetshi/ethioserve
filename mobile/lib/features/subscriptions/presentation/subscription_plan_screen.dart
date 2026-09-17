@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/widgets/responsive_content_width.dart';
 import '../domain/subscription_plan.dart';
 import 'subscription_providers.dart';
 
@@ -66,25 +67,27 @@ class _SubscriptionPlanScreenState
           error: (_, _) => const Center(
             child: Text('Something went wrong. Please try again.'),
           ),
-          data: (plans) => ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              const Text(
-                'Subscribe to appear in customer search results. You can '
-                'subscribe now or later from your dashboard.',
-              ),
-              const SizedBox(height: 16),
-              ...plans.map(
-                (plan) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _PlanCard(
-                    plan: plan,
-                    busy: _busy,
-                    onSubscribe: () => _subscribe(plan.plan),
+          data: (plans) => ResponsiveContentWidth(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                const Text(
+                  'Subscribe to appear in customer search results. You can '
+                  'subscribe now or later from your dashboard.',
+                ),
+                const SizedBox(height: 16),
+                ...plans.map(
+                  (plan) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _PlanCard(
+                      plan: plan,
+                      busy: _busy,
+                      onSubscribe: () => _subscribe(plan.plan),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
