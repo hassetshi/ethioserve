@@ -6,6 +6,7 @@ import '../../../core/providers/locale_provider.dart';
 import '../../../core/providers/location_provider.dart';
 import '../../catalog/presentation/catalog_providers.dart';
 import 'provider_providers.dart';
+import 'widgets/provider_result_card.dart';
 
 const _ratingOptions = [null, 3.0, 4.0, 4.5];
 
@@ -174,31 +175,11 @@ class _ProviderSearchResultsScreenState
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: providers.length,
-                  separatorBuilder: (_, _) => const Divider(),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final provider = providers[index];
-                    return ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(Icons.storefront),
-                      ),
-                      title: Text(provider.businessName),
-                      subtitle: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.star, size: 16, color: Colors.amber),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${provider.rating.toStringAsFixed(1)} (${provider.reviewCount})',
-                          ),
-                          if (provider.distanceKm != null) ...[
-                            const SizedBox(width: 12),
-                            Text(
-                              '${provider.distanceKm!.toStringAsFixed(1)} km',
-                            ),
-                          ],
-                        ],
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
+                    return ProviderResultCard(
+                      summary: provider,
                       onTap: () =>
                           context.push('/providers/${provider.providerId}'),
                     );

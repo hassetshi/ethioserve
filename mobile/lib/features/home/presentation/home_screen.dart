@@ -71,20 +71,32 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (_, _) =>
                   const Text('Something went wrong. Please try again.'),
-              data: (categories) => GridView.count(
-                crossAxisCount: 3,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                children: categories
-                    .map(
-                      (category) => _CategoryTile(
-                        label: category.localizedName(languageCode),
-                        onTap: () => context.push('/categories/${category.id}'),
-                      ),
-                    )
-                    .toList(),
+              data: (categories) => LayoutBuilder(
+                builder: (context, constraints) {
+                  // Hardcoding 3 columns left a tablet's extra width mostly
+                  // empty inside each tile; scale the column count with the
+                  // actual available width instead (phones settle on 3,
+                  // wide tablets on up to 6).
+                  final crossAxisCount = (constraints.maxWidth / 120)
+                      .floor()
+                      .clamp(3, 6);
+                  return GridView.count(
+                    crossAxisCount: crossAxisCount,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    children: categories
+                        .map(
+                          (category) => _CategoryTile(
+                            label: category.localizedName(languageCode),
+                            onTap: () =>
+                                context.push('/categories/${category.id}'),
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
               ),
             ),
           ],

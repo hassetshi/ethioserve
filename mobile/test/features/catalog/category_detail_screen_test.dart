@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../fakes/fake_catalog_repository.dart';
+import '../../helpers/shared_preferences_override.dart';
 
 void main() {
   testWidgets('shows services for the category', (tester) async {
@@ -12,6 +13,7 @@ void main() {
       ProviderScope(
         overrides: [
           catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: const MaterialApp(
           home: CategoryDetailScreen(categoryId: 'cat-1'),

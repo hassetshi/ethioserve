@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../fakes/fake_booking_repository.dart';
+import '../../helpers/shared_preferences_override.dart';
 
 void main() {
   testWidgets('shows a booking with its provider, service, and status', (
@@ -14,6 +15,7 @@ void main() {
       ProviderScope(
         overrides: [
           bookingRepositoryProvider.overrideWithValue(FakeBookingRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: const MaterialApp(home: BookingsListScreen()),
       ),

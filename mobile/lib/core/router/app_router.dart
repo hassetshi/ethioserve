@@ -132,6 +132,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/language',
         builder: (context, state) => const LanguageSelectionScreen(),
       ),
+      GoRoute(
+        path: '/language/change',
+        builder: (context, state) => LanguageSelectionScreen(
+          onLanguageSelected: () =>
+              context.canPop() ? context.pop() : context.go('/profile'),
+        ),
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/otp',

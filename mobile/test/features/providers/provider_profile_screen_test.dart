@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../fakes/fake_provider_repository.dart';
 import '../../fakes/fake_review_repository.dart';
+import '../../helpers/shared_preferences_override.dart';
 
 void main() {
   Widget wrap() {
@@ -40,6 +41,7 @@ void main() {
             FakeProviderRepository(),
           ),
           reviewRepositoryProvider.overrideWithValue(FakeReviewRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: wrap(),
       ),

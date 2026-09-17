@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'fakes/fake_auth_repository.dart';
 import 'fakes/fake_catalog_repository.dart';
 import 'fakes/fake_provider_repository.dart';
+import 'helpers/shared_preferences_override.dart';
 
 void main() {
   testWidgets('app boots to the language selection screen', (tester) async {
@@ -16,6 +17,7 @@ void main() {
       ProviderScope(
         overrides: [
           authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: const EthioServeApp(),
       ),
@@ -37,6 +39,7 @@ void main() {
             catalogRepositoryProvider.overrideWithValue(
               FakeCatalogRepository(),
             ),
+            await fakeSharedPreferencesOverride(),
           ],
           child: const EthioServeApp(),
         ),
@@ -72,6 +75,7 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuth),
           catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+          await fakeSharedPreferencesOverride(),
         ],
         child: const EthioServeApp(),
       ),
@@ -106,6 +110,7 @@ void main() {
           providerRepositoryProvider.overrideWithValue(
             FakeProviderRepository(myProviderId: 'provider-1'),
           ),
+          await fakeSharedPreferencesOverride(),
         ],
         child: const EthioServeApp(),
       ),

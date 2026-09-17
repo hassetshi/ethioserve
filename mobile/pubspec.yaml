@@ -82,6 +82,9 @@ dependencies:
   # main.dart) - safe to build/run before a real DSN exists.
   sentry_flutter: ^9.29.0
 
+  # Persists the user's language choice across app restarts (locale_provider.dart).
+  shared_preferences: ^2.5.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
