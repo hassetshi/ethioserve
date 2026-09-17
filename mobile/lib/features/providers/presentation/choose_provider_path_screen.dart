@@ -30,7 +30,9 @@ class ChooseProviderPathScreen extends ConsumerWidget {
               // pending ones (or, briefly, approved ones before the
               // provider row shows up) go straight to the status screen.
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (context.mounted) context.go('/provider/claim/status');
+                if (context.mounted) {
+                  context.pushReplacement('/provider/claim/status');
+                }
               });
               return const Center(child: CircularProgressIndicator());
             }

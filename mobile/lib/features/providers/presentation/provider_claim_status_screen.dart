@@ -57,7 +57,8 @@ class ProviderClaimStatusScreen extends ConsumerWidget {
                   if (claim.isRejected) ...[
                     const SizedBox(height: 24),
                     FilledButton(
-                      onPressed: () => context.go('/provider/choose'),
+                      onPressed: () =>
+                          context.pushReplacement('/provider/choose'),
                       child: const Text('Try again'),
                     ),
                   ],

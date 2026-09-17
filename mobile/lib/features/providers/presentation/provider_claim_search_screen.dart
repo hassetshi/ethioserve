@@ -52,7 +52,7 @@ class _ProviderClaimSearchScreenState
     try {
       await ref.read(providerRepositoryProvider).requestClaim(providerId);
       ref.invalidate(myClaimStatusProvider);
-      if (mounted) context.go('/provider/claim/status');
+      if (mounted) context.pushReplacement('/provider/claim/status');
     } on ValidationException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
