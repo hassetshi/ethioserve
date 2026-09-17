@@ -164,6 +164,78 @@ void main() {
     expect(find.text('provider-provider-1'), findsOneWidget);
   });
 
+  testWidgets(
+    'query text and results survive pushing forward into a result and '
+    'popping back (Navigator keeps a covered route mounted, not disposed)',
+    (tester) async {
+      final router = GoRouter(
+        initialLocation: '/ai-search',
+        routes: [
+          GoRoute(
+            path: '/ai-search',
+            builder: (_, _) => const AiSearchScreen(),
+          ),
+          GoRoute(
+            path: '/providers/:providerId',
+            builder: (_, state) =>
+                Text('provider-${state.pathParameters['providerId']}'),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            aiServiceProvider.overrideWithValue(
+              FakeAIService(
+                const AiSearchResult(matched: true, serviceId: 'svc-1'),
+              ),
+            ),
+            catalogRepositoryProvider.overrideWithValue(
+              FakeCatalogRepository(),
+            ),
+            providerRepositoryProvider.overrideWithValue(
+              FakeProviderRepository(
+                searchResults: const [
+                  ProviderSummary(
+                    providerId: 'provider-1',
+                    businessName: 'Addis Plumbing Experts',
+                    rating: 4.5,
+                    reviewCount: 10,
+                    verificationStatus: 'verified',
+                  ),
+                ],
+              ),
+            ),
+            locationServiceProvider.overrideWithValue(
+              const FakeLocationService(),
+            ),
+            await fakeSharedPreferencesOverride(),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'I need a plumber');
+      await tester.tap(find.text('Ask'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Addis Plumbing Experts'));
+      await tester.pumpAndSettle();
+      expect(find.text('provider-provider-1'), findsOneWidget);
+
+      router.pop();
+      await tester.pumpAndSettle();
+
+      // The typed query and matched results are still there - no re-search
+      // needed - because AiSearchScreen was only covered (push), never
+      // popped off and disposed.
+      expect(find.text('I need a plumber'), findsOneWidget);
+      expect(find.text('Pipe Repair'), findsOneWidget);
+      expect(find.text('Addis Plumbing Experts'), findsOneWidget);
+    },
+  );
+
   testWidgets('an unmatched query shows the clarification question', (
     tester,
   ) async {

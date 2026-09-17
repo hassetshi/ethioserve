@@ -9,11 +9,14 @@ class LanguageSelectionScreen extends ConsumerWidget {
   const LanguageSelectionScreen({this.onLanguageSelected, super.key});
 
   /// Called after a language is picked, instead of the default first-launch
-  /// behavior of `context.go('/')` (letting the router redirect decide
+  /// behavior of `context.push('/')` (letting the router redirect decide
   /// login vs. home). Set this when reusing the screen from somewhere a
   /// user already has a locale and an account - e.g. Profile's "Language"
   /// entry point - so picking a language returns to where they came from
-  /// instead of re-running the first-launch redirect.
+  /// instead of re-running the first-launch redirect. Also used to decide
+  /// whether this screen shows a back arrow (see `build` below) - only
+  /// non-null when this instance was reached via `push`, so `canPop()` is
+  /// true.
   final VoidCallback? onLanguageSelected;
 
   void _select(WidgetRef ref, BuildContext context, Locale locale) {
@@ -21,9 +24,11 @@ class LanguageSelectionScreen extends ConsumerWidget {
     if (onLanguageSelected != null) {
       onLanguageSelected!();
     } else {
-      // Router redirect decides where to actually land (login vs. home)
-      // based on auth state.
-      context.go('/');
+      // push (not go) so `/language` stays in history - the router
+      // redirect resolves '/' to home (or role-home) as the one new
+      // pushed entry, giving a stack of [/language, /home]. That lets
+      // Back from Home return to Language, instead of discarding it.
+      context.push('/');
     }
   }
 
@@ -32,6 +37,11 @@ class LanguageSelectionScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
+      // First-launch (onLanguageSelected null): this is the initial route,
+      // nothing to go back to, no AppBar. Reached via push from Profile/Home
+      // ("change language"): canPop() is true, so a default AppBar's
+      // automatic back arrow is exactly right.
+      appBar: onLanguageSelected != null ? AppBar() : null,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),

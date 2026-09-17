@@ -4,8 +4,10 @@ import 'package:ethioserve/features/subscriptions/presentation/subscription_prov
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../fakes/fake_subscription_repository.dart';
+import '../../helpers/router_test_harness.dart';
 
 void main() {
   testWidgets('shows real plan prices and lets a provider subscribe', (
@@ -89,4 +91,58 @@ void main() {
     expect(fakeRepo.mySubscription, isNotNull);
     expect(fakeRepo.mySubscription!.plan, 'free');
   });
+
+  testWidgets(
+    'after subscribing, maybePop actually pops when there is a screen underneath',
+    (tester) async {
+      final fakeRepo = FakeSubscriptionRepository();
+      await pumpTestRouter(
+        tester,
+        initialLocation: '/placeholder',
+        routes: [
+          // Stands in for Choose-Path (or Profile) in the real app: pushed
+          // once, stays in history.
+          GoRoute(
+            path: '/placeholder',
+            builder: (context, _) => Scaffold(
+              body: TextButton(
+                onPressed: () => context.push('/form'),
+                child: const Text('placeholder'),
+              ),
+            ),
+          ),
+          // Stands in for the provider registration form: reaches Subscribe
+          // via pushReplacement (the fix), not push/go, so it is itself
+          // removed from history while /placeholder underneath survives.
+          GoRoute(
+            path: '/form',
+            builder: (context, _) => Scaffold(
+              body: TextButton(
+                onPressed: () => context.pushReplacement('/subscribe'),
+                child: const Text('form'),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/subscribe',
+            builder: (_, _) =>
+                const SubscriptionPlanScreen(providerId: 'provider-1'),
+          ),
+        ],
+        overrides: [subscriptionRepositoryProvider.overrideWithValue(fakeRepo)],
+      );
+
+      await tester.tap(find.text('placeholder'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('form'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Subscribe').first);
+      await tester.pumpAndSettle();
+
+      expect(fakeRepo.mySubscription, isNotNull);
+      expect(find.byType(SubscriptionPlanScreen), findsNothing);
+      expect(find.text('placeholder'), findsOneWidget);
+    },
+  );
 }

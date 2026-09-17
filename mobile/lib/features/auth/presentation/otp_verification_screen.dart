@@ -14,7 +14,10 @@ class OtpVerificationScreen extends ConsumerStatefulWidget {
   final String phone;
 
   /// Where to send the user after a successful verify, if they were
-  /// bounced here from a login-gated route. Defaults to `/home`.
+  /// bounced here from a login-gated route. Null when Login was reached
+  /// directly (e.g. Home's plain "Log in" button) - in that case, popping
+  /// back past Login/OTP already reveals the right screen, nothing further
+  /// needs pushing.
   final String? redirectTo;
 
   @override
@@ -37,7 +40,23 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
         .verify(phone: widget.phone, code: _codeController.text.trim());
 
     if (!mounted || !success) return;
-    context.go(widget.redirectTo ?? '/home');
+
+    // Login is always the sole entry point into this auth sub-flow, and
+    // this OTP screen is always pushed exactly once on top of it - so
+    // popping twice removes exactly [this OTP screen, Login] and reveals
+    // whatever was underneath before the user hit the login wall (Home, if
+    // reached via Home's plain "Log in" button; the last browse-trail
+    // screen, if reached via a paywall redirect). The router's redirect
+    // rule already guarantees a logged-in user can never navigate back
+    // onto a rendered Login/OTP screen, so leaving them in history here is
+    // safe.
+    context.pop();
+    context.pop();
+
+    final redirectTo = widget.redirectTo;
+    if (redirectTo != null) {
+      context.push(redirectTo);
+    }
   }
 
   @override

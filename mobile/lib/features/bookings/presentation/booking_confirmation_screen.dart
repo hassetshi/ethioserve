@@ -9,6 +9,7 @@ class BookingConfirmationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Request sent')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -30,12 +31,12 @@ class BookingConfirmationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () => context.go('/bookings/$bookingId'),
+                onPressed: () => context.push('/bookings/$bookingId'),
                 child: const Text('View booking'),
               ),
               const SizedBox(height: 8),
               TextButton(
-                onPressed: () => context.go('/home'),
+                onPressed: () => context.push('/home'),
                 child: const Text('Back to home'),
               ),
             ],
