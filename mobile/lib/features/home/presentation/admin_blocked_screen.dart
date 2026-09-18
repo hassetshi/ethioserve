@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../auth/presentation/auth_providers.dart';
 
@@ -27,7 +28,10 @@ class AdminBlockedScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               OutlinedButton(
-                onPressed: () => ref.read(authRepositoryProvider).signOut(),
+                onPressed: () async {
+                  await ref.read(authRepositoryProvider).signOut();
+                  if (context.mounted) context.go('/login');
+                },
                 child: const Text('Sign out'),
               ),
             ],
