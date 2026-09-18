@@ -10,29 +10,33 @@ import '../../fakes/fake_provider_repository.dart';
 import '../../helpers/router_test_harness.dart';
 
 void main() {
-  testWidgets('tapping Sign out signs out and explicitly navigates to Login, '
-      'rather than relying solely on the router\'s reactive redirect', (
-    tester,
-  ) async {
-    await pumpTestRouter(
-      tester,
-      initialLocation: '/provider',
-      routes: [
-        GoRoute(
-          path: '/provider',
-          builder: (_, _) => const ProviderDashboardScreen(),
-        ),
-        GoRoute(path: '/login', builder: (_, _) => const Text('login')),
-      ],
-      overrides: [
-        authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
-        providerRepositoryProvider.overrideWithValue(FakeProviderRepository()),
-      ],
-    );
+  testWidgets(
+    'tapping Sign out signs out and explicitly navigates to Home (not a '
+    'login wall), rather than relying solely on the router\'s reactive '
+    'redirect',
+    (tester) async {
+      await pumpTestRouter(
+        tester,
+        initialLocation: '/provider',
+        routes: [
+          GoRoute(
+            path: '/provider',
+            builder: (_, _) => const ProviderDashboardScreen(),
+          ),
+          GoRoute(path: '/home', builder: (_, _) => const Text('home')),
+        ],
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          providerRepositoryProvider.overrideWithValue(
+            FakeProviderRepository(),
+          ),
+        ],
+      );
 
-    await tester.tap(find.byTooltip('Sign out'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Sign out'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('login'), findsOneWidget);
-  });
+      expect(find.text('home'), findsOneWidget);
+    },
+  );
 }

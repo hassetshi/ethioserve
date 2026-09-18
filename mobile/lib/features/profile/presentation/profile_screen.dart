@@ -70,7 +70,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _signOut() async {
     await ref.read(authRepositoryProvider).signOut();
-    if (mounted) context.go('/login');
+    // Home, not Login - signing out shouldn't force the user straight into
+    // a login form when the app supports anonymous browsing; they land
+    // back on free discovery, same as any other anonymous visitor.
+    if (mounted) context.go('/home');
   }
 
   @override

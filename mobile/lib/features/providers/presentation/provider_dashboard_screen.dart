@@ -29,7 +29,8 @@ class ProviderDashboardScreen extends ConsumerWidget {
               // refreshListenable-driven redirect (see profile_screen.dart's
               // identical pattern) - don't rely solely on the implicit
               // reactive redirect to actually swap the displayed screen.
-              if (context.mounted) context.go('/login');
+              // Home, not Login - see profile_screen.dart's sign-out.
+              if (context.mounted) context.go('/home');
             },
             icon: const Icon(Icons.logout),
             tooltip: 'Sign out',
