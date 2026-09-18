@@ -95,15 +95,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final user = userAsync.valueOrNull;
       final isAuthRoute = path == '/login' || path == '/otp';
 
+      // Changing/revisiting language is allowed regardless of auth state -
+      // reachable from Home's icon while anonymous, and via Back into the
+      // first-launch /language stack entry either way (see
+      // language_selection_screen.dart's first-launch push).
+      final isLanguageRoute = path == '/language' || path == '/language/change';
+
       if (user == null) {
         // Anonymous customers land on free discovery, not a login wall.
         if (path == '/') return '/home';
-        if (isAuthRoute || _isPublicDiscoveryRoute(path)) return null;
+        if (isAuthRoute || isLanguageRoute || _isPublicDiscoveryRoute(path)) {
+          return null;
+        }
         return '/login?redirect=${Uri.encodeComponent(path)}';
       }
 
-      // Logged in past this point.
-      if (path == '/' || path == '/language' || isAuthRoute) {
+      // Logged in past this point. /language is deliberately not
+      // force-redirected here - the only way to reach it with hasLocale
+      // already true is Back into the original first-launch stack entry,
+      // which should show the screen, not bounce back to role-home.
+      if (path == '/' || isAuthRoute) {
         return switch (user.role) {
           UserRole.admin => '/admin-blocked',
           UserRole.provider => '/provider',
