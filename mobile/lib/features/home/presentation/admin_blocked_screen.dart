@@ -30,7 +30,7 @@ class AdminBlockedScreen extends ConsumerWidget {
               OutlinedButton(
                 onPressed: () async {
                   await ref.read(authRepositoryProvider).signOut();
-                  if (context.mounted) context.go('/login');
+                  if (context.mounted) context.go('/home');
                 },
                 child: const Text('Sign out'),
               ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/locale_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../auth/presentation/auth_providers.dart';
 
 class LanguageSelectionScreen extends ConsumerWidget {
   const LanguageSelectionScreen({this.onLanguageSelected, super.key});
@@ -19,17 +20,35 @@ class LanguageSelectionScreen extends ConsumerWidget {
   /// true.
   final VoidCallback? onLanguageSelected;
 
-  void _select(WidgetRef ref, BuildContext context, Locale locale) {
+  Future<void> _select(
+    WidgetRef ref,
+    BuildContext context,
+    Locale locale,
+  ) async {
     ref.read(localeProvider.notifier).select(locale);
     if (onLanguageSelected != null) {
       onLanguageSelected!();
-    } else {
-      // push (not go) so `/language` stays in history - the router
-      // redirect resolves '/' to home (or role-home) as the one new
-      // pushed entry, giving a stack of [/language, /home]. That lets
-      // Back from Home return to Language, instead of discarding it.
-      context.push('/');
+      return;
     }
+
+    // This screen deliberately renders before auth state resolves (so it's
+    // usable even before Supabase initializes) - meaning a fast tap here
+    // can land while currentUserProvider is still loading. The router's
+    // redirect defers in that case (stays on the splash route at '/')
+    // rather than resolving '/' to a real destination, and the later
+    // correction - once auth actually resolves - happens via a
+    // refreshListenable-triggered redirect, which (unlike an explicit
+    // push) doesn't reliably preserve /language underneath it, breaking
+    // Back. Waiting for the first auth value here means the push below
+    // resolves straight to the right destination in one step, so
+    // /language survives in history under it.
+    try {
+      await ref.read(currentUserProvider.future);
+    } catch (_) {
+      // Don't let an auth-state read failure block navigation - the
+      // router's own redirect will sort out where this lands.
+    }
+    if (context.mounted) context.push('/');
   }
 
   @override
